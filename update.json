@@ -4,12 +4,16 @@
     "1.0.0": ""
   },
   "1.11.2": {
-    "1.0.0": ""
+    "1.0.0": "Initial Creation",
+    "1.1.0": "Added Arcade Machine and Coin Pusher block",
+    "1.2.0": "Added Snake game to Arcade Machine",
+    "1.2.1": "Added Arcade Machine model and textures",
+    "1.2.2": "Added Arcade Machine variants"
   },
   "promos": {
     "1.12-latest": "1.0.0",
     "1.12-recommended": "1.0.0",
-    "1.11.2-latest": "1.0.0",
-    "1.11.2-recommended": "1.0.0"
+    "1.11.2-latest": "1.2.2",
+    "1.11.2-recommended": "1.2.0"
   }
 }
