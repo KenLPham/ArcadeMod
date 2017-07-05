@@ -13,7 +13,8 @@
     "1.2.4": "Added Recipe for coin",
     "1.2.5": "Fixed controls",
     "1.2.6": "Fixed OutOfBounds Error",
-    "1.2.7": "Added Control Menu to Arcade Machine"
+    "1.2.7": "Added Control Menu to Arcade Machine",
+    "1.2.8": "Added insert coin button"
   },
   "promos": {
     "1.12-latest": "1.0.0",
