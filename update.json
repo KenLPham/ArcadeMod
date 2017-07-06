@@ -15,12 +15,13 @@
     "1.2.6": "Fixed OutOfBounds Error",
     "1.2.7": "Added Control Menu to Arcade Machine",
     "1.2.8": "Added insert coin button",
-    "1.2.9": "Added packet handling for inserting coin"
+    "1.2.9": "Added packet handling for inserting coin",
+    "1.2.10": "Added Block rotation to Arcade Machine"
   },
   "promos": {
     "1.12-latest": "1.0.0",
     "1.12-recommended": "1.0.0",
-    "1.11.2-latest": "1.2.9",
+    "1.11.2-latest": "1.2.10",
     "1.11.2-recommended": "1.2.9"
   }
 }
