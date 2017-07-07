@@ -4,24 +4,26 @@
     "1.0.0": ""
   },
   "1.11.2": {
-    "1.0.0": "Initial Creation",
-    "1.1.0": "Added Arcade Machine and Coin Pusher block",
-    "1.2.0": "Added Snake game to Arcade Machine",
-    "1.2.1": "Added Arcade Machine model and textures",
-    "1.2.2": "Added Arcade Machine variants",
-    "1.2.3": "Created ItemBlockArcade\nFixed Item textures for Arcade Machine",
-    "1.2.4": "Added Recipe for coin",
-    "1.2.5": "Fixed controls",
-    "1.2.6": "Fixed OutOfBounds Error",
-    "1.2.7": "Added Control Menu to Arcade Machine",
-    "1.2.8": "Added insert coin button",
-    "1.2.9": "Added packet handling for inserting coin",
-    "1.2.10": "Added Block rotation to Arcade Machine"
+    "0.1.0": "Initial Creation",
+    "0.1.1": "Added Arcade Machine and Coin Pusher block",
+    "0.2.0": "Added Snake game to Arcade Machine",
+    "0.2.1": "Added Arcade Machine model and textures",
+    "0.2.2": "Added Arcade Machine variants",
+    "0.2.3": "Created ItemBlockArcade\nFixed Item textures for Arcade Machine",
+    "0.2.4": "Added Recipe for coin",
+    "0.2.5": "Fixed controls",
+    "0.2.6": "Fixed OutOfBounds Error",
+    "0.2.7": "Added Control Menu to Arcade Machine",
+    "0.2.8": "Added insert coin button",
+    "0.2.9": "Added packet handling for inserting coin",
+    "0.2.10": "Added Block rotation to Arcade Machine",
+    "0.2.11": "Added collision boxes for Arcade Machine\nAdded different bounding boxes for different rotations of Arcade Machine",
+    "0.2.12": "Made Arcade Machine drop item when broken"
   },
   "promos": {
     "1.12-latest": "1.0.0",
     "1.12-recommended": "1.0.0",
-    "1.11.2-latest": "1.2.10",
-    "1.11.2-recommended": "1.2.9"
+    "1.11.2-latest": "0.2.12",
+    "1.11.2-recommended": "0.2.12"
   }
 }
