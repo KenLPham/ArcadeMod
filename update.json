@@ -19,12 +19,13 @@
     "0.2.10": "Added Block rotation to Arcade Machine",
     "0.2.11": "Added collision boxes for Arcade Machine\nAdded different bounding boxes for different rotations of Arcade Machine",
     "0.2.12": "Made Arcade Machine drop item when broken",
-    "0.2.13": "Added notification when update is needed"
+    "0.2.13": "Added notification when update is needed",
+    "0.2.14": "Moved all text from Snake game into lang file for multi-language support"
   },
   "promos": {
     "1.12-latest": "1.0.0",
     "1.12-recommended": "1.0.0",
-    "1.11.2-latest": "0.2.13",
+    "1.11.2-latest": "0.2.14",
     "1.11.2-recommended": "0.2.12"
   }
 }
