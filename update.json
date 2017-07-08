@@ -23,12 +23,13 @@
     "0.2.14": "Moved all text from Snake game into lang file for multi-language support",
     "0.2.15": "Created multiblock structure for arcade machine",
     "0.2.16": "Added temporary usage for tickets\nAdded crafting recipe for Snake Arcade Machine",
+    "0.2.17": "Fixed Arcade Machine variants",
     "0.3.0": "Added Tetris"
   },
   "promos": {
     "1.12-latest": "1.0.0",
     "1.12-recommended": "1.0.0",
     "1.11.2-latest": "0.3.0",
-    "1.11.2-recommended": "0.2.16"
+    "1.11.2-recommended": "0.2.17"
   }
 }
