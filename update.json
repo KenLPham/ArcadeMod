@@ -28,7 +28,7 @@
     "1.0.0": "Public release",
     "1.0.1": "Fixed Crashing when trying to open Snake Arcade Machine",
     "1.0.2": "Fixed Reference to proxies",
-    "1.0.3": "Fixed version in Reference\nAdded Tetris GUI texture"
+    "1.0.3": "Fixed version in Reference\nAdded Tetromino GUI texture"
   },
   "promos": {
     "1.12-latest": "1.0.0",
