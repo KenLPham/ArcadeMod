@@ -25,6 +25,7 @@
     "0.2.16": "Added temporary usage for tickets\nAdded crafting recipe for Snake Arcade Machine",
     "0.2.17": "Fixed Arcade Machine variants",
     "0.2.18": "Added functions to save leaderboard to TileEntity",
+    "0.2.19": "Made Arcade Machines use different textures",
     "0.3.0": "Added Tetris",
     "1.0.0": "Public release"
   },
@@ -32,6 +33,6 @@
     "1.12-latest": "1.0.0",
     "1.12-recommended": "1.0.0",
     "1.11.2-latest": "1.0.0",
-    "1.11.2-recommended": "0.2.18"
+    "1.11.2-recommended": "0.2.19"
   }
 }
