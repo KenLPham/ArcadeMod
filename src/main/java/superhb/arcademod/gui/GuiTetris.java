@@ -27,4 +27,9 @@ public class GuiTetris extends GuiArcade {
         setGuiSize(GUI_X, GUI_Y);
         setTexture(texture);
     }
+
+    @Override
+    public void drawScreen (int mouseX, int mouseY, float partialTicks) {
+        super.drawScreen(mouseX, mouseY, partialTicks);
+    }
 }
