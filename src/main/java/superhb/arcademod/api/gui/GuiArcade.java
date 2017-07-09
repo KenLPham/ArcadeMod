@@ -90,6 +90,7 @@ public class GuiArcade extends GuiScreen {
         return world;
     }
 
+    // TODO: Create functions to set Insert Coin Menu Pos
     @Override
     public void drawScreen (int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();

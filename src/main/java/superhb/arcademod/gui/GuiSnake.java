@@ -14,7 +14,7 @@ import net.minecraft.util.ResourceLocation;
 import java.io.IOException;
 
 public class GuiSnake extends GuiArcade {
-    private static final ResourceLocation texture = new ResourceLocation(Reference.MODID + ":textures/superhb.arcademod.api.gui/snake.png");
+    private static final ResourceLocation texture = new ResourceLocation(Reference.MODID + ":textures/gui/snake.png");
 
     // Game Variables
     private int snakePosX = 0, snakePosY = 0; // 130x185 (26, 37)
