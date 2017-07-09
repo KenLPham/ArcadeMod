@@ -1,0 +1,33 @@
+mod.arcademod:name.locale=Arcade Mod
+
+item.arcademod:coin.name=Coin
+item.arcademod:ticket.name=Ticket
+
+tile.arcademod:arcade_machine.snake.name=Arcade Machine (Snake)
+tile.arcademod:arcade_machine.tetris.name=Arcade Machine (Tetris)
+
+tile.arcademod:coin_pusher.name=Coin Pusher Machine
+
+button.arcademod:insert.locale=Insert Coin
+
+text.arcademod:needed.locale=coin needed
+text.arcademod:needed_plural.locale=coins needed
+text.arcademod:gameover.locale=Game Over
+text.arcademod:score.locale=Score
+
+option.arcademod:start.locale=Start
+option.arcademod:difficulty.locale=Difficulty
+option.arcademod:control.locale=Controls
+
+option.arcademod:difficulty.easy.locale=Easy
+option.arcademod:difficulty.medium.locale=Medium
+option.arcademod:difficulty.hard.locale=Hard
+option.arcademod:difficulty.extreme.locale=Extreme
+
+game.arcademod:snake.name=Snake
+
+control.arcademod:up.snake.name=Up
+control.arcademod:down.snake.name=Down
+control.arcademod:left.snake.name=Left/Back
+control.arcademod:right.snake.name=Right
+control.arcademod:select.snake.name=Select
