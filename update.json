@@ -24,7 +24,7 @@
     "0.2.15": "Created multiblock structure for arcade machine",
     "0.2.16": "Added temporary usage for tickets\nAdded crafting recipe for Snake Arcade Machine",
     "0.2.17": "Fixed Arcade Machine variants",
-    "0.2.18": "Arcade Machine now saves leaderboard to NBT (Leaderboard Menu coming soon)",
+    "0.2.18": "Added functions to save leaderboard to TileEntity",
     "0.3.0": "Added Tetris",
     "1.0.0": "Public release"
   },
