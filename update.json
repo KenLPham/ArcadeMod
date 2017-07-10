@@ -30,7 +30,8 @@
     "1.0.2": "Fixed Reference to proxies",
     "1.0.3": "Fixed version in Reference\nAdded Tetromino GUI texture",
     "1.1.0": "Created all Tetromino shapes",
-    "1.1.1": "Added random picker for next shape to Tetromino"
+    "1.1.1": "Added random picker for next shape to Tetromino",
+    "1.2.0": "Created Prize Block and GUI"
   },
   "promos": {
     "1.12-latest": "1.0.0",
