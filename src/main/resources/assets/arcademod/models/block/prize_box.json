@@ -1,0 +1,6 @@
+{
+    "parent": "block/cube_all",
+    "textures": {
+        "all": "arcademod:blocks/prize_box"
+    }
+}

@@ -132,10 +132,7 @@ public class GuiSnake extends GuiArcade {
                 tickCounter++;
                 if (tickCounter == 500) {
                     tickCounter = 0;
-                    if (useCoins()) {
-                        if (!Minecraft.getMinecraft().player.isCreative()) menu = -1;
-                        else menu = 0;
-                    } else menu = 0;
+                    checkMenuAfterGameOver(0);
                     direction = 0;
                     start = true;
                     tail = 0;

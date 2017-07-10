@@ -4,7 +4,7 @@ import net.minecraft.util.IStringSerializable;
 
 public enum EnumGame implements IStringSerializable {
     SNAKE(0, "snake"),
-    TETRIS(1, "tetris");
+    TETROMINOES(1, "tetrominoes");
     //PACMAN(2, "pacman");
 
     private int id;

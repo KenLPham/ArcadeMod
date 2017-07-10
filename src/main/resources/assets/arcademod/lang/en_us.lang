@@ -4,7 +4,7 @@ item.arcademod:coin.name=Coin
 item.arcademod:ticket.name=Ticket
 
 tile.arcademod:arcade_machine.snake.name=Arcade Machine (Snake)
-tile.arcademod:arcade_machine.tetris.name=Arcade Machine (Tetris)
+tile.arcademod:arcade_machine.tetrominoes.name=Arcade Machine (Tetrominoes)
 
 tile.arcademod:coin_pusher.name=Coin Pusher Machine
 
@@ -14,6 +14,10 @@ text.arcademod:needed.locale=coin needed
 text.arcademod:needed_plural.locale=coins needed
 text.arcademod:gameover.locale=Game Over
 text.arcademod:score.locale=Score
+
+text.arcademod:next.tetrominoes.locale=Next
+text.arcademod:level.tetrominoes.locale=Level
+text.arcademod:row.tetrominoes.locale=Rows
 
 option.arcademod:start.locale=Start
 option.arcademod:difficulty.locale=Difficulty

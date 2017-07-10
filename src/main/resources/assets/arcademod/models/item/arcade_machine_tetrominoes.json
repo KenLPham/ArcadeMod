@@ -1,0 +1,29 @@
+{
+	"parent": "arcademod:block/arcade_machine",
+	"textures": {
+        "bot_front": "arcademod:blocks/tetris/bottom_front",
+        "bot_left": "arcademod:blocks/tetris/bottom_left",
+        "bot_back": "arcademod:blocks/tetris/bottom_back",
+        "bot_right": "arcademod:blocks/tetris/bottom_right",
+        "bot": "arcademod:blocks/tetris/bottom",
+        "slot": "arcademod:blocks/tetris/coin_slot",
+        "con_front": "arcademod:blocks/tetris/controller_front",
+        "con_left": "arcademod:blocks/tetris/controller_left",
+        "con_back": "arcademod:blocks/tetris/controller_back",
+        "con_right": "arcademod:blocks/tetris/controller_right",
+        "con_top": "arcademod:blocks/tetris/controller_top",
+        "con_bot": "arcademod:blocks/tetris/controller_bottom",
+        "border": "arcademod:blocks/tetris/screen_border",
+        "screen": "arcademod:blocks/tetris/screen",
+        "right_ex": "arcademod:blocks/tetris/right_panel_exterior",
+        "right_in": "arcademod:blocks/tetris/right_panel_interior",
+        "left_ex": "arcademod:blocks/tetris/left_panel_exterior",
+        "left_in": "arcademod:blocks/tetris/left_panel_interior",
+        "back": "arcademod:blocks/tetris/back_panel",
+        "sides": "arcademod:blocks/tetris/top_sides",
+        "up": "arcademod:blocks/tetris/top_up",
+        "down": "arcademod:blocks/tetris/top_down",
+        "stick": "arcademod:blocks/tetris/joystick",
+        "particle": "arcademod:blocks/tetris/bottom_front"
+    }
+}

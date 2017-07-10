@@ -44,10 +44,10 @@ public class GuiArcade extends GuiScreen {
         this.tileEntity = tileEntity;
         this.player = player;
         if (useCoins()) {
-            if (!Minecraft.getMinecraft().player.isCreative()) menu = -1;
+            if (!mc.getMinecraft().player.isCreative()) menu = -1;
             else menu = 0;
         } else menu = 0;
-        this.fontRendererObj = Minecraft.getMinecraft().fontRendererObj;
+        this.fontRendererObj = mc.getMinecraft().fontRendererObj;
         buttonWidth = this.fontRendererObj.getStringWidth(I18n.format("button.arcademod:insert.locale")) + 6;
     }
 
@@ -175,5 +175,12 @@ public class GuiArcade extends GuiScreen {
 
     public void giveReward (Item item, int amount, int meta, NBTTagCompound compound) {
         ArcadePacketHandler.INSTANCE.sendToServer(new RewardMessage(item, amount, meta, compound));
+    }
+
+    public void checkMenuAfterGameOver (int main) {
+        if (useCoins()) {
+            if (!mc.getMinecraft().player.isCreative()) menu = -1;
+            else menu = main;
+        } else menu = main;
     }
 }

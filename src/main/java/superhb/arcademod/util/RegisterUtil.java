@@ -15,7 +15,7 @@ import superhb.arcademod.content.items.ItemBlockArcade;
 public class RegisterUtil {
     public static void registerAll (FMLPreInitializationEvent event) {
         registerItems(event, ArcadeItems.coin, ArcadeItems.ticket);
-        registerBlocks(event, ArcadeBlocks.coinPusher, ArcadeBlocks.plushie, ArcadeBlocks.invisible);
+        registerBlocks(event, ArcadeBlocks.coinPusher, ArcadeBlocks.plushie, ArcadeBlocks.invisible, ArcadeBlocks.prizeBox);
         registerArcadeMachine(event, ArcadeBlocks.arcadeMachine);
     }
 

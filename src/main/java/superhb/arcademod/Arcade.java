@@ -62,7 +62,7 @@ public class Arcade {
         Configuration config = new Configuration(event.getSuggestedConfigurationFile());
         config.load();
         disableCoins = config.getBoolean("disableCoins", Configuration.CATEGORY_GENERAL, false, "Disable the need to use coins to play the arcade machines");
-        requireRedstone = config.getBoolean("requireRedstone", Configuration.CATEGORY_GENERAL, true, "Require the machines to be powered by redstone to play");
+        requireRedstone = config.getBoolean("requireRedstone", Configuration.CATEGORY_GENERAL, false, "Require the machines to be powered by redstone to play");
         disableUpdateNotification = config.getBoolean("disableUpdateNotification", Configuration.CATEGORY_GENERAL, false, "Disable message in chat when update is available");
         config.save();
 

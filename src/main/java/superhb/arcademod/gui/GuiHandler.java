@@ -8,7 +8,7 @@ import net.minecraftforge.fml.common.network.IGuiHandler;
 import superhb.arcademod.tileentity.TileEntityArcade;
 
 public class GuiHandler implements IGuiHandler {
-    private int SNAKE = 0, TETRIS = 1;
+    private int SNAKE = 0, TETROMINOES = 1, PRIZE = 2;
 
     // Not needed as Arcade Machines don't have containers
     @Override
@@ -25,7 +25,8 @@ public class GuiHandler implements IGuiHandler {
         TileEntityArcade arcade = (TileEntityArcade)tile;
 
         if (id == SNAKE) return new GuiSnake(world, arcade, player);
-        else if (id == TETRIS) return new GuiTetris(world, arcade, player);
+        else if (id == TETROMINOES) return new GuiTetrominoes(world, arcade, player);
+        else if (id == PRIZE) return new GuiPrize();
         //}
         return null;
     }
