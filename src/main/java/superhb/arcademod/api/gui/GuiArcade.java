@@ -1,6 +1,5 @@
 package superhb.arcademod.api.gui;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
@@ -13,7 +12,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import superhb.arcademod.Arcade;
-import superhb.arcademod.content.ArcadeItems;
+import superhb.arcademod.client.ArcadeItems;
 import superhb.arcademod.network.RewardMessage;
 import superhb.arcademod.network.ServerCoinMessage;
 import superhb.arcademod.tileentity.TileEntityArcade;
@@ -28,7 +27,7 @@ public class GuiArcade extends GuiScreen {
     protected int tickCounter = 0, tick = 20;
     protected boolean inMenu = true;
     protected int menuOption = 0;
-    public int menu = -1;
+    public int menu = -1, startMenu = 0;
     private int buttonX = 0, buttonY = 0;
     private int cost = 1;
     public int buttonWidth, buttonHeight = 20;
@@ -45,8 +44,8 @@ public class GuiArcade extends GuiScreen {
         this.player = player;
         if (useCoins()) {
             if (!mc.getMinecraft().player.isCreative()) menu = -1;
-            else menu = 0;
-        } else menu = 0;
+            else menu = startMenu;
+        } else menu = startMenu;
         this.fontRendererObj = mc.getMinecraft().fontRendererObj;
         buttonWidth = this.fontRendererObj.getStringWidth(I18n.format("button.arcademod:insert.locale")) + 6;
     }
@@ -59,6 +58,14 @@ public class GuiArcade extends GuiScreen {
     public void setButtonPos (int x, int y) {
         buttonX = x;
         buttonY = y;
+    }
+
+    public void setStartMenu (int startMenu) {
+        this.startMenu = startMenu;
+    }
+
+    public int getStartMenu () {
+        return startMenu;
     }
 
     public TileEntityArcade getTileEntity () {
@@ -161,6 +168,14 @@ public class GuiArcade extends GuiScreen {
         }
     }
 
+    @Override
+    protected void keyTyped (char typedChar, int keyCode) throws IOException {
+        if (keyCode == 1) { // Esc
+            if (menu == startMenu && !mc.player.isCreative()) giveReward(ArcadeItems.coin, cost);
+        }
+        super.keyTyped(typedChar, keyCode);
+    }
+
     public void giveReward (ItemStack reward) {
         ArcadePacketHandler.INSTANCE.sendToServer(new RewardMessage(reward));
     }
@@ -177,10 +192,10 @@ public class GuiArcade extends GuiScreen {
         ArcadePacketHandler.INSTANCE.sendToServer(new RewardMessage(item, amount, meta, compound));
     }
 
-    public void checkMenuAfterGameOver (int main) {
+    public void checkMenuAfterGameOver () {
         if (useCoins()) {
             if (!mc.getMinecraft().player.isCreative()) menu = -1;
-            else menu = main;
-        } else menu = main;
+            else menu = startMenu;
+        } else menu = startMenu;
     }
 }

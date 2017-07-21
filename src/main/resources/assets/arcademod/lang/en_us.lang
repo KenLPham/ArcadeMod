@@ -6,7 +6,11 @@ item.arcademod:ticket.name=Ticket
 tile.arcademod:arcade_machine.snake.name=Arcade Machine (Snake)
 tile.arcademod:arcade_machine.tetrominoes.name=Arcade Machine (Tetrominoes)
 
+tile.arcademod:plushie.creeper.name=Creeper Plushie
+
 tile.arcademod:coin_pusher.name=Coin Pusher Machine
+
+tile.arcademod:prize_box.name=Prize Box
 
 button.arcademod:insert.locale=Insert Coin
 

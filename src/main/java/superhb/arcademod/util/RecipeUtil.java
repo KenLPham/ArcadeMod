@@ -5,8 +5,8 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import superhb.arcademod.content.ArcadeBlocks;
-import superhb.arcademod.content.ArcadeItems;
+import superhb.arcademod.client.ArcadeBlocks;
+import superhb.arcademod.client.ArcadeItems;
 
 public class RecipeUtil {
     public static void registerRecipes () {

@@ -2,6 +2,7 @@ package superhb.arcademod.proxy;
 
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
+import superhb.arcademod.network.ClientBuyMessage;
 import superhb.arcademod.network.ClientCoinMessage;
 import superhb.arcademod.util.ArcadePacketHandler;
 import superhb.arcademod.util.KeyHandler;
@@ -14,6 +15,7 @@ public class ClientProxy extends CommonProxy {
         super.preInit(event);
         KeyHandler.preInit();
         ArcadePacketHandler.INSTANCE.registerMessage(ClientCoinMessage.Handler.class, ClientCoinMessage.class, 1, Side.CLIENT);
+        ArcadePacketHandler.INSTANCE.registerMessage(ClientBuyMessage.Handler.class, ClientBuyMessage.class, 4, Side.CLIENT);
     }
 
     @Override
