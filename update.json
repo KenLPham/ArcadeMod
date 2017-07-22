@@ -32,12 +32,12 @@
     "1.0.4": "Added Logger\nMod now creates Arcade_Games directory",
     "1.0.5": "Created Creeper Plushie",
     "1.0.6": "Created Prize Box",
-    "1.0.7": "Snake Fixes:\n-Fixed movement (Atleast is should)\n-New game speed system\n-Increased max tail size to 200\n-Added text telling player how to return to main menu from Control menu"
+    "1.0.7": "Snake Fixes:\n-Fixed movement (At least is should)\n-New game speed system\n-Increased max tail size to 200\n-Added text telling player how to return to main menu from Control menu"
   },
   "promos": {
     "1.12-latest": "1.0.0",
     "1.12-recommended": "1.0.0",
     "1.11.2-latest": "1.0.7",
-    "1.11.2-recommended": "1.0.3"
+    "1.11.2-recommended": "1.0.7"
   }
 }
