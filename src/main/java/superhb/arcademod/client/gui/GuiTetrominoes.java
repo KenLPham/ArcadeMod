@@ -138,7 +138,7 @@ public class GuiTetrominoes extends GuiArcade {
         if (keyCode == KeyHandler.up.getKeyCode()) { // Up/Rotate Forward
             if (inMenu) {
             } else {
-                if (canRotate(0, 0)) {
+                if (canRotate()) {
                     if (rotation == 3) rotation = 0;
                     else rotation += 1;
                     shapePos[curPieceID].setRotation(rotation);
@@ -349,8 +349,7 @@ public class GuiTetrominoes extends GuiArcade {
         return shapes[getWorld().rand.nextInt(7)];
     }
 
-    // TODO remove args
-    private boolean canRotate (int x, int y) {
+    private boolean canRotate () {
         TetrominoPos pos = shapePos[curPieceID];
         switch (pos.getShape()) {
             case 'I':

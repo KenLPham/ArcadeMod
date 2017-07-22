@@ -30,13 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/* Changelog
-    - Added Logger
-    - Created Arcade_Games directory
-    - Created Plushie Block and TileEntity
-    - Created EnumMob
-    - Added Creeper Plushie
-    - Created Prize Box
+/*
+    "1.1.0": "Created all Tetromino shapes",
+    "1.1.1": "Added random picker for next shape to Tetromino",
+    "1.2.0": "Created Prize Block and GUI"
  */
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, updateJSON = Reference.UPDATE_URL)
 public class Arcade {

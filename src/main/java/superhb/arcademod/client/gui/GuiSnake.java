@@ -19,10 +19,12 @@ public class GuiSnake extends GuiArcade {
     // Game Variables
     private int snakePosX = 0, snakePosY = 0; // 130x185 (26, 37)
     private int pointPosX = 0, pointPosY = 0;
-    private int[] tailX = new int[100], tailY = new int[100];
-    private int direction = 0, difficulty = 0; // direction == 0 = start, 1 = up, 2 = down, 3 = left, 4 = right; difficulty == 0 = easy (20), 1 = medium (15), 2 = hard (10), 3 = extreme (5)
+    private int[] tailX = new int[200], tailY = new int[200];
+    private int direction = 0, difficulty = 0; // direction == 0 = start, 1 = up, 2 = down, 3 = left, 4 = right; difficulty == 0 = easy (4), 1 = medium (3), 2 = hard (2), 3 = extreme (1)
     private int tail = 0, score = 0;
     private boolean start = true, gameOver = false;
+
+    private float prevTick = 0, curTick; // TODO: Remove curTick
 
     // Texture Variables
     private static final int GUI_X = 150;
@@ -38,6 +40,11 @@ public class GuiSnake extends GuiArcade {
         setButtonPos((GUI_X / 2) - (buttonWidth / 2), GUI_Y - 32);
         setTexture(texture);
         setStartMenu(0);
+    }
+
+    @Override
+    public void updateScreen () {
+        tickCounter++;
     }
 
     @Override
@@ -117,6 +124,7 @@ public class GuiSnake extends GuiArcade {
                     this.fontRendererObj.drawString("[" + KeyHandler.right.getDisplayName() + "] " + I18n.format("control.arcademod:right.snake.name"), (width / 2) - 40, (height / 2) + 20, Color.white.getRGB());
                     this.fontRendererObj.drawString("[" + KeyHandler.select.getDisplayName() + "] " + I18n.format("control.arcademod:select.snake.name"), (width / 2) - 40, (height / 2) + 30, Color.white.getRGB());
 
+                    this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), (width / 2) - (GUI_X / 2) + 12, (height / 2) + (GUI_Y / 2) - 20, Color.white.getRGB());
                     break;
                 case 3: // Game Over Menu
                     int overWidth = this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:gameover.locale"));
@@ -130,9 +138,8 @@ public class GuiSnake extends GuiArcade {
             }
 
             if (menu == 3) {
-                tickCounter++;
-                if (tickCounter == 500) {
-                    tickCounter = 0;
+                if ((tickCounter - prevTick) >= 500) {
+                    prevTick = tickCounter;
                     checkMenuAfterGameOver();
                     direction = 0;
                     start = true;
@@ -149,10 +156,8 @@ public class GuiSnake extends GuiArcade {
                 // TODO: Send Score to NBT
             }
 
-            // TODO: Use something other than ticks so speed of game can be consistent across computers
-            tickCounter++;
-            if (tickCounter == tick) {
-                tickCounter = 0;
+            if ((tickCounter - prevTick) >= tick) {
+                prevTick = tickCounter;
 
                 int preX = tailX[0];
                 int preY = tailY[0];
@@ -268,6 +273,7 @@ public class GuiSnake extends GuiArcade {
             } else {
                 if (tail > 0) {
                     if (direction != 2) direction = 1;
+                    else direction = 2;
                 } else {
                     direction = 1;
                 }
@@ -285,6 +291,7 @@ public class GuiSnake extends GuiArcade {
             } else {
                 if (tail > 0) {
                     if (direction != 1) direction = 2;
+                    else direction = 1;
                 } else {
                     direction = 2;
                 }
@@ -296,6 +303,7 @@ public class GuiSnake extends GuiArcade {
             } else {
                 if (tail > 0) {
                     if (direction != 4) direction = 3;
+                    else direction = 4;
                 } else {
                     direction = 3;
                 }
@@ -305,6 +313,7 @@ public class GuiSnake extends GuiArcade {
             if (!inMenu) {
                 if (tail > 0) {
                     if (direction != 3) direction = 4;
+                    else direction = 3;
                 } else {
                     direction = 4;
                 }
@@ -327,21 +336,26 @@ public class GuiSnake extends GuiArcade {
                 } else if (menu == 1) {
                     switch (difficulty) {
                         case 0: // Easy
-                            tick = 20;
+                            tick = 4;
                             break;
                         case 1: // Medium
-                            tick = 15;
+                            tick = 3;
                             break;
                         case 2: // Hard
-                            tick = 10;
+                            tick = 2;
                             break;
                         case 3: // Extreme
-                            tick = 5;
+                            tick = 1;
                             break;
                     }
                     menu = 0;
                 }
             }
         }
+    }
+
+    private float lerp (float previousTick, float currentTick, float partialTick) {
+        //return (1 - partialTick) * previousTick + partialTick * currentTick;
+        return partialTick + partialTick * (currentTick - previousTick);
     }
 }

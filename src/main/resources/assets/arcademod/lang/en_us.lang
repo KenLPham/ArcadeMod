@@ -26,6 +26,7 @@ text.arcademod:row.tetrominoes.locale=Rows
 option.arcademod:start.locale=Start
 option.arcademod:difficulty.locale=Difficulty
 option.arcademod:control.locale=Controls
+option.arcademod:back.name=Back
 
 option.arcademod:difficulty.easy.locale=Easy
 option.arcademod:difficulty.medium.locale=Medium
