@@ -1,4 +1,4 @@
-package superhb.arcademod.tileentity;
+package superhb.arcademod.client.tileentity;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
@@ -12,6 +12,7 @@ import net.minecraftforge.common.util.Constants;
 
 import javax.annotation.Nullable;
 
+// TODO: Move to client package
 public class TileEntityArcade extends TileEntity {
     private int game = 0;
     private NBTTagList leaderboard;

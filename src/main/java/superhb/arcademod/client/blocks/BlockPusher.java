@@ -1,6 +1,6 @@
 package superhb.arcademod.client.blocks;
 
-import superhb.arcademod.tileentity.TileEntityPusher;
+import superhb.arcademod.client.tileentity.TileEntityPusher;
 import superhb.arcademod.util.EnumGame;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirectional;

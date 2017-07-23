@@ -10,7 +10,7 @@ import net.minecraft.world.World;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.*;
 import superhb.arcademod.client.blocks.IBlockVariant;
-import superhb.arcademod.tileentity.TileEntityArcade;
+import superhb.arcademod.client.tileentity.TileEntityArcade;
 
 public class ItemBlockArcade extends ItemBlock {
     // TODO: Get texture to change based on variant

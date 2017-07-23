@@ -11,7 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import superhb.arcademod.client.UpdateAnnouncer;
 import superhb.arcademod.client.ArcadeItems;
-import superhb.arcademod.client.gui.GuiPrize;
 import superhb.arcademod.proxy.CommonProxy;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.creativetab.CreativeTabs;
@@ -19,9 +18,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod.*;
 import net.minecraftforge.fml.common.event.*;
-import superhb.arcademod.tileentity.TileEntityArcade;
-import superhb.arcademod.tileentity.TileEntityPlushie;
-import superhb.arcademod.tileentity.TileEntityPrize;
+import superhb.arcademod.client.tileentity.TileEntityArcade;
+import superhb.arcademod.client.tileentity.TileEntityPlushie;
+import superhb.arcademod.client.tileentity.TileEntityPrize;
+import superhb.arcademod.client.tileentity.TileEntityTestArcade;
 import superhb.arcademod.util.EnumType;
 import superhb.arcademod.util.PrizeList;
 
@@ -30,10 +30,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/*
-    "1.1.0": "Created all Tetromino shapes",
-    "1.1.1": "Added random picker for next shape to Tetromino",
-    "1.2.0": "Created Prize Block and GUI"
+/* Game List
+    - Pac-Man
+    - Space Invaders
+    - Donkey Kong (ReddyRedStoneOre)
+    - Super Mario Bros (thatguyEnder)
+    - Asteroids (WilchHabos)
+ */
+
+/* ChangeLog
  */
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, updateJSON = Reference.UPDATE_URL)
 public class Arcade {
@@ -97,10 +102,9 @@ public class Arcade {
         disableUpdateNotification = config.getBoolean("disableUpdateNotification", Configuration.CATEGORY_GENERAL, false, "Disable message in chat when update is available");
         prizeTotal = config.getInt("total", "prize_list", 1, 0, 100, "Amount of prizes in list. This has to be changed manually.");
         prizeList = new PrizeList[prizeTotal];
-        for (int i = 0; i < prizeTotal; i++) {
+        for (int i = 0; i < prizeTotal; i++) { // TODO: Prize List
             String temp = config.getString(String.format("%d", i), "prize_list", defaultList[i], "Format: name:cost");
             String[] s = temp.split(":");
-            logger.info(String.format("Prize Format has [%d]", s.length));
             if (s.length == 3) {
                 Item item = Item.getByNameOrId(s[0] + ":" + s[1]);
                 int cost = new Integer(s[2]);
@@ -130,6 +134,8 @@ public class Arcade {
         GameRegistry.registerTileEntity(TileEntityArcade.class, Reference.MODID + ":tile_arcade");
         GameRegistry.registerTileEntity(TileEntityPlushie.class, Reference.MODID + ":tile_plushie");
         GameRegistry.registerTileEntity(TileEntityPrize.class, Reference.MODID + ":tile_prize");
+
+        GameRegistry.registerTileEntity(TileEntityTestArcade.class, Reference.MODID + ":tile_arcade_test");
 
         // Register Event
         if (!disableUpdateNotification) MinecraftForge.EVENT_BUS.register(new UpdateAnnouncer());

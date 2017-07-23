@@ -5,7 +5,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArcade;
 import superhb.arcademod.client.ArcadeItems;
-import superhb.arcademod.tileentity.TileEntityArcade;
+import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.util.KeyHandler;
 import net.minecraft.world.World;
 import net.minecraft.util.ResourceLocation;
@@ -23,8 +23,7 @@ public class GuiSnake extends GuiArcade {
     private int direction = 0, difficulty = 0; // direction == 0 = start, 1 = up, 2 = down, 3 = left, 4 = right; difficulty == 0 = easy (4), 1 = medium (3), 2 = hard (2), 3 = extreme (1)
     private int tail = 0, score = 0;
     private boolean start = true, gameOver = false;
-
-    private float prevTick = 0, curTick; // TODO: Remove curTick
+    private int tick = 20;
 
     // Texture Variables
     private static final int GUI_X = 150;
@@ -40,11 +39,6 @@ public class GuiSnake extends GuiArcade {
         setButtonPos((GUI_X / 2) - (buttonWidth / 2), GUI_Y - 32);
         setTexture(texture);
         setStartMenu(0);
-    }
-
-    @Override
-    public void updateScreen () {
-        tickCounter++;
     }
 
     @Override
@@ -96,21 +90,18 @@ public class GuiSnake extends GuiArcade {
                     this.fontRendererObj.drawString(I18n.format("option.arcademod:difficulty.hard.locale"), (width / 2) - (hardWidth / 2), height / 2 + 20, 16777215);
                     this.fontRendererObj.drawString(I18n.format("option.arcademod:difficulty.extreme.locale"), (width / 2) - (extremeWidth / 2), height / 2 + 30, 16777215);
 
+                    this.mc.getTextureManager().bindTexture(texture);
                     switch (difficulty) {
-                        case 0: // Easy (20)
-                            this.mc.getTextureManager().bindTexture(texture);
+                        case 0: // Easy
                             this.drawTexturedModalRect(minX + 30, height / 2 - 2, 0, GUI_Y, ARROW_X, ARROW_Y);
                             break;
-                        case 1: // Medium (15)
-                            this.mc.getTextureManager().bindTexture(texture);
+                        case 1: // Medium
                             this.drawTexturedModalRect(minX + 30, height / 2 - 2 + 10, 0, GUI_Y, ARROW_X, ARROW_Y);
                             break;
-                        case 2: // Hard (10)
-                            this.mc.getTextureManager().bindTexture(texture);
+                        case 2: // Hard
                             this.drawTexturedModalRect(minX + 30, height / 2 - 2 + 20, 0, GUI_Y, ARROW_X, ARROW_Y);
                             break;
-                        case 3: // Extreme (5)
-                            this.mc.getTextureManager().bindTexture(texture);
+                        case 3: // Extreme
                             this.drawTexturedModalRect(minX + 30, height / 2 - 2 + 30, 0, GUI_Y, ARROW_X, ARROW_Y);
                             break;
                     }
@@ -128,9 +119,9 @@ public class GuiSnake extends GuiArcade {
                     break;
                 case 3: // Game Over Menu
                     int overWidth = this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:gameover.locale"));
-                    this.fontRendererObj.drawString(I18n.format("text.arcademod:gameover.locale"), (width / 2) - (overWidth / 2), (height / 2) - 20, 16777215);
+                    this.fontRendererObj.drawString(I18n.format("text.arcademod:gameover.locale"), (width / 2) - (overWidth / 2), (height / 2) - 20, Color.white.getRGB());
                     int scoreWidth = this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:score.locale") + ": " + tail);
-                    this.fontRendererObj.drawString(I18n.format("text.arcademod:score.locale") + ": " + tail, (width / 2) - (scoreWidth / 2), (height / 2) - 10, 16777215);
+                    this.fontRendererObj.drawString(I18n.format("text.arcademod:score.locale") + ": " + tail, (width / 2) - (scoreWidth / 2), (height / 2) - 10, Color.white.getRGB());
                     // TODO: Show Highscore
                     break;
                 case 4: // Leaderboard Menu
@@ -138,7 +129,7 @@ public class GuiSnake extends GuiArcade {
             }
 
             if (menu == 3) {
-                if ((tickCounter - prevTick) >= 500) {
+                if ((tickCounter - prevTick) >= 60) {
                     prevTick = tickCounter;
                     checkMenuAfterGameOver();
                     direction = 0;
@@ -259,8 +250,6 @@ public class GuiSnake extends GuiArcade {
     // TODO: Add Pause button and menu
     @Override
     protected void keyTyped (char typedChar, int keyCode) throws IOException {
-        super.keyTyped(typedChar, keyCode);
-
         if (keyCode == KeyHandler.up.getKeyCode()) { // Up arrow
             if (inMenu) {
                 if (menu == 0) {
@@ -325,6 +314,7 @@ public class GuiSnake extends GuiArcade {
                     switch (menuOption) {
                         case 0: // Start
                             inMenu = false;
+                            canGetCoinBack = false;
                             break;
                         case 1: // Options
                             menu = 1;
@@ -352,10 +342,9 @@ public class GuiSnake extends GuiArcade {
                 }
             }
         }
-    }
-
-    private float lerp (float previousTick, float currentTick, float partialTick) {
-        //return (1 - partialTick) * previousTick + partialTick * currentTick;
-        return partialTick + partialTick * (currentTick - previousTick);
+        if (keyCode == 1) { // Esc
+            if (!inMenu) giveReward(ArcadeItems.ticket, (score / 10));
+        }
+        super.keyTyped(typedChar, keyCode);
     }
 }

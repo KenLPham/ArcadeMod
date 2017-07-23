@@ -24,8 +24,8 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import superhb.arcademod.tileentity.TileEntityArcade;
-import superhb.arcademod.tileentity.TileEntityPlushie;
+import superhb.arcademod.client.tileentity.TileEntityArcade;
+import superhb.arcademod.client.tileentity.TileEntityPlushie;
 import superhb.arcademod.util.EnumMob;
 
 import java.util.Random;
@@ -154,8 +154,8 @@ public class BlockPlushie extends Block implements IBlockVariant {
     // TODO: If crouched don't play sound
     @Override
     public boolean onBlockActivated (World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        // TODO: Play sound
-        if (!world.isRemote) world.playSound(player, pos, SoundEvents.ENTITY_CREEPER_HURT, SoundCategory.BLOCKS, 100, 0); // TODO: pitch?
+        // TODO: Make array of SoundEvents
+        if (world.isRemote) world.playSound(player, pos, SoundEvents.ENTITY_CREEPER_HURT, SoundCategory.BLOCKS, 1.0F, 1.0F); // TODO: Volume based on distance
         return true;
     }
 

@@ -17,6 +17,6 @@ public class RecipeUtil {
         snake.setInteger("Game", 0);
         ItemStack snakeStack = new ItemStack(ArcadeBlocks.arcadeMachine);
         snakeStack.setTagCompound(snake);
-        GameRegistry.addRecipe(snakeStack, new Object[] { "bgb", "wbw", "brb", 'b', new ItemStack(Blocks.WOOL, 1, 15), 'g', Blocks.GLASS_PANE, 'w', Blocks.WOOL, 'r', Items.REDSTONE });
+        GameRegistry.addRecipe(snakeStack, new Object[] { "bgb", "wbw", "brb", 'b', new ItemStack(Blocks.WOOL, 1, 15), 'g', Blocks.GLASS_PANE, 'w', new ItemStack(Blocks.WOOL, 1, 0), 'r', Items.REDSTONE });
     }
 }

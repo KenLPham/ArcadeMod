@@ -16,7 +16,7 @@ import superhb.arcademod.client.items.ItemBlockPlushie;
 public class RegisterUtil {
     public static void registerAll (FMLPreInitializationEvent event) {
         registerItems(event, ArcadeItems.coin, ArcadeItems.ticket);
-        registerBlocks(event, ArcadeBlocks.coinPusher, ArcadeBlocks.invisible, ArcadeBlocks.prizeBox);
+        registerBlocks(event, ArcadeBlocks.coinPusher, ArcadeBlocks.invisible, ArcadeBlocks.prizeBox, ArcadeBlocks.testArcade);
         registerArcadeMachine(event, ArcadeBlocks.arcadeMachine);
         registerPlushie(event, ArcadeBlocks.plushie);
     }

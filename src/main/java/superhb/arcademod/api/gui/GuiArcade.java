@@ -15,28 +15,40 @@ import superhb.arcademod.Arcade;
 import superhb.arcademod.client.ArcadeItems;
 import superhb.arcademod.network.RewardMessage;
 import superhb.arcademod.network.ServerCoinMessage;
-import superhb.arcademod.tileentity.TileEntityArcade;
+import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.util.ArcadePacketHandler;
 
 import java.io.IOException;
 
 // TODO: Add comments all functions
 public class GuiArcade extends GuiScreen {
-    private GuiButton insertCoin;
-    private World world;
-    protected int tickCounter = 0, tick = 20;
+    // Tick Variables
+    protected int tickCounter = 0;
+    protected float prevTick = 0;
+
+    // Menu Variables
     protected boolean inMenu = true;
     protected int menuOption = 0;
     public int menu = -1, startMenu = 0;
-    private int buttonX = 0, buttonY = 0;
-    private int cost = 1;
-    public int buttonWidth, buttonHeight = 20;
-    private boolean enoughCoins = true;
-    private TileEntityArcade tileEntity;
-    private EntityPlayer player;
+
+    // GUI Variables
     private int guiLeft, guiTop;
     private int xSize = 0, ySize = 0;
     private ResourceLocation gui;
+    private GuiButton insertCoin;
+    private int buttonX = 0, buttonY = 0;
+    public int buttonWidth, buttonHeight = 20;
+    private int[] offset = { 0, 0 };
+
+    // Cost Variables
+    private int cost = 1;
+    private boolean enoughCoins = true;
+    protected boolean canGetCoinBack = true;
+
+    // Constructor Variable
+    private TileEntityArcade tileEntity;
+    private EntityPlayer player;
+    private World world;
 
     public GuiArcade (World world, TileEntityArcade tileEntity, EntityPlayer player) {
         this.world = world;
@@ -58,6 +70,12 @@ public class GuiArcade extends GuiScreen {
     public void setButtonPos (int x, int y) {
         buttonX = x;
         buttonY = y;
+    }
+
+    // Sets the offset of the Text of the Insert Coin Menu
+    public void setOffset (int x, int y) {
+        offset[0] = x;
+        offset[1] = y;
     }
 
     public void setStartMenu (int startMenu) {
@@ -97,6 +115,11 @@ public class GuiArcade extends GuiScreen {
         return world;
     }
 
+    @Override
+    public void updateScreen () {
+        tickCounter++;
+    }
+
     // TODO: Create functions to set Insert Coin Menu Pos
     @Override
     public void drawScreen (int mouseX, int mouseY, float partialTicks) {
@@ -115,10 +138,10 @@ public class GuiArcade extends GuiScreen {
                 case -1: // Insert Coin Menu
                     buttonList.get(0).enabled = true;
                     buttonList.get(0).visible = true;
-                    this.fontRendererObj.drawString(I18n.format("button.arcademod:insert.locale") + "...", (width / 2) - (coinWidth / 2), height / 2, 16777215);
+                    this.fontRendererObj.drawString(I18n.format("button.arcademod:insert.locale") + "...", (width / 2) - (coinWidth / 2) + offset[0], height / 2 + offset[1], 16777215);
                     if (!enoughCoins) {
-                        if (cost == 1) this.fontRendererObj.drawString(cost + " " + I18n.format("text.arcademod:needed.locale"), (width / 2) - (neededSingWidth / 2), (height / 2) + 10, 16711680);
-                        else this.fontRendererObj.drawString(cost + " " + I18n.format("text.arcademod:needed_plural.locale"), (width / 2) - (neededPluralWidth / 2), (height / 2) + 10, 16711680);
+                        if (cost == 1) this.fontRendererObj.drawString(cost + " " + I18n.format("text.arcademod:needed.locale"), (width / 2) - (neededSingWidth / 2) + offset[0], (height / 2) + 10 + offset[1], 16711680);
+                        else this.fontRendererObj.drawString(cost + " " + I18n.format("text.arcademod:needed_plural.locale"), (width / 2) - (neededPluralWidth / 2) + offset[0], (height / 2) + 10 + offset[1], 16711680);
                     }
                     break;
             }
@@ -171,7 +194,7 @@ public class GuiArcade extends GuiScreen {
     @Override
     protected void keyTyped (char typedChar, int keyCode) throws IOException {
         if (keyCode == 1) { // Esc
-            if (menu == startMenu && !mc.player.isCreative()) giveReward(ArcadeItems.coin, cost);
+            if (canGetCoinBack && !mc.player.isCreative() && menu != -1) giveReward(ArcadeItems.coin, cost);
         }
         super.keyTyped(typedChar, keyCode);
     }

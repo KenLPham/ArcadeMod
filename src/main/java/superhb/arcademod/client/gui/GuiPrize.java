@@ -7,7 +7,7 @@ import net.minecraft.util.ResourceLocation;
 import superhb.arcademod.Arcade;
 import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArrow;
-import superhb.arcademod.tileentity.TileEntityPrize;
+import superhb.arcademod.client.tileentity.TileEntityPrize;
 
 import java.awt.*;
 import java.io.IOException;

@@ -26,7 +26,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import superhb.arcademod.client.ArcadeBlocks;
-import superhb.arcademod.tileentity.TileEntityArcade;
+import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.util.EnumGame;
 
 import javax.annotation.Nullable;
@@ -237,13 +237,11 @@ public class BlockArcade extends Block implements IBlockVariant {
         snakeStack.setTagCompound(snake);
         list.add(snakeStack);
 
-        /*
-        NBTTagCompound tetris = new NBTTagCompound();
-        ItemStack tetrisStack = new ItemStack(item);
-        tetris.setInteger("Game", 1);
-        tetrisStack.setTagCompound(tetris);
-        list.add(tetrisStack);
-        */
+        NBTTagCompound tetrominoes = new NBTTagCompound();
+        ItemStack tetrominoesStack = new ItemStack(item);
+        tetrominoes.setInteger("Game", 1);
+        tetrominoesStack.setTagCompound(tetrominoes);
+        list.add(tetrominoesStack);
     }
 
     @Override

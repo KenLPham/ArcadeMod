@@ -11,7 +11,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import superhb.arcademod.client.blocks.IBlockVariant;
-import superhb.arcademod.tileentity.TileEntityPlushie;
+import superhb.arcademod.client.tileentity.TileEntityPlushie;
 
 // TODO: Variant model
 public class ItemBlockPlushie extends ItemBlock {

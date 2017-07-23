@@ -1,4 +1,4 @@
-package superhb.arcademod.tileentity;
+package superhb.arcademod.client.tileentity;
 
 import net.minecraft.tileentity.TileEntity;
 
