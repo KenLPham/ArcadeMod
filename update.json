@@ -32,12 +32,15 @@
     "1.0.4": "Added Logger\nMod now creates Arcade_Games directory",
     "1.0.5": "Created Creeper Plushie",
     "1.0.6": "Created Prize Box",
-    "1.0.7": "Snake Fixes:\n-Fixed movement (At least is should)\n-New game speed system\n-Increased max tail size to 200\n-Added text telling player how to return to main menu from Control menu"
+    "1.0.7": "Snake Fixes:\n- Fixed movement (At least is should)\n-New game speed system\n- Increased max tail size to 200\n- Added text telling player how to return to main menu from Control menu",
+    "1.0.8": "Fixed Snake Arcade cabinet recipe allowing any wool other than white",
+    "1.0.9": "Removed unused textures",
+    "1.2.0": "- Added Tetris\n- Added functions to Gui Arcade API\n- Decreased wait time at Game Over before returning to Start Menu\n- Made it so leaving during game still gives you tickets\n- Made it so leaving before playing a game returns your coin(s)"
   },
   "promos": {
     "1.12-latest": "1.0.0",
     "1.12-recommended": "1.0.0",
-    "1.11.2-latest": "1.0.7",
-    "1.11.2-recommended": "1.0.7"
+    "1.11.2-latest": "1.2.0",
+    "1.11.2-recommended": "1.2.0"
   }
 }
