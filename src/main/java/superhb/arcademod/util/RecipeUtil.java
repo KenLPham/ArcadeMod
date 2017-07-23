@@ -18,5 +18,11 @@ public class RecipeUtil {
         ItemStack snakeStack = new ItemStack(ArcadeBlocks.arcadeMachine);
         snakeStack.setTagCompound(snake);
         GameRegistry.addRecipe(snakeStack, new Object[] { "bgb", "wbw", "brb", 'b', new ItemStack(Blocks.WOOL, 1, 15), 'g', Blocks.GLASS_PANE, 'w', new ItemStack(Blocks.WOOL, 1, 0), 'r', Items.REDSTONE });
+
+        NBTTagCompound tetrominoes = new NBTTagCompound();
+        tetrominoes.setInteger("Game", 1);
+        ItemStack tetrominoesStack = new ItemStack(ArcadeBlocks.arcadeMachine);
+        tetrominoesStack.setTagCompound(tetrominoes);
+        GameRegistry.addRecipe(tetrominoesStack, new Object[] { "bgb", "bbb", "brb", 'b', new ItemStack(Blocks.WOOL, 1, 11), 'g', Blocks.GLASS_PANE, 'r', Items.REDSTONE});
     }
 }
