@@ -1,9 +1,13 @@
 package superhb.arcademod.client.gui;
 
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import org.lwjgl.input.Keyboard;
 import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArcade;
@@ -16,6 +20,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
+// TODO: Add sounds?
 public class GuiTetrominoes extends GuiArcade {
     // 10x18 Blocks
     // Each shape placed is 17 pts
@@ -40,6 +45,9 @@ public class GuiTetrominoes extends GuiArcade {
     private static final int ARROW_HORIZONTAL_X = 7;
     private static final int ARROW_HORIZONTAL_Y = 11;
 
+    // Music Variables
+    private boolean playMusic = true;
+
     // Game Variables
     private int score = 0, row = 0, level = 1;
     private boolean gameOver = false;
@@ -50,6 +58,8 @@ public class GuiTetrominoes extends GuiArcade {
     private Point piecePoint = new Point(3, 0);
     private int[][] board;
     private int[] speed = { 1, 10, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
+
+    private int controlTick = 0, prevControlTick = 0, controlSpeed = 2;
 
     private final Point[][][] pieces = { // [shape][rotation][block]
             {
@@ -125,6 +135,12 @@ public class GuiTetrominoes extends GuiArcade {
         }
     }
 
+    @Override
+    public void updateScreen () {
+        super.updateScreen();
+        controlTick++;
+    }
+
     // TODO: Make leaderboard menu
     // TODO: Save high score to nbt
     // TODO: Save leaderboard (Top 10) to nbt
@@ -140,13 +156,21 @@ public class GuiTetrominoes extends GuiArcade {
 
         int controlWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:control.locale"));
 
+        // TODO: Make it so that song plays on loop
+        // TODO: Make it so you can change the volume through GUI
+        if (playMusic && !inMenu) {
+            playMusic = false;
+            //mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(new SoundEvent(new ResourceLocation(Reference.MODID, "theme.tetris")), 1.0F));
+        }
+
         if (inMenu) {
+            // TODO: Volume Menu
             switch (menu) {
                 case 0: // Main Menu
-                    int titleWidth = this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:name.tetrominoes.locale"));
+                    int titleWidth = this.fontRendererObj.getStringWidth(I18n.format("game.arcademod:tetrominoes.name"));
                     int startWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:start.locale"));
 
-                    this.fontRendererObj.drawString(I18n.format("text.arcademod:name.tetrominoes.locale"), playX + (130 / 2) - (titleWidth / 2), playY + 2, Color.white.getRGB());
+                    this.fontRendererObj.drawString(I18n.format("game.arcademod:tetrominoes.name"), playX + (130 / 2) - (titleWidth / 2), playY + 2, Color.white.getRGB());
                     this.fontRendererObj.drawString(I18n.format("option.arcademod:start.locale"), playX + (130 / 2) - (startWidth / 2), (height / 2), Color.white.getRGB());
                     this.fontRendererObj.drawString(I18n.format("option.arcademod:control.locale"), playX + (130 / 2) - (controlWidth / 2), (height / 2) + 10, Color.white.getRGB());
 
@@ -231,10 +255,22 @@ public class GuiTetrominoes extends GuiArcade {
                 giveNextPiece = false;
             }
 
-            if ((tickCounter - prevTick) >= (isSpeedKeyDown() ? speed[0] : speed[level])) {
+            // Move Current Piece down or place
+            if ((tickCounter - prevTick) >= (isKeyDown(KeyHandler.down.getKeyCode()) ? speed[0] : speed[level])) {
                 prevTick = tickCounter;
+
                 if (canMoveDown()) piecePoint.y++;
                 else place();
+            }
+
+            // Controls
+            if ((controlTick - prevControlTick) >= controlSpeed) {
+                prevControlTick = controlTick;
+                if (isKeyDown(KeyHandler.left.getKeyCode())) {
+                    if (canMoveLeft()) piecePoint.x--;
+                } else if (isKeyDown(KeyHandler.right.getKeyCode())) {
+                    if (canMoveRight()) piecePoint.x++;
+                }
             }
 
             // Draw Tetrominos
@@ -278,7 +314,7 @@ public class GuiTetrominoes extends GuiArcade {
                 }
             }
         }
-        if (keyCode == KeyHandler.down.getKeyCode()) { // Down/Speed Up
+        if (keyCode == KeyHandler.down.getKeyCode()) { // Down
             if (inMenu) {
                 if (menu == 0) { // Start
                     if (menuOption == 1) menuOption = 0;
@@ -291,14 +327,10 @@ public class GuiTetrominoes extends GuiArcade {
         if (keyCode == KeyHandler.left.getKeyCode()) { // Left/Back
             if (inMenu) {
                 if (menu == 1 || menu == 2) menu = 0; // Level Select or Control Menu
-            } else {
-                if (canMoveLeft()) piecePoint.x--;
             }
         }
         if (keyCode == KeyHandler.right.getKeyCode()) { // Right
             if (inMenu) {
-            } else {
-                if (canMoveRight()) piecePoint.x++;
             }
         }
         if (keyCode == KeyHandler.select.getKeyCode()) { // Select
@@ -325,6 +357,9 @@ public class GuiTetrominoes extends GuiArcade {
         }
         if (keyCode == 1) { // Esc
             if (!inMenu) giveReward(ArcadeItems.ticket, row);
+            // TODO: Only Stop Arcade Machine Sounds
+            //mc.getSoundHandler().stopSound(PositionedSoundRecord.getMasterRecord(new SoundEvent(new ResourceLocation(Reference.MODID, "theme.tetris")), 1));
+            //mc.getSoundHandler().stopSounds();
         }
         super.keyTyped(typedChar, keyCode);
     }
@@ -340,10 +375,6 @@ public class GuiTetrominoes extends GuiArcade {
         else if (row >= 70 && level == 7) level = 8;
         else if (row >= 80 && level == 8) level = 9;
         else if (row >= 90 && level == 9) level = 10;
-    }
-
-    private boolean isSpeedKeyDown () {
-        return Keyboard.isKeyDown(KeyHandler.down.getKeyCode());
     }
 
     private void drawTetromino (int shape, int rotation, int x, int y) {
@@ -376,7 +407,6 @@ public class GuiTetrominoes extends GuiArcade {
         for (int i = 0; i < 4; i++) this.drawTexturedModalRect(nextX + pos[shape][0] + (pieces[shape][0][i].x * PREVIEW_BLOCK), nextY + pos[shape][1] + (pieces[shape][0][i].y * PREVIEW_BLOCK), (GUI_X + PLAY_BLOCK), 0, PREVIEW_BLOCK, PREVIEW_BLOCK);
     }
 
-    // TODO: Don't rotate if blocked below or on sides
     private boolean canRotate () {
         int nextRot = 0;
 
@@ -417,7 +447,6 @@ public class GuiTetrominoes extends GuiArcade {
         return true;
     }
 
-    // x + pieces[curShape][rotation][i].x, y + pieces[shape][rotation][i].y - 1
     private boolean canMoveDown () {
         for (int i = 0; i < 4; i++) {
             if ((piecePoint.y + pieces[curShape][rotation][i].y - 1) == 17) return false;

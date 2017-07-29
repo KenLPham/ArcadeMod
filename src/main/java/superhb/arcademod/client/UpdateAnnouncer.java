@@ -20,7 +20,6 @@ public class UpdateAnnouncer {
         if (event.player.world.isRemote && event.player instanceof EntityPlayerSP) {
             EntityPlayerSP player = (EntityPlayerSP) event.player;
 
-            // TODO: Get url from Reference
             ClickEvent openUrl = new ClickEvent(ClickEvent.Action.OPEN_URL, Reference.URL);
             TextComponentString download = new TextComponentString("[Download Latest]");
 
@@ -32,7 +31,7 @@ public class UpdateAnnouncer {
                 }
                 player.sendMessage(download.setStyle(download.getStyle().setColor(TextFormatting.GREEN).setClickEvent(openUrl).setUnderlined(true)));
             }
-            MinecraftForge.EVENT_BUS.unregister(this);
         }
+        MinecraftForge.EVENT_BUS.unregister(this);
     }
 }

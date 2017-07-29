@@ -30,13 +30,27 @@ import superhb.arcademod.util.EnumMob;
 
 import java.util.Random;
 
+// TODO: Redo Creeper Texture
 @SuppressWarnings("deprecation")
 public class BlockPlushie extends Block implements IBlockVariant {
     // TODO: Diagonal rotation
+    /** {@link net.minecraft.block.BlockBanner.BlockBannerStanding#withRotation(IBlockState, Rotation)} */
     public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
     public static final PropertyEnum MOB = PropertyEnum.create("mob", EnumMob.class);
-    public static final AxisAlignedBB[] boundingBox = {
-        new AxisAlignedBB((5.0D / 16.0D), 0.0D, (5.0D / 16.0D), (11.0D / 16.0D), (13.0D / 16.0D), (11.0D / 16.0D)) // Creeper
+
+    // TODO: Rotations
+    public static final AxisAlignedBB[][] boundingBox = { // [Mob][Rotation]
+            { // Creeper TODO: Fix Bounding Box (Rotation Update)
+                    new AxisAlignedBB((5.0D / 16.0D), 0.0D, (5.0D / 16.0D), (11.0D / 16.0D), (13.0D / 16.0D), (11.0D / 16.0D))
+            },
+            { // Pig TODO: Correct Bounding Box
+                    new AxisAlignedBB((5.0D / 16.0D), 0.0D, (5.0D / 16.0D), (11.0D / 16.0D), (10.0D / 16.0D), (11.0D / 16.0D))
+            }
+    };
+
+    public static final SoundEvent[] mobSounds = {
+            SoundEvents.ENTITY_CREEPER_HURT,
+            SoundEvents.ENTITY_PIG_AMBIENT
     };
 
     public BlockPlushie(Material material) {
@@ -81,14 +95,23 @@ public class BlockPlushie extends Block implements IBlockVariant {
         return Item.getItemFromBlock(this);
     }
 
-    // TODO: Different bounding box for different rotation?
     @Override
     public AxisAlignedBB getBoundingBox (IBlockState state, IBlockAccess source, BlockPos pos) {
-        return new AxisAlignedBB((5.0D / 16.0D), 0.0D, (5.0D / 16.0D), (11.0D / 16.0D), (13.0D / 16.0D), (11.0D / 16.0D));
+        return boundingBox[0][0];
+    }
+
+    private AxisAlignedBB getBoundingBox (int mob, int rotation) {
+        return boundingBox[mob][rotation];
     }
 
     @Override
     public AxisAlignedBB getSelectedBoundingBox (IBlockState state, World world, BlockPos pos) {
+        TileEntity tile = world.getTileEntity(pos);
+
+        if (tile instanceof TileEntityPlushie) {
+            TileEntityPlushie plushie = (TileEntityPlushie)tile;
+            return getBoundingBox(plushie.getMobID(), 0).offset(pos);
+        }
         return state.getBoundingBox(world, pos).offset(pos);
     }
 
@@ -113,7 +136,7 @@ public class BlockPlushie extends Block implements IBlockVariant {
     public IBlockState getActualState (IBlockState state, IBlockAccess world, BlockPos pos) {
         TileEntity tile = world.getTileEntity(pos);
 
-        if (tile instanceof TileEntityArcade) {
+        if (tile instanceof TileEntityPlushie) {
             TileEntityPlushie plushie = (TileEntityPlushie)tile;
             return state.withProperty(MOB, EnumMob.getValue(plushie.getMobID()));
         }
@@ -154,8 +177,11 @@ public class BlockPlushie extends Block implements IBlockVariant {
     // TODO: If crouched don't play sound
     @Override
     public boolean onBlockActivated (World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        // TODO: Make array of SoundEvents
-        if (world.isRemote) world.playSound(player, pos, SoundEvents.ENTITY_CREEPER_HURT, SoundCategory.BLOCKS, 1.0F, 1.0F); // TODO: Volume based on distance
+        TileEntity tile = world.getTileEntity(pos);
+        if (tile instanceof TileEntityPlushie) {
+            TileEntityPlushie plushie = (TileEntityPlushie)tile;
+            if (world.isRemote) world.playSound(player, pos, mobSounds[plushie.getMobID()], SoundCategory.BLOCKS, 1.0F, 1.0F); // TODO: Volume based on distance
+        }
         return true;
     }
 

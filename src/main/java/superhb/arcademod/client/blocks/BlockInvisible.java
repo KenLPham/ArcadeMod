@@ -24,6 +24,7 @@ import superhb.arcademod.client.ArcadeBlocks;
 import java.util.Random;
 
 // Used for MultiBlock purposes only
+// TODO: Make it easier to use with any block
 // TODO: Show break progress on model
 // TODO: Change break particles
 @SuppressWarnings("deprecation")

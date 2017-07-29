@@ -4,6 +4,9 @@
 		"mob": {
 			"creeper": {
 				"model": "arcademod:creeper_plushie"
+			},
+			"pig": {
+				"model": "arcademod:pig_plushie"
 			}
 		},
 		"facing": {

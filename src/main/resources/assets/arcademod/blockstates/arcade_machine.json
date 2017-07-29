@@ -4,6 +4,7 @@
 		"model": "arcademod:arcade_machine"
 	},
 	"variants": {
+		"inventory": [{}],
 		"game": {
 			"snake": {
 				"textures": {

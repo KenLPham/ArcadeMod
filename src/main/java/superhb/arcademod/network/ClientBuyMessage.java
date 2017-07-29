@@ -44,4 +44,21 @@ public class ClientBuyMessage implements IMessage {
             return null;
         }
     }
+    /*
+    if (message.getMenu() == -1) {
+        GuiScreen screen = Minecraft.getMinecraft().currentScreen;
+
+        if (screen instanceof GuiArcade) {
+            GuiArcade arcade = (GuiArcade) screen;
+            arcade.isEnoughCoins(message.isEnoughCoins());
+        }
+    } else {
+        GuiScreen screen = Minecraft.getMinecraft().currentScreen;
+
+        if (screen instanceof GuiArcade) {
+            GuiArcade arcade = (GuiArcade) screen;
+            arcade.menu = message.getMenu();
+        }
+    }
+     */
 }

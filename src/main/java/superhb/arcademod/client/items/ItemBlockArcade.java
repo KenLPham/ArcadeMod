@@ -2,6 +2,8 @@ package superhb.arcademod.client.items;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -9,10 +11,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.*;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import superhb.arcademod.Reference;
 import superhb.arcademod.client.blocks.IBlockVariant;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
+import superhb.arcademod.util.EnumMob;
 
-public class ItemBlockArcade extends ItemBlock {
+public class ItemBlockArcade extends ItemBlock implements IItemMeshDefinition {
     // TODO: Get texture to change based on variant
     public ItemBlockArcade (Block block) {
         super(block);
@@ -66,5 +72,17 @@ public class ItemBlockArcade extends ItemBlock {
     @Override
     public String getUnlocalizedName(ItemStack stack) {
         return super.getUnlocalizedName(stack) + "." + ((IBlockVariant)block).getVariantName(stack);
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public ItemMeshDefinition getMeshDefinition () {
+        return new ItemMeshDefinition() {
+            @Override
+            public ModelResourceLocation getModelLocation(ItemStack stack) {
+                if (stack.hasTagCompound()) return new ModelResourceLocation(Reference.MODID + ":arcade_machine", "game=" + EnumMob.getName(stack.getTagCompound().getInteger("Mob")));
+                else return new ModelResourceLocation(Reference.MODID + ":arcade_machine", "game=snake");
+            }
+        };
     }
 }

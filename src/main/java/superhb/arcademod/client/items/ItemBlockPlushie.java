@@ -14,6 +14,13 @@ import superhb.arcademod.client.blocks.IBlockVariant;
 import superhb.arcademod.client.tileentity.TileEntityPlushie;
 
 // TODO: Variant model
+/*
+http://www.minecraftforge.net/forum/topic/51160-1112-rendering-an-item-based-on-nbt/#comment-254079
+https://github.com/MinecraftForge/MinecraftForge/blob/16bfd8cef1d12ee9ca0de1122addaf9916767ae9/src/main/java/net/minecraftforge/client/model/ModelDynBucket.java
+https://github.com/MinecraftForge/MinecraftForge/blob/16bfd8cef1d12ee9ca0de1122addaf9916767ae9/src/main/java/net/minecraftforge/client/model/ItemLayerModel.java
+
+https://github.com/TheGreyGhost/MinecraftByExample/tree/master/src/main/java/minecraftbyexample/mbe15_item_dynamic_item_model
+ */
 public class ItemBlockPlushie extends ItemBlock {
     public ItemBlockPlushie (Block block) {
         super(block);

@@ -23,7 +23,7 @@ public class GuiSnake extends GuiArcade {
     private int direction = 0, difficulty = 0; // direction == 0 = start, 1 = up, 2 = down, 3 = left, 4 = right; difficulty == 0 = easy (4), 1 = medium (3), 2 = hard (2), 3 = extreme (1)
     private int tail = 0, score = 0;
     private boolean start = true, gameOver = false;
-    private int tick = 20;
+    private int tick = 4;
 
     // Texture Variables
     private static final int GUI_X = 150;

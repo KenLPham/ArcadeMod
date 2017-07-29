@@ -1,5 +1,6 @@
 package superhb.arcademod;
 
+import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.ForgeVersion;
@@ -9,6 +10,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.versioning.ComparableVersion;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import superhb.arcademod.client.ArcadeBlocks;
 import superhb.arcademod.client.UpdateAnnouncer;
 import superhb.arcademod.client.ArcadeItems;
 import superhb.arcademod.proxy.CommonProxy;
@@ -22,7 +24,6 @@ import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.client.tileentity.TileEntityPlushie;
 import superhb.arcademod.client.tileentity.TileEntityPrize;
 import superhb.arcademod.client.tileentity.TileEntityTestArcade;
-import superhb.arcademod.util.EnumType;
 import superhb.arcademod.util.PrizeList;
 
 import java.io.File;
@@ -33,13 +34,30 @@ import java.util.Set;
 /* Game List
     - Pac-Man
     - Space Invaders
-    - Donkey Kong (ReddyRedStoneOre)
-    - Super Mario Bros (thatguyEnder)
-    - Asteroids (WilchHabos)
+    - Donkey Kong (ReddyRedStoneOre) [CF]
+    - Super Mario Bros (thatguyEnder) [CF]
+    - Asteroids (WilchHabos) [CF]
+    - DDR (GamerGuy941Ytube) [MCF]
+    - Pinball
+ */
+
+/* Special Machines
+    - Skeeball
+    - Claw Machine
+    - Coin Pusher
  */
 
 /* ChangeLog
+    1.2.1
+    - Changed Insert Coin button sound
+    - Fixed Snake Easy Difficulty being too slow (When not set to easy manually)
+    - Tetris: Better controls
+    - Tetris: Changed name language format
+    - Added Prize Counter
+    - Added Pig Plushie
  */
+
+// Reload resources with F3+T
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, updateJSON = Reference.UPDATE_URL)
 public class Arcade {
     @SidedProxy(clientSide = Reference.CLIENT_PROXY, serverSide = Reference.SERVER_PROXY)
@@ -72,12 +90,19 @@ public class Arcade {
     public static boolean requireRedstone;
     public static boolean disableUpdateNotification;
 
+    // Prize List Variables
     public static int prizeTotal = 0;
     public static PrizeList[] prizeList;
+    private String[] s_prizeList;
 
     // TODO: default add all plushies
     private final String[] defaultList  = {
-        "arcademod:plushie:5:Mob=0"
+            "arcademod:plushie:5:Mob=0",
+            "arcademod:plushie:3:Mob=1",
+            "minecraft:diamond:200",
+            "minecraft:iron_ingot:100",
+            "minecraft:gold_ingot:150",
+            "minecraft:diamond_block:1800"
     };
 
     // Game Addons
@@ -100,26 +125,11 @@ public class Arcade {
         disableCoins = config.getBoolean("disableCoins", Configuration.CATEGORY_GENERAL, false, "Disable the need to use coins to play the arcade machines");
         requireRedstone = config.getBoolean("requireRedstone", Configuration.CATEGORY_GENERAL, false, "Require the machines to be powered by redstone to play");
         disableUpdateNotification = config.getBoolean("disableUpdateNotification", Configuration.CATEGORY_GENERAL, false, "Disable message in chat when update is available");
-        prizeTotal = config.getInt("total", "prize_list", 1, 0, 100, "Amount of prizes in list. This has to be changed manually.");
+        // Prize List
+        prizeTotal = config.getInt("total", "prize_list", defaultList.length, 0, 100, "Amount of prizes in list. This has to be changed manually.");
         prizeList = new PrizeList[prizeTotal];
-        for (int i = 0; i < prizeTotal; i++) { // TODO: Prize List
-            String temp = config.getString(String.format("%d", i), "prize_list", defaultList[i], "Format: name:cost");
-            String[] s = temp.split(":");
-            if (s.length == 3) {
-                Item item = Item.getByNameOrId(s[0] + ":" + s[1]);
-                int cost = new Integer(s[2]);
-                prizeList[i] = new PrizeList(new ItemStack(item), cost);
-            } else if (s.length == 4) { // TODO: Figure out NBT
-                Item item = Item.getByNameOrId(s[0] + ":" + s[1]);
-                int cost = new Integer(s[2]);
-                String[] nbt = s[3].split("=");
-                ItemStack stack = new ItemStack(item);
-
-                stack.setTagCompound(new NBTTagCompound());
-                stack.getTagCompound().setInteger(nbt[0], new Integer(nbt[1]));
-                prizeList[i] = new PrizeList(stack, cost);
-            }
-        }
+        s_prizeList = new String[prizeTotal];
+        for (int i = 0; i < prizeTotal; i++) s_prizeList[i] = config.getString(String.format("%d", i), "prize_list", defaultList[i], "Format: name:cost");
         config.save();
 
         // Game Addons
@@ -158,19 +168,44 @@ public class Arcade {
         }
 
         // Check for other mods here
-        // TODO: Move creation of prizeList here
+
+        // Prize List
+        loadPrizeList();
 
         proxy.postInit(event);
     }
 
+    private void loadPrizeList () {
+        for (int i = 0; i < s_prizeList.length; i++) {
+            String[] s = s_prizeList[i].split(":");
+            if (s.length == 3) {
+                Item item = Item.getByNameOrId(s[0] + ":" + s[1]);
+                int cost = new Integer(s[2]);
+                prizeList[i] = new PrizeList(item, cost);
+            } else if (s.length == 4) {
+                int cost = new Integer(s[2]);
+                Item item = Item.getByNameOrId(s[0] + ":" + s[1]);
+                String[] nbt = s[3].split("=");
+
+                NBTTagCompound compound = new NBTTagCompound();
+                // TODO: phraser for other types
+                try {
+                    compound.setInteger(nbt[0], new Integer(nbt[1]));
+                } catch (NumberFormatException e) {
+                    compound.setString(nbt[0], nbt[1]);
+                }
+                ItemStack stack = new ItemStack(item, 1);
+                stack.setTagCompound(compound);
+                prizeList[i] = new PrizeList(stack.getItem(), cost);
+            }
+        }
+    }
+
     // TODO: Game Addons
     // Gets files from /Arcade_Games/ directory
-    private void getTypeFiles (List<File> games) {
+    private void getAddons (List<File> games) {
         for (File game : games) {
             if (game.isDirectory()) {
-                for (EnumType type : EnumType.values()) {
-
-                }
             }
         }
     }

@@ -3,16 +3,22 @@ package superhb.arcademod.client.gui;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import superhb.arcademod.Arcade;
 import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArrow;
+import superhb.arcademod.client.ArcadeBlocks;
+import superhb.arcademod.client.ArcadeItems;
 import superhb.arcademod.client.tileentity.TileEntityPrize;
+import superhb.arcademod.network.RewardMessage;
+import superhb.arcademod.network.ServerBuyMessage;
+import superhb.arcademod.util.ArcadePacketHandler;
 
 import java.awt.*;
 import java.io.IOException;
 
-// TODO: Enlarge GUI
+// TODO: Different GUI
 public class GuiPrize extends GuiScreen {
     private GuiButton prizeNext, prizePrev, amountUp, amountDown, buy;
 
@@ -39,7 +45,8 @@ public class GuiPrize extends GuiScreen {
         super.drawScreen(mouseX, mouseY, partialTicks);
 
         String name = tile.getDisplayName().getUnformattedText();
-        fontRendererObj.drawString(name, guiLeft, guiTop, Color.darkGray.getRGB());
+        int nameWidth = fontRendererObj.getStringWidth(name);
+        fontRendererObj.drawString(name, (width / 2) - (nameWidth / 2), guiTop + 4, Color.darkGray.getRGB());
 
         // Amount
         fontRendererObj.drawString(String.format("%d", amount), (guiLeft + 91) - (fontRendererObj.getStringWidth(String.format("%d", amount)) / 2), (guiTop + 34), Color.white.getRGB());
@@ -53,7 +60,7 @@ public class GuiPrize extends GuiScreen {
         GlStateManager.enableLighting();
         drawRect((guiLeft + 31), (guiTop + 29), (guiLeft + 31 + 16), (guiTop + 29 + 16), -2130706433);
         GlStateManager.enableDepth();
-        itemRender.renderItemAndEffectIntoGUI(Arcade.prizeList[curPrize].getStack(), (guiLeft + 31), (guiTop + 29));
+        itemRender.renderItemAndEffectIntoGUI(new ItemStack(Arcade.prizeList[curPrize].getItem()), (guiLeft + 31), (guiTop + 29));
         // TODO: Hover Overlay
         //itemRender.renderItemOverlayIntoGUI(fontRendererObj, new ItemStack(ArcadeBlocks.plushie), guiLeft, guiTop, "Item");
     }
@@ -83,13 +90,12 @@ public class GuiPrize extends GuiScreen {
         } else if (button == amountDown) {
             if (amount != 1) amount--;
         } else if (button == buy) {
-            // TODO: Send Packet
+            ArcadePacketHandler.INSTANCE.sendToServer(new ServerBuyMessage(Arcade.prizeList[curPrize].getItem(), new ItemStack(ArcadeItems.ticket), amount, Arcade.prizeList[curPrize].getPrice() * amount));
         }
     }
 
     @Override
-    public boolean doesGuiPauseGame ()
-    {
+    public boolean doesGuiPauseGame () {
         return false;
     }
 }

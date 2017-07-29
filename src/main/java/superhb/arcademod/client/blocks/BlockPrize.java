@@ -52,7 +52,6 @@ public class BlockPrize extends Block {
         }
     }
 
-    // TODO: If crouched don't open gui
     @Override
     public boolean onBlockActivated (World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         if (world.isRemote) player.openGui(Arcade.instance, -1, world, pos.getX(), pos.getY(), pos.getZ());

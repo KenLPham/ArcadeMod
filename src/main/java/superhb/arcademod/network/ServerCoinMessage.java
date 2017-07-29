@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import superhb.arcademod.Arcade;
 import superhb.arcademod.util.ArcadePacketHandler;
 
 public class ServerCoinMessage implements IMessage {
@@ -52,6 +53,7 @@ public class ServerCoinMessage implements IMessage {
                 public void run() {
                     EntityPlayerMP serverPlayer = context.getServerHandler().playerEntity;
 
+                    // TODO: Do check for costs above 64
                     if (serverPlayer.inventory.hasItemStack(message.getStack())) {
                         ItemStack coin = serverPlayer.inventory.getStackInSlot(serverPlayer.inventory.getSlotFor(message.getStack()));
                         int slot = serverPlayer.inventory.getSlotFor(message.getStack());

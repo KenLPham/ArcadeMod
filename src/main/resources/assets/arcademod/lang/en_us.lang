@@ -7,6 +7,7 @@ tile.arcademod:arcade_machine.snake.name=Arcade Machine (Snake)
 tile.arcademod:arcade_machine.tetrominoes.name=Arcade Machine (Tetris)
 
 tile.arcademod:plushie.creeper.name=Creeper Plushie
+tile.arcademod:plushie.pig.name=Pig Plushie
 
 tile.arcademod:coin_pusher.name=Coin Pusher Machine
 
@@ -19,7 +20,6 @@ text.arcademod:needed_plural.locale=coins needed
 text.arcademod:gameover.locale=Game Over
 text.arcademod:score.locale=Score
 
-text.arcademod:name.tetrominoes.locale=Tetris
 text.arcademod:next.tetrominoes.locale=Next
 text.arcademod:level.tetrominoes.locale=Level
 text.arcademod:row.tetrominoes.locale=Rows
@@ -36,6 +36,7 @@ option.arcademod:difficulty.hard.locale=Hard
 option.arcademod:difficulty.extreme.locale=Extreme
 
 game.arcademod:snake.name=Snake
+game.arcademod:tetrominoes.name=Tetris
 
 control.arcademod:up.snake.name=Up
 control.arcademod:down.snake.name=Down

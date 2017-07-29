@@ -33,6 +33,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
+// TODO: Make block emit light when powered by redstone or RF
 @SuppressWarnings("deprecation")
 public class BlockArcade extends Block implements IBlockVariant {
     public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
@@ -183,6 +184,7 @@ public class BlockArcade extends Block implements IBlockVariant {
         world.removeTileEntity(pos);
     }
 
+    // TODO: Don't allow player to place block if multiblock doesn't have room
     @Override
     public void onBlockPlacedBy (World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
         world.setBlockState(new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ()), ArcadeBlocks.invisible.getDefaultState().withProperty(FACING, state.getValue(FACING)), 3);
@@ -208,7 +210,6 @@ public class BlockArcade extends Block implements IBlockVariant {
         return getStateFromMeta(meta).withProperty(FACING, placer.getHorizontalFacing());
     }
 
-    // TODO: if crouched don't open gui
     @Override
     public boolean onBlockActivated (World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         TileEntity tile = world.getTileEntity(pos);

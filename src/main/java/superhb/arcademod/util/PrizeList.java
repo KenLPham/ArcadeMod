@@ -1,18 +1,18 @@
 package superhb.arcademod.util;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.Item;
 
 public class PrizeList {
-    private ItemStack stack;
+    private Item item;
     private int price;
 
-    public PrizeList (ItemStack stack, int price) {
-        this.stack = stack;
+    public PrizeList (Item item, int price) {
+        this.item = item;
         this.price = price;
     }
 
-    public ItemStack getStack () {
-        return stack;
+    public Item getItem () {
+        return item;
     }
 
     public int getPrice () {

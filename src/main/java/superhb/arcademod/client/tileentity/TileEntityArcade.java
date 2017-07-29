@@ -6,25 +6,39 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.EnergyStorage;
 
 import javax.annotation.Nullable;
 
-// TODO: Move to client package
-public class TileEntityArcade extends TileEntity {
+// TODO: Make use of Forge Energy API (RF)
+//https://github.com/CJMinecraft01/BitOfEverything/blob/master/src/main/java/cjminecraft/bitofeverything/tileentity/TileEntityBlockBreaker.java
+public class TileEntityArcade extends TileEntity implements ITickable {
     private int game = 0;
+
+    // Leaderboard TODO: Redo whatever the fuck this is
     private NBTTagList leaderboard;
     private String player[] = { "", "", "", "", "", "", "", "", "", "" }, difficulty[] = { "", "", "", "", "", "", "", "", "", "" };
     private int score[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
+    // Energy (Default 10 RF/tick)
+    private EnergyStorage storage;
+
     public TileEntityArcade () {
         game = 0;
+        storage = new EnergyStorage(5000, 1000, 0);
     }
 
     public TileEntityArcade (int game) {
         this.game = game;
+        storage = new EnergyStorage(5000, 1000, 0);
     }
 
     public int getGameID () {
@@ -46,6 +60,17 @@ public class TileEntityArcade extends TileEntity {
     }
 
     @Override
+    public void update () {
+        if (world != null && !world.isRemote) {
+            if (!world.isBlockPowered(pos)) { // Not Powered
+                // Do not emit light
+            } else {
+                // Emit light
+            }
+        }
+    }
+
+    @Override
     public NBTTagCompound writeToNBT (NBTTagCompound compound) {
         super.writeToNBT(compound);
         compound.setInteger("Game", game);
@@ -57,6 +82,7 @@ public class TileEntityArcade extends TileEntity {
             com.setString("Difficulty", difficulty[i]);
             leaderboard.appendTag(com);
         }
+        compound.setInteger("Energy", storage.getEnergyStored());
         compound.setTag("Leaderboard", leaderboard);
         return compound;
     }
@@ -71,6 +97,7 @@ public class TileEntityArcade extends TileEntity {
             score[i] = leaderboard.getCompoundTagAt(i).getInteger("Score");
             difficulty[i] = leaderboard.getCompoundTagAt(i).getString("Difficulty");
         }
+        storage.receiveEnergy(compound.getInteger("Energy"), false);
     }
 
     @Override
@@ -104,5 +131,18 @@ public class TileEntityArcade extends TileEntity {
     public boolean shouldRefresh (World world, BlockPos pos, IBlockState old, IBlockState newState) {
         if (world.isAirBlock(pos)) return true;
         return false;
+    }
+
+    // Capability System
+    @Override
+    public <T> T getCapability (Capability<T> capability, EnumFacing facing) {
+        if (capability == CapabilityEnergy.ENERGY) return (T)storage;
+        return super.getCapability(capability, facing);
+    }
+
+    @Override
+    public boolean hasCapability (Capability<?> capability, EnumFacing facing) {
+        if (capability == CapabilityEnergy.ENERGY) return true;
+        return super.hasCapability(capability, facing);
     }
 }

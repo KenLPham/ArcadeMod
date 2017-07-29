@@ -8,7 +8,7 @@ import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.world.World;
 import superhb.arcademod.client.tileentity.TileEntityTestArcade;
 
-// TODO: Replace BlockArcade
+// https://github.com/MinecraftForge/MinecraftForge/blob/f9c7caaf0cda38cdc18842d47e216a66f0c7c14e/src/test/java/net/minecraftforge/debug/ModelLoaderRegistryDebug.java
 @SuppressWarnings("deprecation")
 public class BlockTestArcade extends Block {
     public BlockTestArcade (Material material) {

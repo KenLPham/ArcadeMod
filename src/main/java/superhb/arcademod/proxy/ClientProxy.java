@@ -4,11 +4,9 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import superhb.arcademod.client.renderer.RendererArcade;
-import superhb.arcademod.network.ClientBuyMessage;
-import superhb.arcademod.network.ClientCoinMessage;
+import superhb.arcademod.network.*;
 import superhb.arcademod.client.tileentity.TileEntityTestArcade;
-import superhb.arcademod.util.ArcadePacketHandler;
-import superhb.arcademod.util.KeyHandler;
+import superhb.arcademod.util.*;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import superhb.arcademod.util.RecipeUtil;
 
@@ -17,16 +15,23 @@ public class ClientProxy extends CommonProxy {
     public void preInit (FMLPreInitializationEvent event) {
         super.preInit(event);
 
-        ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTestArcade.class, new RendererArcade());
+        // Register TileEntitySpecialRenderer
+        //ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTestArcade.class, new RendererArcade());
 
+        // Register Network Message
         KeyHandler.preInit();
         ArcadePacketHandler.INSTANCE.registerMessage(ClientCoinMessage.Handler.class, ClientCoinMessage.class, 1, Side.CLIENT);
         ArcadePacketHandler.INSTANCE.registerMessage(ClientBuyMessage.Handler.class, ClientBuyMessage.class, 4, Side.CLIENT);
+
+        // Register Sounds
+        ArcadeSoundRegistry.registerSounds();
     }
 
     @Override
     public void init (FMLInitializationEvent event) {
         super.init(event);
+
+        // Register Recipes
         RecipeUtil.registerRecipes();
     }
 }

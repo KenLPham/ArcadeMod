@@ -1,0 +1,18 @@
+{
+	"theme.tetris": {
+		"sounds": [
+			{
+				"name": "arcademod:tetris_theme",
+				"stream": true
+			}
+		]
+	},
+	"effect.insert": {
+		"sounds": [
+			{
+				"name": "arcademod:insert_coin",
+				"stream": true
+			}
+		]
+	}
+}
