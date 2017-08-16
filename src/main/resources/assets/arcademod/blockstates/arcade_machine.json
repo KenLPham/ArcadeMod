@@ -1,70 +1,58 @@
 {
 	"forge_marker": 1,
 	"defaults": {
-		"model": "arcademod:arcade_machine"
+		"model": "arcademod:generic_machine.obj",
+		"custom": { "flip-v": true }
 	},
 	"variants": {
-		"inventory": [{}],
-		"game": {
+        "game": {
 			"snake": {
 				"textures": {
-					"bot_front": "arcademod:blocks/snake/bottom_front",
-					"bot_left": "arcademod:blocks/snake/bottom_left",
-					"bot_back": "arcademod:blocks/snake/bottom_back",
-					"bot_right": "arcademod:blocks/snake/bottom_right",
-					"bot": "arcademod:blocks/snake/bottom",
-					"slot": "arcademod:blocks/snake/coin_slot",
-					"con_front": "arcademod:blocks/snake/controller_front",
-					"con_left": "arcademod:blocks/snake/controller_left",
-					"con_back": "arcademod:blocks/snake/controller_back",
-					"con_right": "arcademod:blocks/snake/controller_right",
-					"con_top": "arcademod:blocks/snake/controller_top",
-					"con_bot": "arcademod:blocks/snake/controller_bottom",
-					"border": "arcademod:blocks/snake/screen_border",
-					"screen": "arcademod:blocks/snake/screen",
-					"right_ex": "arcademod:blocks/snake/right_panel_exterior",
-					"right_in": "arcademod:blocks/snake/right_panel_interior",
-					"left_ex": "arcademod:blocks/snake/left_panel_exterior",
-					"left_in": "arcademod:blocks/snake/left_panel_interior",
-					"back": "arcademod:blocks/snake/back_panel",
-					"sides": "arcademod:blocks/snake/top_sides",
-					"up": "arcademod:blocks/snake/top_up",
-					"down": "arcademod:blocks/snake/top_down",
-					"stick": "arcademod:blocks/snake/joystick",
-					"particle": "arcademod:blocks/snake/bottom_front"
+					"#Back": "arcademod:blocks/generic_machine"
 				}
 			},
             "tetrominoes": {
-                "textures": {
-                    "bot_front": "arcademod:blocks/tetrominoes/bottom_front",
-                    "bot_left": "arcademod:blocks/tetrominoes/bottom_left",
-                    "bot_back": "arcademod:blocks/tetrominoes/bottom_back",
-                    "bot_right": "arcademod:blocks/tetrominoes/bottom_right",
-                    "bot": "arcademod:blocks/tetrominoes/bottom",
-                    "slot": "arcademod:blocks/tetrominoes/coin_slot",
-                    "con_front": "arcademod:blocks/tetrominoes/controller_front",
-                    "con_left": "arcademod:blocks/tetrominoes/controller_left",
-                    "con_back": "arcademod:blocks/tetrominoes/controller_back",
-                    "con_right": "arcademod:blocks/tetrominoes/controller_right",
-                    "con_top": "arcademod:blocks/tetrominoes/controller_top",
-                    "con_bot": "arcademod:blocks/tetrominoes/controller_bottom",
-                    "border": "arcademod:blocks/tetrominoes/screen_border",
-                    "screen": "arcademod:blocks/tetrominoes/screen",
-                    "right_ex": "arcademod:blocks/tetrominoes/right_panel_exterior",
-                    "right_in": "arcademod:blocks/tetrominoes/right_panel_interior",
-                    "left_ex": "arcademod:blocks/tetrominoes/left_panel_exterior",
-                    "left_in": "arcademod:blocks/tetrominoes/left_panel_interior",
-                    "back": "arcademod:blocks/tetrominoes/back_panel",
-                    "sides": "arcademod:blocks/tetrominoes/top_sides",
-                    "up": "arcademod:blocks/tetrominoes/top_up",
-                    "down": "arcademod:blocks/tetrominoes/top_down",
-                    "stick": "arcademod:blocks/tetrominoes/joystick",
-                    "particle": "arcademod:blocks/tetrominoes/bottom_front"
-                }
+                "model": "arcademod:tetris.obj"
+            },
+            "pacman": {
+            	"model": "arcademod:pacman.obj"
             }
 		},
 		"facing": {
 			"south": {
+                "transform": {
+                	"gui": {
+                        "translation": [0, -0.167, 0],
+			            "rotation": [{ "x": 30 }, { "y": 225 }],
+			            "scale": 0.4167
+			        },
+			        "ground": {
+			            "scale": 0.25
+			        },
+			        "fixed": {
+                        "translation": [0, -0.25, 0],
+			            "scale": 0.5
+			        },
+			        "head": {
+			            "scale": 0.625
+			        },
+			        "firstperson_lefthand": {
+			            "rotation": [{ "y": -225 }],
+			            "scale": 0.4
+			        },
+			        "firstperson_righthand": {
+			        	"rotation": [{ "y": 45 }],
+			            "scale": 0.4
+			        },
+			        "thirdperson_lefthand": {
+			            "scale": 0.625
+			        },
+			        "thirdperson_righthand": {
+			        	"translation": [0, 2.5, 0],
+			        	"rotation": [{ "x": 75 }, { "y": 45 }],
+			            "scale": 0.375
+			        }
+                },
 				"y": 0
 			},
 			"west": {

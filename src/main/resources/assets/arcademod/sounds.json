@@ -14,5 +14,109 @@
 				"stream": true
 			}
 		]
+	},
+	"effect.pacman_waka_1": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/waka.1",
+				"stream": true
+			}
+		]
+	},
+	"effect.pacman_waka_2": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/waka.2",
+				"stream": true
+			}
+		]
+	},
+	"effect.pacman_waka_3": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/waka.3",
+				"stream": true
+			}
+		]
+	},
+	"effect.pacman_waka_4": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/waka.4",
+				"stream": true
+			}
+		]
+	},
+	"effect.pacman_waka_5": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/waka.5",
+				"stream": true
+			}
+		]
+	},
+	"effect.pacman_waka_6": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/waka.6",
+				"stream": true
+			}
+		]
+	},
+	"effect.pacman_death": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/death",
+				"stream": true
+			}
+		]
+	},
+	"effect.pacman_fruit": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/fruit",
+				"stream": true
+			}
+		]
+	},
+	"theme.pacman": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/pacman",
+				"stream": true
+			}
+		]
+	},
+	"effect.pacman_ghost": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/ghost",
+				"stream": true
+			}
+		]
+	},
+	"theme.pacman_siren": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/siren",
+				"stream": true
+			}
+		]
+	},
+	"theme.pacman_fright": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/fright",
+				"stream": true
+			}
+		]
+	},
+	"effect.pacman_life": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/life",
+				"stream": true
+			}
+		]
 	}
 }

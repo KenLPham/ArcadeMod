@@ -5,6 +5,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -13,13 +14,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.*;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import superhb.arcademod.Arcade;
 import superhb.arcademod.Reference;
 import superhb.arcademod.client.blocks.IBlockVariant;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
+import superhb.arcademod.util.EnumGame;
 import superhb.arcademod.util.EnumMob;
 
 public class ItemBlockArcade extends ItemBlock implements IItemMeshDefinition {
-    // TODO: Get texture to change based on variant
     public ItemBlockArcade (Block block) {
         super(block);
 
@@ -35,22 +37,26 @@ public class ItemBlockArcade extends ItemBlock implements IItemMeshDefinition {
 
     @Override
     public boolean placeBlockAt (ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, IBlockState newState) {
-        super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
+        BlockPos up = new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ());
+        if (world.getBlockState(up).getBlock() != Blocks.AIR) return false;
+        else {
+            super.placeBlockAt(stack, player, world, pos, side, hitX, hitY, hitZ, newState);
 
-        if (stack.getTagCompound() == null) {
-            stack.setTagCompound(new NBTTagCompound());
+            if (stack.getTagCompound() == null) {
+                stack.setTagCompound(new NBTTagCompound());
 
+                NBTTagCompound compound = stack.getTagCompound();
+                compound.setInteger("Game", 0);
+                // TODO: setLeaderboard
+            }
             NBTTagCompound compound = stack.getTagCompound();
-            compound.setInteger("Game", 0);
-            // TODO: setLeaderboard
+            if (world.getTileEntity(pos) instanceof TileEntityArcade) {
+                TileEntityArcade tile = (TileEntityArcade) world.getTileEntity(pos);
+                tile.setGameID(compound.getInteger("Game"));
+                // TODO: setLeaderboard
+            }
+            return true;
         }
-        NBTTagCompound compound = stack.getTagCompound();
-        if (world.getTileEntity(pos) instanceof TileEntityArcade) {
-            TileEntityArcade tile = (TileEntityArcade)world.getTileEntity(pos);
-            tile.setGameID(compound.getInteger("Game"));
-            // TODO: setLeaderboard
-        }
-        return true;
     }
 
     @Override
@@ -80,8 +86,10 @@ public class ItemBlockArcade extends ItemBlock implements IItemMeshDefinition {
         return new ItemMeshDefinition() {
             @Override
             public ModelResourceLocation getModelLocation(ItemStack stack) {
-                if (stack.hasTagCompound()) return new ModelResourceLocation(Reference.MODID + ":arcade_machine", "game=" + EnumMob.getName(stack.getTagCompound().getInteger("Mob")));
-                else return new ModelResourceLocation(Reference.MODID + ":arcade_machine", "game=snake");
+                if (stack.hasTagCompound()) {
+                    return new ModelResourceLocation(Reference.MODID + ":arcade_machine", "facing=south,game=" + EnumGame.values()[stack.getTagCompound().getInteger("Game")].getName());
+                }
+                else return new ModelResourceLocation(Reference.MODID + ":arcade_machine", "facing=south,game=snake");
             }
         };
     }

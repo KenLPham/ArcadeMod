@@ -3,17 +3,13 @@ package superhb.arcademod.client.blocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.properties.PropertyEnum;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IBlockState;
+import net.minecraft.block.properties.*;
+import net.minecraft.block.state.*;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
@@ -27,6 +23,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.client.tileentity.TileEntityPlushie;
 import superhb.arcademod.util.EnumMob;
+import superhb.arcademod.util.EnumRotation;
 
 import java.util.Random;
 
@@ -36,6 +33,7 @@ public class BlockPlushie extends Block implements IBlockVariant {
     // TODO: Diagonal rotation
     /** {@link net.minecraft.block.BlockBanner.BlockBannerStanding#withRotation(IBlockState, Rotation)} */
     public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
+    public static final PropertyEnum ROTATION = PropertyEnum.create("rotation", EnumRotation.class);
     public static final PropertyEnum MOB = PropertyEnum.create("mob", EnumMob.class);
 
     // TODO: Rotations
@@ -93,6 +91,11 @@ public class BlockPlushie extends Block implements IBlockVariant {
     @Override
     public Item getItemDropped (IBlockState state, Random rand, int fortune) {
         return Item.getItemFromBlock(this);
+    }
+
+    @Override
+    public boolean isReplaceable (IBlockAccess world, BlockPos pos) {
+        return false;
     }
 
     @Override
@@ -174,7 +177,6 @@ public class BlockPlushie extends Block implements IBlockVariant {
         return getStateFromMeta(meta).withProperty(FACING, placer.getHorizontalFacing());
     }
 
-    // TODO: If crouched don't play sound
     @Override
     public boolean onBlockActivated (World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
         TileEntity tile = world.getTileEntity(pos);
@@ -194,11 +196,13 @@ public class BlockPlushie extends Block implements IBlockVariant {
     @Override
     @SideOnly(Side.CLIENT)
     public void getSubBlocks (Item item, CreativeTabs tab, NonNullList<ItemStack> list) {
-        NBTTagCompound creeper = new NBTTagCompound();
-        ItemStack creeperStack = new ItemStack(item);
-        creeper.setInteger("Mob", 0);
-        creeperStack.setTagCompound(creeper);
-        list.add(creeperStack);
+        for (int i = 0; i < EnumMob.values().length; i++) {
+            NBTTagCompound compound = new NBTTagCompound();
+            ItemStack stack = new ItemStack(item);
+            compound.setInteger("Mob", i);
+            stack.setTagCompound(compound);
+            list.add(stack);
+        }
     }
 
     @Override

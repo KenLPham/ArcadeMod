@@ -1,8 +1,9 @@
 package superhb.arcademod.util;
 
-import net.minecraft.client.renderer.ItemMeshDefinition;
 import net.minecraft.client.renderer.block.model.ModelBakery;
-import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumFacing;
+import net.minecraftforge.client.model.obj.OBJLoader;
+import superhb.arcademod.Reference;
 import superhb.arcademod.client.ArcadeBlocks;
 import superhb.arcademod.client.ArcadeItems;
 import net.minecraft.block.Block;
@@ -19,61 +20,99 @@ import superhb.arcademod.client.items.ItemBlockPlushie;
 
 public class RegisterUtil {
     public static void registerAll (FMLPreInitializationEvent event) {
-        //registerBlockWithItem(event, ArcadeBlocks.arcadeMachine, new ItemBlockArcade(ArcadeBlocks.arcadeMachine), "inventory");
-        registerItemMeshDefinition(event, new ItemBlockArcade(ArcadeBlocks.arcadeMachine), ArcadeBlocks.arcadeMachine);
+        registerArcadeMachine(event, ArcadeBlocks.arcadeMachine);
+
 
 
         registerItems(event, ArcadeItems.coin, ArcadeItems.ticket);
         registerBlocks(event, ArcadeBlocks.invisible, ArcadeBlocks.prizeBox); //ArcadeBlocks.coinPusher, ArcadeBlocks.testArcade
-        //registerArcadeMachine(event, ArcadeBlocks.arcadeMachine);
         registerPlushie(event, ArcadeBlocks.plushie);
     }
 
+    // Block Registry Functions
     private static void registerBlocks (FMLPreInitializationEvent event, Block... blocks) {
         for (Block block : blocks) {
             final ItemBlock item = new ItemBlock(block);
 
-            if (event.getSide() == Side.CLIENT) registerModelVariant(block, item, "inventory");
+            if (event.getSide() == Side.CLIENT) registerModelVariant(item, block, "inventory");
         }
     }
 
-    private static void registerModelVariant (Block block, Item item, String variantType) {
-        GameRegistry.register(block.setUnlocalizedName(block.getRegistryName().toString()));
-        GameRegistry.register(item, block.getRegistryName());
+    private static void registerModelVariant (Item item, Block block, String variantType) {
+        registerItemBlock(item, block);
         ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), 0, new ModelResourceLocation(block.getRegistryName(), variantType));
     }
 
-    private static void registerBlockWithItem (FMLPreInitializationEvent event, Block block, ItemBlock item, String variant) {
-        if (event.getSide() == Side.CLIENT) registerModelVariant(block, item, variant);
+    private static void registerBlockWithItem (FMLPreInitializationEvent event, Item item, Block block, String variant) {
+        if (event.getSide() == Side.CLIENT) registerModelVariant(item, block, variant);
     }
 
-    private static <T extends IItemMeshDefinition> void registerItemMeshDefinition (FMLPreInitializationEvent event, T item, Block block) {
-        if (event.getSide() == Side.CLIENT) {
-            GameRegistry.register(block.setUnlocalizedName(block.getRegistryName().toString()));
-            GameRegistry.register((Item)item, block.getRegistryName());
+    @Deprecated
+    private static void registerArcadeMachine (Item item, Block block) {
+        registerItemBlock(item, block);
+        OBJLoader.INSTANCE.addDomain(Reference.MODID);
 
-            ItemMeshDefinition def = item.getMeshDefinition();
-            ModelLoader.setCustomMeshDefinition((Item)item, def);
-            ModelBakery.registerItemVariants((Item)item, def.getModelLocation(new ItemStack((Item)item)));
+        if (item instanceof IItemMeshDefinition) {
+            ModelLoader.setCustomMeshDefinition(item, ((IItemMeshDefinition)item).getMeshDefinition());
+            for (EnumGame g : EnumGame.values()) {
+                for (int i = 2; i < 6; i++) ModelBakery.registerItemVariants(item, new ModelResourceLocation(block.getRegistryName(), "facing=" + EnumFacing.values()[i].getName() + ",game=" + g.getName()));
+            }
         }
+    }
+
+    @Deprecated
+    private static void registerPlushie (Item item, Block block) {
+        registerItemBlock(item, block);
+        if (item instanceof IItemMeshDefinition) {
+            ModelLoader.setCustomMeshDefinition(item, ((IItemMeshDefinition)item).getMeshDefinition());
+            for (EnumMob m : EnumMob.values()) {
+                for (int i = 2; i < 6; i++) ModelBakery.registerItemVariants(item, new ModelResourceLocation(block.getRegistryName(), "facing=" + EnumFacing.values()[i].getName() + ",mob=" + m.getName()));
+            }
+        }
+    }
+
+    private static void registerBlockWavefrontModelVariant (Item item, Block block, String variantType) {
+        registerItemBlock(item, block);
+        OBJLoader.INSTANCE.addDomain(Reference.MODID);
+        ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(block.getRegistryName(), variantType));
+    }
+
+    private static void registerBlockWavefrontModel (Item item, Block block) {
+        registerItemBlock(item, block);
+        OBJLoader.INSTANCE.addDomain(Reference.MODID);
+        ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(block.getRegistryName(), "inventory"));
     }
 
     @Deprecated
     private static void registerArcadeMachine (FMLPreInitializationEvent event, Block block) {
         final ItemBlockArcade item = new ItemBlockArcade(block);
-        if (event.getSide() == Side.CLIENT) registerModelVariant(block, item, "game");
+        if (event.getSide() == Side.CLIENT) registerArcadeMachine(item, block);
     }
 
     @Deprecated
     private static void registerPlushie (FMLPreInitializationEvent event, Block block) {
         final ItemBlockPlushie item = new ItemBlockPlushie(block);
-        if (event.getSide() == Side.CLIENT) registerModelVariant(block, item, "mob");
+        if (event.getSide() == Side.CLIENT) registerPlushie(item, block);
+    }
+
+    private static void registerBlock (Block block) {
+        GameRegistry.register(block.setUnlocalizedName(block.getRegistryName().toString()));
+    }
+
+    // Item Registry Functions
+    private static void registerItem (Item item) {
+        GameRegistry.register(item.setUnlocalizedName(item.getRegistryName().toString()));
+    }
+
+    private static void registerItemBlock (Item item, Block block) {
+        registerBlock(block);
+        GameRegistry.register(item, block.getRegistryName());
     }
 
     private static void registerItems (FMLPreInitializationEvent event, Item... items) {
         for (Item item : items) {
             if (event.getSide() == Side.CLIENT) {
-                GameRegistry.register(item.setUnlocalizedName(item.getRegistryName().toString()));
+                registerItem(item);
                 ModelLoader.setCustomModelResourceLocation(item, 0, new ModelResourceLocation(item.getRegistryName(), "inventory"));
             }
         }

@@ -5,6 +5,7 @@ item.arcademod:ticket.name=Ticket
 
 tile.arcademod:arcade_machine.snake.name=Arcade Machine (Snake)
 tile.arcademod:arcade_machine.tetrominoes.name=Arcade Machine (Tetris)
+tile.arcademod:arcade_machine.pacman.name=Arcade Machine (Pac-Man)
 
 tile.arcademod:plushie.creeper.name=Creeper Plushie
 tile.arcademod:plushie.pig.name=Pig Plushie

@@ -23,7 +23,7 @@ public class GuiSnake extends GuiArcade {
     private int direction = 0, difficulty = 0; // direction == 0 = start, 1 = up, 2 = down, 3 = left, 4 = right; difficulty == 0 = easy (4), 1 = medium (3), 2 = hard (2), 3 = extreme (1)
     private int tail = 0, score = 0;
     private boolean start = true, gameOver = false;
-    private int tick = 4;
+    private int prevTick = 0, tick = 4;
 
     // Texture Variables
     private static final int GUI_X = 150;
@@ -124,7 +124,7 @@ public class GuiSnake extends GuiArcade {
                     this.fontRendererObj.drawString(I18n.format("text.arcademod:score.locale") + ": " + tail, (width / 2) - (scoreWidth / 2), (height / 2) - 10, Color.white.getRGB());
                     // TODO: Show Highscore
                     break;
-                case 4: // Leaderboard Menu
+                case 4: // ArcadeLeaderboard Menu
                     break;
             }
 

@@ -37,7 +37,6 @@ public class GuiArrow extends GuiButton {
         this.type = type;
     }
 
-    // TODO: Draw all variants
     @Override
     public void drawButton (Minecraft mc, int mouseX, int mouseY) {
         if (visible) {

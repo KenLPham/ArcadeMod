@@ -17,6 +17,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+// TODO: Coin pusher machine
 @SuppressWarnings("deprecation")
 public class BlockPusher extends Block {
     public static final PropertyDirection FACING = BlockDirectional.FACING;
@@ -54,6 +55,11 @@ public class BlockPusher extends Block {
     @Override
     public boolean canSpawnInBlock () {
         return true;
+    }
+
+    @Override
+    public boolean isReplaceable (IBlockAccess world, BlockPos pos) {
+        return false;
     }
 
     @Override

@@ -1,6 +1,5 @@
 package superhb.arcademod;
 
-import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.ForgeVersion;
@@ -10,7 +9,6 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.versioning.ComparableVersion;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import superhb.arcademod.client.ArcadeBlocks;
 import superhb.arcademod.client.UpdateAnnouncer;
 import superhb.arcademod.client.ArcadeItems;
 import superhb.arcademod.proxy.CommonProxy;
@@ -20,16 +18,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod.*;
 import net.minecraftforge.fml.common.event.*;
-import superhb.arcademod.client.tileentity.TileEntityArcade;
-import superhb.arcademod.client.tileentity.TileEntityPlushie;
-import superhb.arcademod.client.tileentity.TileEntityPrize;
-import superhb.arcademod.client.tileentity.TileEntityTestArcade;
+import superhb.arcademod.client.tileentity.*;
 import superhb.arcademod.util.PrizeList;
 
 import java.io.File;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /* Game List
     - Pac-Man
@@ -37,7 +30,9 @@ import java.util.Set;
     - Donkey Kong (ReddyRedStoneOre) [CF]
     - Super Mario Bros (thatguyEnder) [CF]
     - Asteroids (WilchHabos) [CF]
+    - Galaga (TheFroggyFrog) [CF]
     - DDR (GamerGuy941Ytube) [MCF]
+    - Pong
     - Pinball
  */
 
@@ -48,13 +43,22 @@ import java.util.Set;
  */
 
 /* ChangeLog
-    1.2.1
+    1.3.0
+    - Added Prize Counter
+    - Added Pig Plushie
+    1.3.1
     - Changed Insert Coin button sound
     - Fixed Snake Easy Difficulty being too slow (When not set to easy manually)
     - Tetris: Better controls
     - Tetris: Changed name language format
-    - Added Prize Counter
-    - Added Pig Plushie
+    1.3.2
+    - Fixed Tetris GUI from cutting off
+    - API: Added GuiButtonScalable
+    - API: Allow GUI to be scaled
+    1.3.3
+    - New Arcade Machine models
+    1.3.4
+    - Added Prize Counter model
  */
 
 // Reload resources with F3+T
@@ -98,11 +102,7 @@ public class Arcade {
     // TODO: default add all plushies
     private final String[] defaultList  = {
             "arcademod:plushie:5:Mob=0",
-            "arcademod:plushie:3:Mob=1",
-            "minecraft:diamond:200",
-            "minecraft:iron_ingot:100",
-            "minecraft:gold_ingot:150",
-            "minecraft:diamond_block:1800"
+            "arcademod:plushie:3:Mob=1"
     };
 
     // Game Addons
@@ -126,6 +126,7 @@ public class Arcade {
         requireRedstone = config.getBoolean("requireRedstone", Configuration.CATEGORY_GENERAL, false, "Require the machines to be powered by redstone to play");
         disableUpdateNotification = config.getBoolean("disableUpdateNotification", Configuration.CATEGORY_GENERAL, false, "Disable message in chat when update is available");
         // Prize List
+        // TODO: Get prizeTotal some other way
         prizeTotal = config.getInt("total", "prize_list", defaultList.length, 0, 100, "Amount of prizes in list. This has to be changed manually.");
         prizeList = new PrizeList[prizeTotal];
         s_prizeList = new String[prizeTotal];
@@ -145,8 +146,6 @@ public class Arcade {
         GameRegistry.registerTileEntity(TileEntityPlushie.class, Reference.MODID + ":tile_plushie");
         GameRegistry.registerTileEntity(TileEntityPrize.class, Reference.MODID + ":tile_prize");
 
-        GameRegistry.registerTileEntity(TileEntityTestArcade.class, Reference.MODID + ":tile_arcade_test");
-
         // Register Event
         if (!disableUpdateNotification) MinecraftForge.EVENT_BUS.register(new UpdateAnnouncer());
 
@@ -160,6 +159,7 @@ public class Arcade {
 
     @EventHandler
     public void postInit (FMLPostInitializationEvent event) {
+        // Change Log
         for (ModContainer mod : Loader.instance().getModList()) {
             if (mod.getModId().equals(Reference.MODID)) {
                 status = ForgeVersion.getResult(mod).status;

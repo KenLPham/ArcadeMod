@@ -4,6 +4,7 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -16,6 +17,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import superhb.arcademod.Arcade;
@@ -81,16 +83,22 @@ public class BlockArcade extends Block implements IBlockVariant {
     }
 
     @Override
+    public boolean isReplaceable (IBlockAccess world, BlockPos pos) {
+        return false;
+    }
+
+    // TODO: Fix bounding box
+    @Override
     public AxisAlignedBB getBoundingBox (IBlockState state, IBlockAccess source, BlockPos pos) {
         switch (state.getValue(FACING)) {
             case NORTH:
-                return new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, (12.0D / 16.0D));
+                return new AxisAlignedBB((1.0D / 16.0D), 0.0D, 0.0D, (15.0D / 16.0D), 1.0D, (14.0D / 16.0D));
             case SOUTH:
-                return new AxisAlignedBB(0.0D, 0.0D, (4.0D / 16.0D), 1.0D, 1.0D, 1.0D);
+                return new AxisAlignedBB((1.0D / 16.0D), 0.0D, (2.0D / 16.0D), (15.0D / 16.0D), 1.0D, 1.0D);
             case WEST:
-                return new AxisAlignedBB(0.0D, 0.0D, 0.0D, (12.0D / 16.0D), 1.0D, 1.0D);
+                return new AxisAlignedBB(0.0D, 0.0D, (1.0D / 16.0D), (14.0D / 16.0D), 1.0D, (15.0D / 16.0D));
             case EAST:
-                return new AxisAlignedBB((4.0D / 16.0D), 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
+                return new AxisAlignedBB((2.0D / 16.0D), 0.0D, (1.0D / 16.0D), 1.0D, 1.0D, (15.0D / 16.0D));
         }
         return new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, (31.0D / 16.0D), (12.0D / 16.0D));
     }
@@ -100,6 +108,7 @@ public class BlockArcade extends Block implements IBlockVariant {
         return state.getBoundingBox(world, pos).offset(pos);
     }
 
+    // TODO: Fix collision box
     @Override
     public void addCollisionBoxToList (IBlockState state, World world, BlockPos pos, AxisAlignedBB entityBox, List<AxisAlignedBB> collidingBoxes, @Nullable Entity entity, boolean par6) {
         super.addCollisionBoxToList(pos, entityBox, collidingBoxes, new AxisAlignedBB(0.0D, (13.0D / 16.0D), 0.0D, 1.0D, (3.0D / 16.0D), 1.0D));
@@ -127,7 +136,26 @@ public class BlockArcade extends Block implements IBlockVariant {
         }
     }
 
-    // TODO: wat
+    // TODO: Setup
+    /*
+    @Override
+    public boolean addLandingEffects (IBlockState state, WorldServer worldObj, BlockPos pos, IBlockState state0, EntityLivingBase entity, int numberOfParticles) {
+        return false;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public boolean addHitEffects (IBlockState state, World worldObj, RayTraceResult target, ParticleManager manager) {
+        return false;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public boolean addDestroyEffects (World world, BlockPos pos, ParticleManager manager) {
+        return false;
+    }
+    */
+
     @Override
     public ItemStack getPickBlock (IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
         TileEntity tile = world.getTileEntity(pos);
@@ -184,7 +212,6 @@ public class BlockArcade extends Block implements IBlockVariant {
         world.removeTileEntity(pos);
     }
 
-    // TODO: Don't allow player to place block if multiblock doesn't have room
     @Override
     public void onBlockPlacedBy (World world, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
         world.setBlockState(new BlockPos(pos.getX(), pos.getY() + 1, pos.getZ()), ArcadeBlocks.invisible.getDefaultState().withProperty(FACING, state.getValue(FACING)), 3);
@@ -222,27 +249,31 @@ public class BlockArcade extends Block implements IBlockVariant {
         return true;
     }
 
+    /*
+    @Override
+    public boolean canConnectRedstone (IBlockState state, IBlockAccess world, BlockPos pos, @Nullable EnumFacing side) {
+        return true;
+    }
+    */
+
     @Override
     public String getVariantName (ItemStack stack) {
         if (stack.hasTagCompound()) return EnumGame.getRegistryName(stack.getTagCompound().getInteger("Game"));
         return EnumGame.getRegistryName(0);
     }
 
-    // TODO: Better way to add subtypes to creative tab
     @Override
     @SideOnly(Side.CLIENT)
     public void getSubBlocks (Item item, CreativeTabs tab, NonNullList<ItemStack> list) {
-        NBTTagCompound snake = new NBTTagCompound();
-        ItemStack snakeStack = new ItemStack(item);
-        snake.setInteger("Game", 0);
-        snakeStack.setTagCompound(snake);
-        list.add(snakeStack);
-
-        NBTTagCompound tetrominoes = new NBTTagCompound();
-        ItemStack tetrominoesStack = new ItemStack(item);
-        tetrominoes.setInteger("Game", 1);
-        tetrominoesStack.setTagCompound(tetrominoes);
-        list.add(tetrominoesStack);
+        for (int i = 0; i < EnumGame.values().length; i++) {
+            if (i != 2) {
+                NBTTagCompound compound = new NBTTagCompound();
+                ItemStack stack = new ItemStack(item);
+                compound.setInteger("Game", i);
+                stack.setTagCompound(compound);
+                list.add(stack);
+            }
+        }
     }
 
     @Override
@@ -251,7 +282,7 @@ public class BlockArcade extends Block implements IBlockVariant {
 
         TileEntity tile = world.getTileEntity(pos);
 
-        return tile == null ? false : tile.receiveClientEvent(eventId, eventParam);
+        return tile != null && tile.receiveClientEvent(eventId, eventParam);
     }
 
     @Override

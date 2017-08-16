@@ -23,10 +23,9 @@ import javax.annotation.Nullable;
 public class TileEntityArcade extends TileEntity implements ITickable {
     private int game = 0;
 
-    // Leaderboard TODO: Redo whatever the fuck this is
-    private NBTTagList leaderboard;
-    private String player[] = { "", "", "", "", "", "", "", "", "", "" }, difficulty[] = { "", "", "", "", "", "", "", "", "", "" };
-    private int score[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    // Leaderboard TODO: Leaderboard
+    //private NBTTagList leaderboard;
+    private ArcadeLeaderboard[] leaderboard;
 
     // Energy (Default 10 RF/tick)
     private EnergyStorage storage;
@@ -34,11 +33,13 @@ public class TileEntityArcade extends TileEntity implements ITickable {
     public TileEntityArcade () {
         game = 0;
         storage = new EnergyStorage(5000, 1000, 0);
+        leaderboard = new ArcadeLeaderboard[10];
     }
 
     public TileEntityArcade (int game) {
         this.game = game;
         storage = new EnergyStorage(5000, 1000, 0);
+        leaderboard = new ArcadeLeaderboard[10];
     }
 
     public int getGameID () {
@@ -49,13 +50,11 @@ public class TileEntityArcade extends TileEntity implements ITickable {
         game = id;
     }
 
-    public void addToLeaderboard (int place, String name, int score, String difficulty) {
-        player[place] = name;
-        this.score[place] = score;
-        this.difficulty[place] = difficulty;
+    public void saveLeaderboard (ArcadeLeaderboard[] newLeaderboard) {
+        leaderboard = newLeaderboard;
     }
 
-    public NBTTagList getLeaderboard () {
+    public ArcadeLeaderboard[] getLeaderboard () {
         return leaderboard;
     }
 
@@ -74,6 +73,7 @@ public class TileEntityArcade extends TileEntity implements ITickable {
     public NBTTagCompound writeToNBT (NBTTagCompound compound) {
         super.writeToNBT(compound);
         compound.setInteger("Game", game);
+        /*
         leaderboard = new NBTTagList();
         for (int i = 0; i < player.length; i++) {
             NBTTagCompound com = new NBTTagCompound();
@@ -82,8 +82,9 @@ public class TileEntityArcade extends TileEntity implements ITickable {
             com.setString("Difficulty", difficulty[i]);
             leaderboard.appendTag(com);
         }
+        */
         compound.setInteger("Energy", storage.getEnergyStored());
-        compound.setTag("Leaderboard", leaderboard);
+        //compound.setTag("Leaderboard", leaderboard);
         return compound;
     }
 
@@ -91,12 +92,14 @@ public class TileEntityArcade extends TileEntity implements ITickable {
     public void readFromNBT (NBTTagCompound compound) {
         super.readFromNBT(compound);
         game = compound.getInteger("Game");
+        /*
         leaderboard = compound.getTagList("Leaderboard", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < leaderboard.tagCount(); i++) {
             player[i] = leaderboard.getCompoundTagAt(i).getString("Player");
             score[i] = leaderboard.getCompoundTagAt(i).getInteger("Score");
             difficulty[i] = leaderboard.getCompoundTagAt(i).getString("Difficulty");
         }
+        */
         storage.receiveEnergy(compound.getInteger("Energy"), false);
     }
 

@@ -2,6 +2,8 @@ package superhb.arcademod.client.items;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemBlock;
@@ -10,18 +12,15 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import superhb.arcademod.Reference;
 import superhb.arcademod.client.blocks.IBlockVariant;
 import superhb.arcademod.client.tileentity.TileEntityPlushie;
+import superhb.arcademod.util.EnumMob;
 
-// TODO: Variant model
-/*
-http://www.minecraftforge.net/forum/topic/51160-1112-rendering-an-item-based-on-nbt/#comment-254079
-https://github.com/MinecraftForge/MinecraftForge/blob/16bfd8cef1d12ee9ca0de1122addaf9916767ae9/src/main/java/net/minecraftforge/client/model/ModelDynBucket.java
-https://github.com/MinecraftForge/MinecraftForge/blob/16bfd8cef1d12ee9ca0de1122addaf9916767ae9/src/main/java/net/minecraftforge/client/model/ItemLayerModel.java
-
-https://github.com/TheGreyGhost/MinecraftByExample/tree/master/src/main/java/minecraftbyexample/mbe15_item_dynamic_item_model
- */
-public class ItemBlockPlushie extends ItemBlock {
+//TODO: Fix block rotation
+public class ItemBlockPlushie extends ItemBlock implements IItemMeshDefinition {
     public ItemBlockPlushie (Block block) {
         super(block);
 
@@ -71,5 +70,19 @@ public class ItemBlockPlushie extends ItemBlock {
     @Override
     public String getUnlocalizedName(ItemStack stack) {
         return super.getUnlocalizedName(stack) + "." + ((IBlockVariant)block).getVariantName(stack);
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public ItemMeshDefinition getMeshDefinition () {
+        return new ItemMeshDefinition() {
+            @Override
+            public ModelResourceLocation getModelLocation(ItemStack stack) {
+                if (stack.hasTagCompound()) {
+                    return new ModelResourceLocation(Reference.MODID + ":plushie", "facing=north,mob=" + EnumMob.values()[stack.getTagCompound().getInteger("Mob")].getName());
+                }
+                else return new ModelResourceLocation(Reference.MODID + ":plushie", "facing=north,mob=creeper");
+            }
+        };
     }
 }

@@ -59,6 +59,11 @@ public class BlockInvisible extends Block {
     }
 
     @Override
+    public boolean isReplaceable (IBlockAccess world, BlockPos pos) {
+        return false;
+    }
+
+    @Override
     public Item getItemDropped (IBlockState state, Random rand, int fortune) {
         return Item.getItemFromBlock(ArcadeBlocks.arcadeMachine);
     }
@@ -67,13 +72,13 @@ public class BlockInvisible extends Block {
     public AxisAlignedBB getBoundingBox (IBlockState state, IBlockAccess source, BlockPos pos) {
         switch (state.getValue(FACING)) {
             case NORTH:
-                return new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, (15.0D / 16.0D), (12.0D / 16.0D));
+                return new AxisAlignedBB((1.0D / 16.0D), 0.0D, 0.0D, (15.0D / 16.0D), 1.0D, (14.0D / 16.0D));
             case SOUTH:
-                return new AxisAlignedBB(0.0D, 0.0D, (4.0D / 16.0D), 1.0D, (15.0D / 16.0D), 1.0D);
+                return new AxisAlignedBB((1.0D / 16.0D), 0.0D, (2.0D / 16.0D), (15.0D / 16.0D), 1.0D, 1.0D);
             case WEST:
-                return new AxisAlignedBB(0.0D, 0.0D, 0.0D, (12.0D / 16.0D), (15.0D / 16.0D), 1.0D);
+                return new AxisAlignedBB(0.0D, 0.0D, (1.0D / 16.0D), (14.0D / 16.0D), 1.0D, (15.0D / 16.0D));
             case EAST:
-                return new AxisAlignedBB((4.0D / 16.0D), 0.0D, 0.0D, 1.0D, (15.0D / 16.0D), 1.0D);
+                return new AxisAlignedBB((2.0D / 16.0D), 0.0D, (1.0D / 16.0D), 1.0D, 1.0D, (15.0D / 16.0D));
         }
         return new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, (15.0D / 16.0D), (12.0D / 16.0D));
     }

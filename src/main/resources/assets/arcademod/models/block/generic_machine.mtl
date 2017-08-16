@@ -1,0 +1,123 @@
+# Blender MTL File: 'generic_machine.blend'
+# Material Count: 11
+
+newmtl Back
+# Ns 96.078431
+# Ka 1.000000 1.000000 1.000000
+# Kd 0.103280 0.640000 0.000000
+# Ks 0.500000 0.500000 0.500000
+# Ke 0.000000 0.000000 0.000000
+# Ni 1.000000
+# d 1.000000
+# illum 2
+map_Kd arcademod:blocks/generic_machine
+
+newmtl Bezel
+# Ns 96.078431
+# Ka 1.000000 1.000000 1.000000
+# Kd 0.800000 0.216328 0.627082
+# Ks 0.500000 0.500000 0.500000
+# Ke 0.000000 0.000000 0.000000
+# Ni 1.000000
+# d 1.000000
+# illum 2
+map_Kd arcademod:blocks/generic_machine
+
+newmtl Bottom
+# Ns 96.078431
+# Ka 1.000000 1.000000 1.000000
+# Kd 0.640000 0.000000 0.008121
+# Ks 0.500000 0.500000 0.500000
+# Ke 0.000000 0.000000 0.000000
+# Ni 1.000000
+# d 1.000000
+# illum 2
+map_Kd arcademod:blocks/generic_machine
+
+newmtl Coin
+# Ns 96.078431
+# Ka 1.000000 1.000000 1.000000
+# Kd 0.000000 0.640000 0.271087
+# Ks 0.500000 0.500000 0.500000
+# Ke 0.000000 0.000000 0.000000
+# Ni 1.000000
+# d 1.000000
+# illum 2
+map_Kd arcademod:blocks/generic_machine
+
+newmtl Controller
+# Ns 96.078431
+# Ka 1.000000 1.000000 1.000000
+# Kd 0.367000 0.000000 0.640000
+# Ks 0.500000 0.500000 0.500000
+# Ke 0.000000 0.000000 0.000000
+# Ni 1.000000
+# d 1.000000
+# illum 2
+map_Kd arcademod:blocks/generic_machine
+
+newmtl Front
+# Ns 96.078431
+# Ka 1.000000 1.000000 1.000000
+# Kd 0.004412 0.000000 0.640000
+# Ks 0.500000 0.500000 0.500000
+# Ke 0.000000 0.000000 0.000000
+# Ni 1.000000
+# d 1.000000
+# illum 2
+map_Kd arcademod:blocks/generic_machine
+
+newmtl LeftSide
+# Ns 96.078431
+# Ka 1.000000 1.000000 1.000000
+# Kd 0.640000 0.592663 0.000000
+# Ks 0.500000 0.500000 0.500000
+# Ke 0.000000 0.000000 0.000000
+# Ni 1.000000
+# d 1.000000
+# illum 2
+map_Kd arcademod:blocks/generic_machine
+
+newmtl RightSide
+# Ns 96.078431
+# Ka 1.000000 1.000000 1.000000
+# Kd 0.000000 0.594138 0.640000
+# Ks 0.500000 0.500000 0.500000
+# Ke 0.000000 0.000000 0.000000
+# Ni 1.000000
+# d 1.000000
+# illum 2
+map_Kd arcademod:blocks/generic_machine
+
+newmtl Screen
+# Ns 96.078431
+# Ka 1.000000 1.000000 1.000000
+# Kd 0.013220 0.640000 0.000000
+# Ks 0.500000 0.500000 0.500000
+# Ke 0.000000 0.000000 0.000000
+# Ni 1.000000
+# d 1.000000
+# illum 2
+map_Kd arcademod:blocks/generic_machine
+
+newmtl ScreenBorder
+# Ns 96.078431
+# Ka 1.000000 1.000000 1.000000
+# Kd 0.640000 0.000000 0.056552
+# Ks 0.500000 0.500000 0.500000
+# Ke 0.000000 0.000000 0.000000
+# Ni 1.000000
+# d 1.000000
+# illum 2
+map_Kd arcademod:blocks/generic_machine
+
+newmtl Top
+# Ns 96.078431
+# Ka 1.000000 1.000000 1.000000
+# Kd 0.640000 0.064335 0.000000
+# Ks 0.500000 0.500000 0.500000
+# Ke 0.000000 0.000000 0.000000
+# Ni 1.000000
+# d 1.000000
+# illum 2
+map_Kd arcademod:blocks/generic_machine

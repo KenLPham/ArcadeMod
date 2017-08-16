@@ -1,40 +1,38 @@
 package superhb.arcademod.api.gui;
 
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import org.lwjgl.input.Keyboard;
 import superhb.arcademod.Arcade;
 import superhb.arcademod.client.ArcadeItems;
+import superhb.arcademod.client.tileentity.ArcadeLeaderboard;
 import superhb.arcademod.network.RewardMessage;
 import superhb.arcademod.network.ServerCoinMessage;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
-import superhb.arcademod.util.ArcadePacketHandler;
-import superhb.arcademod.util.ArcadeSoundRegistry;
+import superhb.arcademod.util.*;
 
 import java.io.IOException;
 
-// TODO: Add comments all functions
 public class GuiArcade extends GuiScreen {
     // Tick Variables
     public int tickCounter = 0;
-    public float prevTick = 0;
     private boolean useTick = true;
 
     // Menu Variables
     public boolean inMenu = true;
     public int menuOption = 0;
     public int menu = -1, startMenu = 0;
+    public boolean useInternalMenu = true;
 
     // GUI Variables
+    public int textureWidth = 256, textureHeight = 256;
     private int guiLeft, guiTop;
     private int xSize = 0, ySize = 0;
     private ResourceLocation gui;
@@ -42,6 +40,8 @@ public class GuiArcade extends GuiScreen {
     private int buttonX = 0, buttonY = 0;
     public int buttonWidth, buttonHeight = 20;
     private int[] offset = { 0, 0 };
+    private float scale = 1;
+    public int xScaled, yScaled;
 
     // Cost Variables
     private int cost = 1;
@@ -77,6 +77,46 @@ public class GuiArcade extends GuiScreen {
     }
 
     /**
+     * Set the width and height of the GUI Texture along with Scale Factor
+     *
+     * @param width Width of Texture
+     * @param height Height of Texture
+     * @param scale Scale Factor
+     */
+    public void setGuiSize (int width, int height, float scale) {
+        xSize = width;
+        ySize = height;
+        this.scale = scale;
+    }
+
+    /**
+     * Set Scale Factor
+     *
+     * @param scale Scale Factor
+     */
+    public void setGuiScale (float scale) {
+        this.scale = scale;
+    }
+
+    /**
+     * Gets GUI Scale Factor
+     *
+     * @return scale
+     */
+    public float getGuiScale () {
+        return scale;
+    }
+
+    /**
+     * Disable Insert Menu to allow custom ones
+     *
+     * @param disable True = off, False = on
+     */
+    public void disableInternalMenu (boolean disable) {
+        useInternalMenu = !disable;
+    }
+
+    /**
      * Set the 'Insert Coin' Button Position.
      * (0,0) is the top left corner of GUI
      *
@@ -87,8 +127,6 @@ public class GuiArcade extends GuiScreen {
         buttonX = x;
         buttonY = y;
     }
-
-    // Sets the offset of the Text of the Insert Coin Menu
 
     /**
      * Offsets the text of the Insert Coin Menu.
@@ -136,6 +174,19 @@ public class GuiArcade extends GuiScreen {
      */
     public void setTexture (ResourceLocation texture) {
         gui = texture;
+    }
+
+    /**
+     * Set GUI Texture with custom width and height
+     *
+     * @param texture GUI Texture Location
+     * @param width Custom Texture Width
+     * @param height Custom Texture Height
+     */
+    public void setTexture (ResourceLocation texture, int width, int height) {
+        gui = texture;
+        textureWidth = width;
+        textureHeight = height;
     }
 
     /**
@@ -188,34 +239,40 @@ public class GuiArcade extends GuiScreen {
 
     @Override
     public void drawScreen (int mouseX, int mouseY, float partialTicks) {
+        xScaled = Math.round((width / 2) / scale);
+        yScaled = Math.round((height / 2) / scale);
+
         this.drawDefaultBackground();
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
+        GlStateManager.scale(scale, scale, scale);
         this.mc.getTextureManager().bindTexture(gui);
-        this.drawTexturedModalRect((width / 2) - (xSize / 2), (height / 2) - (ySize / 2), 0, 0, xSize, ySize);
+        this.drawModalRectWithCustomSizedTexture(xScaled - (xSize / 2), yScaled - (ySize / 2), 0, 0, xSize, ySize, textureWidth, textureHeight); // TODO: Allow offset?
+
         super.drawScreen(mouseX, mouseY, partialTicks);
 
-        int coinWidth = this.fontRendererObj.getStringWidth(I18n.format("button.arcademod:insert.locale") + "...");
-        int neededSingWidth = this.fontRendererObj.getStringWidth(cost + " " + I18n.format("text.arcademod:needed.locale"));
-        int neededPluralWidth = this.fontRendererObj.getStringWidth(cost + " " + I18n.format("text.arcademod:needed_plural.locale"));
+        if (useInternalMenu) {
+            int coinWidth = this.fontRendererObj.getStringWidth(I18n.format("button.arcademod:insert.locale") + "...");
+            int neededSingWidth = this.fontRendererObj.getStringWidth(cost + " " + I18n.format("text.arcademod:needed.locale"));
+            int neededPluralWidth = this.fontRendererObj.getStringWidth(cost + " " + I18n.format("text.arcademod:needed_plural.locale"));
 
-        // TODO: Make bool to allow people to turn of this insert coin menu and make their own
-        if (inMenu) {
-            switch (menu) {
-                case -1: // Insert Coin Menu
-                    buttonList.get(0).enabled = true;
-                    buttonList.get(0).visible = true;
-                    this.fontRendererObj.drawString(I18n.format("button.arcademod:insert.locale") + "...", (width / 2) - (coinWidth / 2) + offset[0], height / 2 + offset[1], 16777215);
-                    if (!enoughCoins) {
-                        if (cost == 1) this.fontRendererObj.drawString(cost + " " + I18n.format("text.arcademod:needed.locale"), (width / 2) - (neededSingWidth / 2) + offset[0], (height / 2) + 10 + offset[1], 16711680);
-                        else this.fontRendererObj.drawString(cost + " " + I18n.format("text.arcademod:needed_plural.locale"), (width / 2) - (neededPluralWidth / 2) + offset[0], (height / 2) + 10 + offset[1], 16711680);
-                    }
-                    break;
+            if (inMenu) {
+                switch (menu) {
+                    case -1: // Insert Coin Menu
+                        buttonList.get(0).enabled = true;
+                        buttonList.get(0).visible = true;
+                        this.fontRendererObj.drawString(I18n.format("button.arcademod:insert.locale") + "...", xScaled - (coinWidth / 2) + offset[0], yScaled + offset[1], 16777215);
+                        if (!enoughCoins) {
+                            if (cost == 1) this.fontRendererObj.drawString(cost + " " + I18n.format("text.arcademod:needed.locale"), xScaled - (neededSingWidth / 2) + offset[0], yScaled + 10 + offset[1], 16711680);
+                            else this.fontRendererObj.drawString(cost + " " + I18n.format("text.arcademod:needed_plural.locale"), xScaled - (neededPluralWidth / 2) + offset[0], yScaled + 10 + offset[1], 16711680);
+                        }
+                        break;
+                }
             }
-        }
 
-        if (menu != -1) {
-            buttonList.get(0).enabled = false;
-            buttonList.get(0).visible = false;
+            if (menu != -1) {
+                buttonList.get(0).enabled = false;
+                buttonList.get(0).visible = false;
+            }
         }
     }
 
@@ -228,26 +285,82 @@ public class GuiArcade extends GuiScreen {
     public void initGui () {
         super.initGui();
 
-        this.guiLeft = (this.width - this.xSize) / 2;
-        this.guiTop = (this.height - this.ySize) / 2;
+        this.guiLeft = Math.round((width / 2) / scale) - (xSize / 2); //(this.width - this.xSize) / 2;
+        this.guiTop = Math.round((height / 2) / scale) - (ySize / 2); //(this.height - this.ySize) / 2;
 
-        if (useCoins()) this.buttonList.add(insertCoin = new GuiSoundButton(0, (guiLeft + buttonX), (guiTop + buttonY), buttonWidth, buttonHeight, I18n.format("button.arcademod:insert.locale"), ArcadeSoundRegistry.INSERT_COIN));
+        if (useCoins()) this.buttonList.add(insertCoin = new GuiSoundButton(0, (guiLeft + buttonX), (guiTop + buttonY), buttonWidth, buttonHeight, scale, I18n.format("button.arcademod:insert.locale"), ArcadeSoundRegistry.INSERT_COIN));
     }
 
     // UNUSED
     // TODO: Leaderboard
-    public void addPlayerToLeaderboard (String name, int score, String difficulty) {
+    // TODO: Use packet instead of direct access (Check if needed before doing that)
+    @Deprecated
+    public void updateLeaderboard (String name, int score, String difficulty) {
+        boolean stopChecking = false;
+        ArcadeLeaderboard[] temp = getLeaderboard();
+        ArcadeLeaderboard[] leaderboard = getLeaderboard();
+        int place = 11;
+
+        // TODO: Move check here
+
+        tileEntity.saveLeaderboard(leaderboard);
     }
 
-    public void addPlayerToLeaderboard (int place, String name, int score, String difficulty) {
-    }
+    /*
+    static boolean stopChecking = false;
+  static int place = 11;
+  static int score = 1200;
+  static int[] scores = { 5000, 3000, 1200, 1200, 900, 700, 500, 400, 300, 200 };
+  static int[] temp = { 5000, 3000, 1200, 1200, 900, 700, 500, 400, 300, 200 };
 
-    public NBTTagList getLeaderboard () {
+  public static void main(String[] args) {
+    	for (int i = 9; i >= 0; i--) {
+    		System.out.println("Current Leaderboard: [" + i +"]: [" + scores[i] + "]");
+    		if (!stopChecking) {
+    			if (score > scores[i]) {
+    				System.out.println("Score is greater than [" + i + "]");
+    				if (i < place || place == 11) {
+    					//System.out.println("Setting Place to [" + i + "]");
+    					place = i;
+    				}
+    			} else if (score == scores[i]) {
+    				//System.out.println("Score is equal to [" + i + "]");
+    				if (i != 9) {
+    					place = i + 1;
+    					stopChecking = true;
+    				}
+    			} else if (score < scores[i]) {
+    				stopChecking = true;
+    			}
+    		}
+  	}
+
+  	if (place != 11) {
+  		scores[place] = score;
+  		System.out.println("Place: [" + place + "]");
+  		//for (int i = 9; i >= 0; i--) {
+  		//	System.out.println("Temp Leaderboard: [" + i +"]: [" + temp[i] + "]");
+  		//}
+  		for (int i = place + 1; i < 10; i++) {
+  			//System.out.println("Setting [" + (i - 1) + "] to [" + i + "]");
+  			scores[i] = temp[i - 1];
+  		}
+  	}
+
+  	for (int i = 9; i >= 0; i--) {
+  		System.out.println("New Leaderboard: [" + i +"]: [" + scores[i] + "]");
+  	}
+  }
+     */
+
+    @Deprecated
+    public ArcadeLeaderboard[] getLeaderboard () {
         return tileEntity.getLeaderboard();
     }
 
-    public NBTTagCompound getHighscore () {
-        return tileEntity.getLeaderboard().getCompoundTagAt(0);
+    @Deprecated
+    public ArcadeLeaderboard getHighscore () {
+        return tileEntity.getLeaderboard()[0];
     }
     // UNUSED
 

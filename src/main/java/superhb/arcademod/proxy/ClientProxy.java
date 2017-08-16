@@ -1,11 +1,8 @@
 package superhb.arcademod.proxy;
 
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
-import superhb.arcademod.client.renderer.RendererArcade;
 import superhb.arcademod.network.*;
-import superhb.arcademod.client.tileentity.TileEntityTestArcade;
 import superhb.arcademod.util.*;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import superhb.arcademod.util.RecipeUtil;
@@ -14,9 +11,6 @@ public class ClientProxy extends CommonProxy {
     @Override
     public void preInit (FMLPreInitializationEvent event) {
         super.preInit(event);
-
-        // Register TileEntitySpecialRenderer
-        //ClientRegistry.bindTileEntitySpecialRenderer(TileEntityTestArcade.class, new RendererArcade());
 
         // Register Network Message
         KeyHandler.preInit();

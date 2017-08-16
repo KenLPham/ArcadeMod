@@ -12,6 +12,7 @@ import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -40,6 +41,11 @@ public class BlockPrize extends Block {
     public void breakBlock (World world, BlockPos pos, IBlockState state) {
         super.breakBlock(world, pos, state);
         world.removeTileEntity(pos);
+    }
+
+    @Override
+    public boolean isReplaceable (IBlockAccess world, BlockPos pos) {
+        return false;
     }
 
     @Override

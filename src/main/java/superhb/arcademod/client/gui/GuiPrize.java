@@ -61,8 +61,8 @@ public class GuiPrize extends GuiScreen {
         drawRect((guiLeft + 31), (guiTop + 29), (guiLeft + 31 + 16), (guiTop + 29 + 16), -2130706433);
         GlStateManager.enableDepth();
         itemRender.renderItemAndEffectIntoGUI(new ItemStack(Arcade.prizeList[curPrize].getItem()), (guiLeft + 31), (guiTop + 29));
-        // TODO: Hover Overlay
-        //itemRender.renderItemOverlayIntoGUI(fontRendererObj, new ItemStack(ArcadeBlocks.plushie), guiLeft, guiTop, "Item");
+        // TODO: Hover Overlay                                                                                                                          What the actual fuck
+        itemRender.renderItemOverlayIntoGUI(fontRendererObj, new ItemStack(Arcade.prizeList[curPrize].getItem()), (guiLeft + 31), (guiTop + 29), Arcade.prizeList[curPrize].getItem().getItemStackDisplayName(new ItemStack(Arcade.prizeList[curPrize].getItem())));
     }
 
     @Override
