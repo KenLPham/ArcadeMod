@@ -1,28 +1,25 @@
 package superhb.arcademod.util;
 
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
+import net.minecraft.init.*;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.fml.common.registry.GameRegistry;
-import superhb.arcademod.client.ArcadeBlocks;
-import superhb.arcademod.client.ArcadeItems;
+import superhb.arcademod.client.*;
 
 public class RecipeUtil {
     public static void registerRecipes () {
-        GameRegistry.addRecipe(new ItemStack(ArcadeItems.coin, 1), new Object[] { "gg", "gg", 'g', Items.GOLD_NUGGET });
-        GameRegistry.addRecipe(new ItemStack(ArcadeBlocks.prizeBox, 1), new Object[] { "iii", "igi", "iri", 'i', Items.IRON_INGOT, 'g', Blocks.GLASS_PANE, 'r', Items.REDSTONE });
+        GameRegistry.addRecipe(new ItemStack(ArcadeItems.coin, 1), "gg", "gg", 'g', Items.GOLD_NUGGET);
+        GameRegistry.addRecipe(new ItemStack(ArcadeBlocks.prizeBox, 1), "iii", "igi", "iri", 'i', Items.IRON_INGOT, 'g', Blocks.GLASS_PANE, 'r', Items.REDSTONE);
 
-        NBTTagCompound snake = new NBTTagCompound();
-        snake.setInteger("Game", 0);
-        ItemStack snakeStack = new ItemStack(ArcadeBlocks.arcadeMachine);
-        snakeStack.setTagCompound(snake);
-        GameRegistry.addRecipe(snakeStack, new Object[] { "bgb", "wbw", "brb", 'b', new ItemStack(Blocks.WOOL, 1, 15), 'g', Blocks.GLASS_PANE, 'w', new ItemStack(Blocks.WOOL, 1, 0), 'r', Items.REDSTONE });
+        registerRecipeWithNBT(new ItemStack(ArcadeBlocks.arcadeMachine), "Game", 0, "bgb", "wbw", "brb", 'b', new ItemStack(Blocks.WOOL, 1, 15), 'g', Blocks.GLASS_PANE, 'w', new ItemStack(Blocks.WOOL, 1, 0), 'r', Items.REDSTONE);
+        registerRecipeWithNBT(new ItemStack(ArcadeBlocks.arcadeMachine), "Game", 1, "bgb", "bbb", "brb", 'b', new ItemStack(Blocks.WOOL, 1, 11), 'g', Blocks.GLASS_PANE, 'r', Items.REDSTONE);
+        registerRecipeWithNBT(new ItemStack(ArcadeBlocks.arcadeMachine), "Game", 2, "ygy", "yby", "yry", 'y', new ItemStack(Blocks.WOOL, 1, 4), 'g', Blocks.GLASS_PANE, 'r', Items.REDSTONE);
+    }
 
-        NBTTagCompound tetrominoes = new NBTTagCompound();
-        tetrominoes.setInteger("Game", 1);
-        ItemStack tetrominoesStack = new ItemStack(ArcadeBlocks.arcadeMachine);
-        tetrominoesStack.setTagCompound(tetrominoes);
-        GameRegistry.addRecipe(tetrominoesStack, new Object[] { "bgb", "bbb", "brb", 'b', new ItemStack(Blocks.WOOL, 1, 11), 'g', Blocks.GLASS_PANE, 'r', Items.REDSTONE});
+    private static void registerRecipeWithNBT (ItemStack output, String key, int value, Object... recipe) {
+        NBTTagCompound compound = new NBTTagCompound();
+        compound.setInteger(key, value);
+        output.setTagCompound(compound);
+        GameRegistry.addRecipe(output, recipe);
     }
 }

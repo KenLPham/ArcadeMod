@@ -3,7 +3,7 @@ package superhb.arcademod;
 public class Reference {
     public static final String MODID = "arcademod";
     public static final String NAME = "Arcade Mod";
-    public static final String VERSION = "1.3.4";
+    public static final String VERSION = "1.3.5";
     public static final String CLIENT_PROXY = "superhb.arcademod.proxy.ClientProxy";
     public static final String SERVER_PROXY = "superhb.arcademod.proxy.CommonProxy";
     public static final String DESCRIPTION = "Adds various arcade machines to Minecraft";
