@@ -29,10 +29,16 @@ public class GuiPrize extends GuiScreen {
     private int guiLeft = 0, guiTop = 0;
     private int amount = 1, curPrize = 0;
 
+    private boolean isEnough = true;
+
     private TileEntityPrize tile;
 
     public GuiPrize (TileEntityPrize tile) {
         this.tile = tile;
+    }
+
+    public void isEnough (boolean enough) {
+        isEnough = enough;
     }
 
     @Override
@@ -52,7 +58,7 @@ public class GuiPrize extends GuiScreen {
         fontRendererObj.drawString(String.format("%d", amount), (guiLeft + 91) - (fontRendererObj.getStringWidth(String.format("%d", amount)) / 2), (guiTop + 34), Color.white.getRGB());
 
         // Cost
-        fontRendererObj.drawString("Cost: " + (Arcade.prizeList[curPrize].getPrice() * amount), (guiLeft + 70), (guiTop + 63), Color.darkGray.getRGB());
+        fontRendererObj.drawString("Cost: " + (Arcade.prizeList[curPrize].getPrice() * amount), (guiLeft + 70), (guiTop + 63), isEnough ? Color.darkGray.getRGB() : Color.red.getRGB());
 
         // TODO: Item colors are fine, blocks are darker
         // Draw Prizes
@@ -60,9 +66,9 @@ public class GuiPrize extends GuiScreen {
         GlStateManager.enableLighting();
         drawRect((guiLeft + 31), (guiTop + 29), (guiLeft + 31 + 16), (guiTop + 29 + 16), -2130706433);
         GlStateManager.enableDepth();
-        itemRender.renderItemAndEffectIntoGUI(new ItemStack(Arcade.prizeList[curPrize].getItem()), (guiLeft + 31), (guiTop + 29));
+        itemRender.renderItemAndEffectIntoGUI(Arcade.prizeList[curPrize].getStack(), (guiLeft + 31), (guiTop + 29));
         // TODO: Hover Overlay                                                                                                                          What the actual fuck
-        itemRender.renderItemOverlayIntoGUI(fontRendererObj, new ItemStack(Arcade.prizeList[curPrize].getItem()), (guiLeft + 31), (guiTop + 29), Arcade.prizeList[curPrize].getItem().getItemStackDisplayName(new ItemStack(Arcade.prizeList[curPrize].getItem())));
+        //itemRender.renderItemOverlayIntoGUI(fontRendererObj, new ItemStack(Arcade.prizeList[curPrize].getItem()), (guiLeft + 31), (guiTop + 29), Arcade.prizeList[curPrize].getItem().getItemStackDisplayName(new ItemStack(Arcade.prizeList[curPrize].getItem())));
     }
 
     @Override
@@ -90,7 +96,7 @@ public class GuiPrize extends GuiScreen {
         } else if (button == amountDown) {
             if (amount != 1) amount--;
         } else if (button == buy) {
-            ArcadePacketHandler.INSTANCE.sendToServer(new ServerBuyMessage(Arcade.prizeList[curPrize].getItem(), new ItemStack(ArcadeItems.ticket), amount, Arcade.prizeList[curPrize].getPrice() * amount));
+            ArcadePacketHandler.INSTANCE.sendToServer(new ServerBuyMessage(Arcade.prizeList[curPrize].getStack(), new ItemStack(ArcadeItems.ticket), amount, Arcade.prizeList[curPrize].getPrice() * amount));
         }
     }
 

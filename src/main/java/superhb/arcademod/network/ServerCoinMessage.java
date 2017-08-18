@@ -12,6 +12,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import superhb.arcademod.Arcade;
 import superhb.arcademod.util.ArcadePacketHandler;
 
+// TODO: Add coinMenu and mainMenu ID to constructor
 public class ServerCoinMessage implements IMessage {
     private int cost;
     private ItemStack stack;

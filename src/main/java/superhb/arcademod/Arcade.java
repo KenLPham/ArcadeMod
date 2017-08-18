@@ -43,22 +43,7 @@ import java.util.*;
  */
 
 /* ChangeLog
-    1.3.0
-    - Added Prize Counter
-    - Added Pig Plushie
-    1.3.1
-    - Changed Insert Coin button sound
-    - Fixed Snake Easy Difficulty being too slow (When not set to easy manually)
-    - Tetris: Better controls
-    - Tetris: Changed name language format
-    1.3.2
-    - Fixed Tetris GUI from cutting off
-    - API: Added GuiButtonScalable
-    - API: Allow GUI to be scaled
-    1.3.3
-    - New Arcade Machine models
-    1.3.4
-    - Added Prize Counter model
+    1.3.5
  */
 
 // Reload resources with F3+T
@@ -86,6 +71,7 @@ public class Arcade {
         }
     };
 
+    // ChangeLog Variables
     public static Set<Map.Entry<ComparableVersion, String>> changelog;
     public static ForgeVersion.Status status;
 
@@ -102,7 +88,12 @@ public class Arcade {
     // TODO: default add all plushies
     private final String[] defaultList  = {
             "arcademod:plushie:5:Mob=0",
-            "arcademod:plushie:3:Mob=1"
+            "arcademod:plushie:3:Mob=1",
+            "minecraft:diamond:128",
+            "minecraft:iron_ingot:64",
+            "minecraft:gold_ingot:96",
+            "minecraft:ender_pearl:16",
+            "minecraft:ender_eye:32"
     };
 
     // Game Addons
@@ -181,7 +172,7 @@ public class Arcade {
             if (s.length == 3) {
                 Item item = Item.getByNameOrId(s[0] + ":" + s[1]);
                 int cost = new Integer(s[2]);
-                prizeList[i] = new PrizeList(item, cost);
+                prizeList[i] = new PrizeList(new ItemStack(item), cost);
             } else if (s.length == 4) {
                 int cost = new Integer(s[2]);
                 Item item = Item.getByNameOrId(s[0] + ":" + s[1]);
@@ -196,7 +187,7 @@ public class Arcade {
                 }
                 ItemStack stack = new ItemStack(item, 1);
                 stack.setTagCompound(compound);
-                prizeList[i] = new PrizeList(stack.getItem(), cost);
+                prizeList[i] = new PrizeList(stack, cost);
             }
         }
     }

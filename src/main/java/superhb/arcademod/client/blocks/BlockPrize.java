@@ -2,6 +2,9 @@ package superhb.arcademod.client.blocks;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -19,12 +22,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import superhb.arcademod.Arcade;
 import superhb.arcademod.client.tileentity.TileEntityPrize;
 
-// TODO: Design
 @SuppressWarnings("deprecation")
 public class BlockPrize extends Block {
+    public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
+
     public BlockPrize(Material material) {
         super(material);
         setHardness(1.0F);
+        setDefaultState(blockState.getBaseState().withProperty(FACING, EnumFacing.NORTH));
     }
 
     @Override
@@ -64,6 +69,37 @@ public class BlockPrize extends Block {
         return true;
     }
 
+    @Override
+    public IBlockState getStateFromMeta (int meta) {
+        return getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(meta));
+    }
+
+    @Override
+    public int getMetaFromState (IBlockState state) {
+        return state.getValue(FACING).getHorizontalIndex();
+    }
+
+    @Override
+    protected BlockStateContainer createBlockState () {
+        return new BlockStateContainer(this, new IProperty[] { FACING });
+    }
+
+    @Override
+    public int damageDropped (IBlockState state) {
+        return 0;
+    }
+
+    @Override
+    public IBlockState getStateForPlacement (World world, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
+        return getStateFromMeta(meta).withProperty(FACING, placer.getHorizontalFacing());
+    }
+
+    @Override
+    public boolean canRenderInLayer (IBlockState state, BlockRenderLayer layer) {
+        return layer == BlockRenderLayer.TRANSLUCENT || layer == BlockRenderLayer.SOLID;
+    }
+
+    @Override
     @SideOnly(Side.CLIENT)
     public BlockRenderLayer getBlockLayer () {
         return BlockRenderLayer.SOLID;
@@ -76,7 +112,7 @@ public class BlockPrize extends Block {
 
     @Override
     public boolean isFullCube (IBlockState state) {
-        return true;
+        return false;
     }
 
     @Override

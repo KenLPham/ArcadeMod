@@ -88,7 +88,6 @@ public class GuiPacMan extends GuiArcade {
     private int score = 0;
     private final int speedMultiplier = 4;
     private final int ghostSpeedMultiplier = 4;
-    private boolean frightened = false;
     private boolean blink = false;
 
     /*
@@ -100,7 +99,14 @@ public class GuiPacMan extends GuiArcade {
      */
     private int[] direction = { 0, 0, 0, 0, 0 };
     private int nextDirection = 0;
+
+    // Ghost Variables
     private int[] mode = { 0, 0, 0, 0 };
+    private int[] period = { 0, 0, 0, 0 };
+    private boolean[] frightened = { false, false, false, false };
+    private boolean[] eaten = { false, false, false, false };
+    private boolean[] inHouse = { false, true, true, true };
+    private int[] dotCounter = { 0, 0, 0, 0, 0 }; // dotCounter[4] = Global Dot Counter
 
     private int playX, playY;
     private int playerX = 25, playerY = 44;
@@ -118,7 +124,8 @@ public class GuiPacMan extends GuiArcade {
     private int ghostTick = 0, ghostSpeed = 1;
     private int ghostMovementTick[] = { 0, 0, 0, 0 };
     private int movementTick = 0, movementSpeed = 1;
-    private int modeTick = 0;
+    private int modeTick[] = { 0, 0, 0, 0 };
+    private int timeSinceEaten = 0;
 
     private boolean pauseModeTimer = false;
 
@@ -577,7 +584,7 @@ public class GuiPacMan extends GuiArcade {
         if ((tickCounter - frightTick) >= 70) blink = true;
         if ((tickCounter - frightTick) >= 90) { // TODO: Change fright speed depending on level
             frightTick = tickCounter;
-            frightened = false;
+            for (int i = 0; i < 4; i++) frightened[i] = false;
             blink = false;
         }
         blinkyAi();
@@ -614,7 +621,8 @@ public class GuiPacMan extends GuiArcade {
         }
         drawPacman(playerX, playerY, direction[0], false);
 
-        checkCenter(0);
+        // Pac-Man Collision Check with edibles and ghosts
+        checkCenter();
 
         // Controls
         if (canMoveLeft(0) && nextDirection == 3) {
@@ -895,6 +903,29 @@ public class GuiPacMan extends GuiArcade {
         }
     }
 
+    private int getModeTime (byte level, int period) {
+        if (level == 0) { // Level 1
+            if (period == 0 || period == 2) return (7 * 20);
+            else if (period == 1 || period == 3 || period == 5) return (20 * 20);
+            else if (period == 4 || period == 6) return (5 * 20);
+            else if (period == 7) return 0; // Indefinite
+        } else if (level > 0 && level < 4) { // Level 2-4
+            if (period == 0 || period == 2) return (7 * 20);
+            else if (period == 1 || period == 3) return (20 * 20);
+            else if (period == 5) return (1033 * 20);
+            else if (period == 4) return (5 * 20);
+            else if (period == 6) return 1;
+            else if (period == 7) return 0; // Indefinite
+        } else if (level > 3) { // Level 5+
+            if (period == 0 || period == 2 || period == 4) return (5 * 20);
+            else if (period == 1 || period == 3) return (20 * 20);
+            else if (period == 5) return (1037 * 20);
+            else if (period == 6) return 1;
+            else if (period == 7) return 0; // Indefinite
+        }
+        return 0;
+    }
+
     /* Direction ID
         0 = Still
         1 = Up
@@ -1005,46 +1036,47 @@ public class GuiPacMan extends GuiArcade {
 
     //this.drawModalRectWithCustomSizedTexture(playX + gameCollision[1].center[0] + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].center[1] + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Center
     /** Checks Center collider of Character Collider to see if it collided with PacMan or Ghost or dot/energizer */
-    private boolean checkCenter (int character) {
+    private boolean checkCenter () {
         // Edible Check
-        if (character == 0) { // Player
-            for (int i = 0; i < tempPoints.length; i++) {
-                if (tempPoints[i] != null) {
-                    if ((playX + gameCollision[character].center[1] + 5 + (playerX * speedMultiplier)) == (playX + 11 + gameCollision[2].center[0] + ((int) tempPoints[i].pos.getX() * 8)) && (playY + gameCollision[character].center[1] + 4 + (playerY * speedMultiplier)) == (playY + 11 + gameCollision[2].center[1] - 1 + ((int) tempPoints[i].pos.getY() * 8))) {
-                        if (WAKA == 0) {
-                            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_1, 1.0F));
-                            WAKA = 1;
-                        } else if (WAKA == 1) {
-                            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_2, 1.0F));
-                            WAKA = 2;
-                        } else if (WAKA == 2) {
-                            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_3, 1.0F));
-                            WAKA = 3;
-                        } else if (WAKA == 3) {
-                            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_4, 1.0F));
-                            WAKA = 4;
-                        } else if (WAKA == 4) {
-                            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_5, 1.0F));
-                            WAKA = 5;
-                        } else if (WAKA == 5) {
-                            this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_6, 1.0F));
-                            WAKA = 0;
-                        }
-                        if (tempPoints[i].isEnergizer) {
-                            // Check for energizer sound
-                            score += 50;
-                            FRIGHT_STATE = 0;
-                            frightTick = 0;
-                            frightened = true;
-                        } else score += 10;
-                        tempPoints[i] = null;
+        for (int i = 0; i < tempPoints.length; i++) {
+            if (tempPoints[i] != null) {
+                if ((playX + gameCollision[0].center[1] + 5 + (playerX * speedMultiplier)) == (playX + 11 + gameCollision[2].center[0] + ((int) tempPoints[i].pos.getX() * 8)) && (playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier)) == (playY + 11 + gameCollision[2].center[1] - 1 + ((int) tempPoints[i].pos.getY() * 8))) {
+                    if (WAKA == 0) {
+                        this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_1, 1.0F));
+                        WAKA = 1;
+                    } else if (WAKA == 1) {
+                        this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_2, 1.0F));
+                        WAKA = 2;
+                    } else if (WAKA == 2) {
+                        this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_3, 1.0F));
+                        WAKA = 3;
+                    } else if (WAKA == 3) {
+                        this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_4, 1.0F));
+                        WAKA = 4;
+                    } else if (WAKA == 4) {
+                        this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_5, 1.0F));
+                        WAKA = 5;
+                    } else if (WAKA == 5) {
+                        this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_6, 1.0F));
+                        WAKA = 0;
                     }
+                    if (tempPoints[i].isEnergizer) {
+                        // Check for energizer sound
+                        score += 50;
+                        FRIGHT_STATE = 0;
+                        frightTick = 0;
+
+                        for (int g = 0; g < 4; g++) {
+                            if (!inHouse[g]) frightened[g] = true;
+                        }
+                    } else score += 10;
+                    tempPoints[i] = null;
                 }
             }
-
-            // TODO: Death Check
-            // TODO: Death Animation
         }
+
+        // TODO: Death Check
+        // TODO: Death Animation
 
         return false;
     }
@@ -1066,11 +1098,20 @@ public class GuiPacMan extends GuiArcade {
 
     // TODO: Eaten Movement
     private void blinkyAi () {
+        if ((tickCounter - modeTick[0]) >= getModeTime(level, period[0])) {
+            modeTick[0] = tickCounter;
+
+            if (period[0] == 0 || period[0] == 2 || period[0] == 4 || period[0] == 6) mode[0] = 0; // Scatter
+            else mode[0] = 1; // Chase
+
+            if (period[0] != 7) period[0]++;
+        }
+
         // Movement
         if ((tickCounter - ghostMovementTick[0]) >= 2) {
             ghostMovementTick[0] = tickCounter;
 
-            if (!frightened) {
+            if (!frightened[0]) {
                 // Scatter
                 if (mode[0] == 0) direction[1] = pathfinding(1, playX + 12 + (50 * 4), playY + 11);
                 // Chase
@@ -1107,11 +1148,11 @@ public class GuiPacMan extends GuiArcade {
             }
         }
 
-        drawGhost(ghostPos[0][0], ghostPos[0][1], direction[1], 0, frightened, false, false);
+        drawGhost(ghostPos[0][0], ghostPos[0][1], direction[1], 0, frightened[0], eaten[0], false);
     }
 
     private void inkyAi () {
-        drawGhost(ghostPos[1][0], ghostPos[1][1], direction[2], 1, frightened, false, false);
+        drawGhost(ghostPos[1][0], ghostPos[1][1], direction[2], 1, frightened[1], eaten[1], false);
     }
 
     private void pinkyAi () {
@@ -1122,7 +1163,7 @@ public class GuiPacMan extends GuiArcade {
         if ((tickCounter - ghostMovementTick[2]) >= 2) {
             ghostMovementTick[2] = tickCounter;
 
-            if (!frightened) {
+            if (!frightened[2]) {
                 if (mode[2] == 0) direction[3] = pathfinding(3, playX + 12, playY + 11); // Scatter
                 else { // Chase
                     if (direction[0] == 1) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX - 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + ((playerY - 4) * speedMultiplier));
@@ -1138,11 +1179,11 @@ public class GuiPacMan extends GuiArcade {
                 if (canMoveRight(3) && direction[3] == 4) ghostPos[2][0]++;
             }
         }
-        drawGhost(ghostPos[2][0], ghostPos[2][1], direction[3], 2, frightened, false, false);
+        drawGhost(ghostPos[2][0], ghostPos[2][1], direction[3], 2, frightened[2], eaten[2], false);
     }
 
     private void clydeAi () {
-        drawGhost(ghostPos[3][0], ghostPos[3][1], direction[4], 3, frightened, false, false);
+        drawGhost(ghostPos[3][0], ghostPos[3][1], direction[4], 3, frightened[3], eaten[3], false);
     }
 
     private void frightAI (int ghost) {

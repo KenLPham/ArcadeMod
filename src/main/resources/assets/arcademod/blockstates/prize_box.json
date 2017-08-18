@@ -1,5 +1,28 @@
 {
+	"forge_marker": 1,
+    "defaults": {
+    	"model": "forge:multi-layer",
+    	"custom": {
+    		"base": "arcademod:prize_box#base",
+    		"Solid": "arcademod:prize_box#base",
+    		"Translucent": "arcademod:prize_box#glass"
+    	},
+    	"transform": "forge:default-block"
+    },
     "variants": {
-        "normal": { "model": "arcademod:prize_box" }
+    	"normal": [{}],
+    	"inventory": [{}],
+        "facing": {
+            "south": { "y": 0 },
+            "west": { "y": 90 },
+            "north": { "y": 180 },
+            "east": { "y": 270 }
+        },
+    	"base": [{
+    		"model": "arcademod:prize_cabinet.obj"
+    	}],
+    	"glass": [{
+    		"model": "arcademod:prize_cabinet_glass.obj"
+    	}]
     }
 }

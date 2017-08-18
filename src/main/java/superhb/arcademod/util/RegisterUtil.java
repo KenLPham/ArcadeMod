@@ -25,7 +25,8 @@ public class RegisterUtil {
 
 
         registerItems(event, ArcadeItems.coin, ArcadeItems.ticket);
-        registerBlocks(event, ArcadeBlocks.invisible, ArcadeBlocks.prizeBox); //ArcadeBlocks.coinPusher, ArcadeBlocks.testArcade
+        registerBlocks(event, ArcadeBlocks.invisible); //ArcadeBlocks.coinPusher
+        registerBlocksWithOBJModel(event, ArcadeBlocks.prizeBox);
         registerPlushie(event, ArcadeBlocks.plushie);
     }
 
@@ -36,6 +37,11 @@ public class RegisterUtil {
 
             if (event.getSide() == Side.CLIENT) registerModelVariant(item, block, "inventory");
         }
+    }
+
+    private static void registerBlocksWithOBJModel (FMLPreInitializationEvent event, Block... blocks) {
+        OBJLoader.INSTANCE.addDomain(Reference.MODID);
+        registerBlocks(event, blocks);
     }
 
     private static void registerModelVariant (Item item, Block block, String variantType) {

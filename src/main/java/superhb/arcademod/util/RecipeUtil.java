@@ -11,7 +11,7 @@ import superhb.arcademod.client.ArcadeItems;
 public class RecipeUtil {
     public static void registerRecipes () {
         GameRegistry.addRecipe(new ItemStack(ArcadeItems.coin, 1), new Object[] { "gg", "gg", 'g', Items.GOLD_NUGGET });
-        GameRegistry.addRecipe(new ItemStack(Items.GOLD_NUGGET, 1), new Object[] { "tt", "tt", 't', ArcadeItems.ticket}); // Temporary Recipe
+        GameRegistry.addRecipe(new ItemStack(ArcadeBlocks.prizeBox, 1), new Object[] { "iii", "igi", "iri", 'i', Items.IRON_INGOT, 'g', Blocks.GLASS_PANE, 'r', Items.REDSTONE });
 
         NBTTagCompound snake = new NBTTagCompound();
         snake.setInteger("Game", 0);

@@ -8,7 +8,17 @@
         "game": {
 			"snake": {
 				"textures": {
-					"#Back": "arcademod:blocks/generic_machine"
+					"#Back": "arcademod:blocks/snake",
+					"#Bezel": "arcademod:blocks/snake",
+					"#Bottom": "arcademod:blocks/snake",
+					"#Coin": "arcademod:blocks/snake",
+					"#Controller": "arcademod:blocks/snake",
+					"#Front": "arcademod:blocks/snake",
+					"#LeftSide": "arcademod:blocks/snake",
+					"#RightSide": "arcademod:blocks/snake",
+					"#Screen": "arcademod:blocks/snake",
+					"#ScreenBorder": "arcademod:blocks/snake",
+					"#Top": "arcademod:blocks/snake"
 				}
 			},
             "tetrominoes": {

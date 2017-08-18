@@ -12,7 +12,7 @@ tile.arcademod:plushie.pig.name=Pig Plushie
 
 tile.arcademod:coin_pusher.name=Coin Pusher Machine
 
-tile.arcademod:prize_box.name=Prize Box
+tile.arcademod:prize_box.name=Prize Counter
 
 button.arcademod:insert.locale=Insert Coin
 
