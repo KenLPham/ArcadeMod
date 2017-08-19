@@ -3,11 +3,14 @@ package superhb.arcademod.client.gui;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
 import superhb.arcademod.Arcade;
 import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArcade;
+import superhb.arcademod.client.audio.LoopingSound;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.util.ArcadeSoundRegistry;
 import superhb.arcademod.util.KeyHandler;
@@ -80,6 +83,7 @@ public class GuiPacMan extends GuiArcade {
     private int WAKA = 0;
     private int ENERGIZER_SOUND = 0;
     private float volume = 1.0F;
+    private boolean playSiren = true;
 
     // Game Variables
     private boolean died = false;
@@ -639,6 +643,12 @@ public class GuiPacMan extends GuiArcade {
             nextDirection = 0;
         }
 
+        // Sound
+        if (playSiren) {
+            playSiren = false;
+            this.mc.getSoundHandler().playSound(new LoopingSound(ArcadeSoundRegistry.PACMAN_SIREN, SoundCategory.BLOCKS)); // Repeats a few times before stopping completely.
+        }
+
         this.fontRendererObj.drawString("Score: " + score, xScaled - (GUI_X / 2) + 6, yScaled - (GUI_Y / 2) + 6, Color.WHITE.getRGB());
         this.fontRendererObj.drawString("Ready!", xScaled - (this.fontRendererObj.getStringWidth("Ready!") / 2), yScaled, Color.YELLOW.getRGB());
     }
@@ -926,6 +936,30 @@ public class GuiPacMan extends GuiArcade {
         return 0;
     }
 
+    /*  Level | Normal | Dots | Fright | Energizer
+        1     | 80%    | 71%  | 90%    | 79%
+        2-4   | 90%    | 79%  | 95%    | 83%
+        5-20  | 100%   | 87%  | 100%   | 87%
+        21+   | 90%    | 79%  | -      | -
+     */
+    private int getPacManSpeed (int level) {
+        if (level == 1) return 4;
+        if (level > 1 && level < 5) return 5;
+        else if (level >= 5 && level < 21) return 6;
+        else if (level >= 21) return 5;
+        return 4;
+    }
+
+    /*  Level | Normal | Fright | Tunnel
+        1     | 75%    | 50%    | 40%
+        2-4   | 85%    | 55%    | 45%
+        5-20  | 95%    | 60%    | 50%
+        21+   | 95%    | -      | 50%
+     */
+    private int getGhostSpeed (int level) {
+        return 1;
+    }
+
     /* Direction ID
         0 = Still
         1 = Up
@@ -1069,7 +1103,10 @@ public class GuiPacMan extends GuiArcade {
                         for (int g = 0; g < 4; g++) {
                             if (!inHouse[g]) frightened[g] = true;
                         }
-                    } else score += 10;
+                    } else {
+                        // Add to dot counter
+                        score += 10;
+                    }
                     tempPoints[i] = null;
                 }
             }
@@ -1198,6 +1235,7 @@ public class GuiPacMan extends GuiArcade {
         4 = Right
      */
 
+    // TODO: Gotta do this shit again... yay
     // When going up or down, sometimes makes a u-turn which isn't allowed
     // GL
     private int pathfinding (int ghost, int targetX, int targetY) {
