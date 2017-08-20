@@ -77,6 +77,7 @@ public class GuiPacMan extends GuiArcade {
     private int BLINK_SPEED = 2;
     private int GHOST_STATE = 0;
     private int ENERGIZER_STATE = 0;
+    private boolean resetState = true;
 
     // TODO: Audio
     // Audio Variables
@@ -84,11 +85,12 @@ public class GuiPacMan extends GuiArcade {
     private int ENERGIZER_SOUND = 0;
     private float volume = 1.0F;
     private boolean playSiren = true;
+    private boolean playDeath = true;
 
     // Game Variables
     private boolean died = false;
     private int life = 3;
-    private byte level = 0;
+    private int level;
     private int score = 0;
     private final int speedMultiplier = 4;
     private final int ghostSpeedMultiplier = 4;
@@ -124,7 +126,7 @@ public class GuiPacMan extends GuiArcade {
 
     private int blinkTick = 0;
     private int frightTick = 0;
-    private int animationTick = 0, animationSpeed = 1;
+    private int animationTick = 0, animationSpeed = 2;
     private int energizerTick = 0;
     private int ghostTick = 0, ghostSpeed = 1;
     private int ghostMovementTick[] = { 0, 0, 0, 0 };
@@ -539,14 +541,14 @@ public class GuiPacMan extends GuiArcade {
         this.mc.getTextureManager().bindTexture(texture);
         this.drawModalRectWithCustomSizedTexture(xScaled - (GUI_X / 2) + 5, yScaled - (GUI_Y / 2) + 14, GUI_X, 0, MAZE_X, MAZE_Y, 512, 512);
 
-        // Maze
-        if ((tickCounter - energizerTick) >= 6) {
-            energizerTick = tickCounter;
-
-            if (ENERGIZER_STATE == 0) ENERGIZER_STATE = 1;
-            else if (ENERGIZER_STATE == 1) ENERGIZER_STATE = 0;
-        }
-        drawEdibles(false);
+        if (!died) {
+            // Maze
+            if ((tickCounter - energizerTick) >= 6) {
+                energizerTick = tickCounter;
+                if (ENERGIZER_STATE == 0) ENERGIZER_STATE = 1;
+                else if (ENERGIZER_STATE == 1) ENERGIZER_STATE = 0;
+            }
+            drawEdibles(false);
 
         /* Ghost Blink per level and fright time
                 Level | Fright Time | # of Blinks (Flashes)
@@ -573,86 +575,111 @@ public class GuiPacMan extends GuiArcade {
             -   21+   | 0 sec       | 0
 
          */
-        // TODO: Scatter, Chase timing
-        // Ghost
-        if ((tickCounter - blinkTick) >= 5 && blink) {
-            blinkTick = tickCounter;
-
-            if (FRIGHT_STATE == 0) FRIGHT_STATE = 1;
-            else if (FRIGHT_STATE == 1) FRIGHT_STATE = 0;
-        }
-        if ((tickCounter - ghostTick) >= 4) {
-            ghostTick = tickCounter;
-
-            if (GHOST_STATE == 0) GHOST_STATE = 1;
-            else if (GHOST_STATE == 1) GHOST_STATE = 0;
-        }
-        if ((tickCounter - frightTick) >= 70) blink = true;
-        if ((tickCounter - frightTick) >= 90) { // TODO: Change fright speed depending on level
-            frightTick = tickCounter;
-            for (int i = 0; i < 4; i++) frightened[i] = false;
-            blink = false;
-        }
-        blinkyAi();
-
-        // TODO: Implement AI
-        pinkyAi();
-        inkyAi();
-        clydeAi();
-
-        checkHouse();
-
-        // Maze Debug
-        //drawMazeCollision(true);
-
-        // Pac-Man
-        if ((tickCounter - movementTick) >= 2) {
-            movementTick = tickCounter;
-
-            if (canMoveUp(0) && direction[0] == 1) {
-                if (PACMAN_STATE == 0) PACMAN_STATE = 1;
-                else PACMAN_STATE = 0;
-                playerY--;
-            } else if (canMoveDown(0) && direction[0] == 2) {
-                if (PACMAN_STATE == 0) PACMAN_STATE = 1;
-                else PACMAN_STATE = 0;
-                playerY++;
-            } else if (canMoveLeft(0) && direction[0] == 3) {
-                if (PACMAN_STATE == 0) PACMAN_STATE = 1;
-                else PACMAN_STATE = 0;
-                playerX--;
-            } else if (canMoveRight(0) && direction[0] == 4) {
-                if (PACMAN_STATE == 0) PACMAN_STATE = 1;
-                else PACMAN_STATE = 0;
-                playerX++;
+            // TODO: Scatter, Chase timing
+            // Ghost
+            if ((tickCounter - blinkTick) >= 5 && blink) {
+                blinkTick = tickCounter;
+                if (FRIGHT_STATE == 0) FRIGHT_STATE = 1;
+                else if (FRIGHT_STATE == 1) FRIGHT_STATE = 0;
             }
-        }
-        drawPacman(playerX, playerY, direction[0], false);
+            if ((tickCounter - ghostTick) >= 4) {
+                ghostTick = tickCounter;
+                if (GHOST_STATE == 0) GHOST_STATE = 1;
+                else if (GHOST_STATE == 1) GHOST_STATE = 0;
+            }
+            if ((tickCounter - frightTick) >= 70)
+                blink = true;
+            if ((tickCounter - frightTick) >= 90) { // TODO: Change fright speed depending on level
+                frightTick = tickCounter;
+                for (int i = 0; i < 4; i++) frightened[i] = false;
+                blink = false;
+            }
+            blinkyAi();
 
-        // Pac-Man Collision Check with edibles and ghosts
-        checkCenter();
+            // TODO: Implement AI
+            pinkyAi();
+            inkyAi();
+            clydeAi();
 
-        // Check time since last eaten. 4 second limit for level 1-4. 3 second limit for 5+
+            checkHouse();
 
-        // Controls
-        if (canMoveLeft(0) && nextDirection == 3) {
-            direction[0] = 3;
-            nextDirection = 0;
-        } else if (canMoveRight(0) && nextDirection == 4) {
-            direction[0] = 4;
-            nextDirection = 0;
-        } else if (canMoveUp(0) && nextDirection == 1) {
-            direction[0] = 1;
-            nextDirection = 0;
-        } else if (canMoveDown(0) && nextDirection == 2) {
-            direction[0] = 2;
-            nextDirection = 0;
-        }
+            // Maze Debug
+            //drawMazeCollision(true);
 
-        // Sound
-        if (playSiren) {
-            playSiren = false;
-            this.mc.getSoundHandler().playSound(new LoopingSound(ArcadeSoundRegistry.PACMAN_SIREN, SoundCategory.BLOCKS)); // Repeats a few times before stopping completely.
+            // Pac-Man
+            if ((tickCounter - movementTick) >= 2) {
+                movementTick = tickCounter;
+                if (canMoveUp(0) && direction[0] == 1) {
+                    if (PACMAN_STATE == 0) PACMAN_STATE = 1;
+                    else PACMAN_STATE = 0;
+                    playerY--;
+                } else if (canMoveDown(0) && direction[0] == 2) {
+                    if (PACMAN_STATE == 0) PACMAN_STATE = 1;
+                    else PACMAN_STATE = 0;
+                    playerY++;
+                } else if (canMoveLeft(0) && direction[0] == 3) {
+                    if (PACMAN_STATE == 0) PACMAN_STATE = 1;
+                    else PACMAN_STATE = 0;
+                    playerX--;
+                } else if (canMoveRight(0) && direction[0] == 4) {
+                    if (PACMAN_STATE == 0) PACMAN_STATE = 1;
+                    else PACMAN_STATE = 0;
+                    playerX++;
+                }
+            }
+            drawPacman(playerX, playerY, direction[0], false);
+
+            // Pac-Man Collision Check with edibles and ghosts
+            checkCenter();
+
+            // Check time since last eaten. 4 second limit for level 1-4. 3 second limit for 5+
+
+            // Controls
+            if (canMoveLeft(0) && nextDirection == 3) {
+                direction[0] = 3;
+                nextDirection = 0;
+            } else if (canMoveRight(0) && nextDirection == 4) {
+                direction[0] = 4;
+                nextDirection = 0;
+            } else if (canMoveUp(0) && nextDirection == 1) {
+                direction[0] = 1;
+                nextDirection = 0;
+            } else if (canMoveDown(0) && nextDirection == 2) {
+                direction[0] = 2;
+                nextDirection = 0;
+            }
+
+            // Sound
+            if (playSiren) {
+                playSiren = false;
+                this.mc.getSoundHandler().playSound(new LoopingSound(ArcadeSoundRegistry.PACMAN_SIREN, SoundCategory.BLOCKS)); // Repeats a few times before stopping completely.
+            }
+        } else { // ded
+            if (resetState) {
+                resetState = false;
+                PACMAN_STATE = 0;
+            }
+
+            if (playDeath) {
+                playDeath = false;
+                this.mc.getSoundHandler().playSound(new PositionedSoundRecord(ArcadeSoundRegistry.PACMAN_DEATH, SoundCategory.BLOCKS, 1.0F, 1.0F, getTileEntity().getPos()));
+            }
+
+            if ((tickCounter - animationTick) >= animationSpeed) {
+                animationTick = tickCounter;
+                if (PACMAN_STATE != 13) PACMAN_STATE++;
+            }
+            deathAnimation();
+
+            if (PACMAN_STATE == 13) {
+                // Check lives. if any left. reset. if not. game over
+                if (life == 0) {
+                    // Game Over
+                } else {
+                    life--;
+                    resetLevel();
+                }
+            }
         }
 
         this.fontRendererObj.drawString("Score: " + score, xScaled - (GUI_X / 2) + 6, yScaled - (GUI_Y / 2) + 6, Color.WHITE.getRGB());
@@ -706,6 +733,7 @@ public class GuiPacMan extends GuiArcade {
     };
      */
 
+    // life is lost = ghost is eaten
     // Ghost's individual counter is deactivated (but not reset) when a life is lost
     // The global counter is activated and reset everytime a life is lost
     // Global dot counter release
@@ -724,6 +752,31 @@ public class GuiPacMan extends GuiArcade {
             else return 0;
         }
         return 0;
+    }
+
+    private void deathAnimation () {
+        GlStateManager.color(1.0F, 1.0F, 1.0F);
+
+        int x = playX + 5 + (playerX * speedMultiplier);
+        int y = playY + 4 + (playerY * speedMultiplier);
+
+        switch (direction[0]) {
+            case 0: // Still
+                this.drawModalRectWithCustomSizedTexture(x, y, 0, GUI_Y, PACMAN, PACMAN, 512, 512);
+                break;
+            case 1: // Up
+                this.drawModalRectWithCustomSizedTexture(x, y, (PACMAN * PACMAN_STATE), GUI_Y + (PACMAN * 2), PACMAN, PACMAN, 512, 512);
+                break;
+            case 2: // Down
+                this.drawModalRectWithCustomSizedTexture(x, y, (PACMAN * PACMAN_STATE), GUI_Y + (PACMAN * 3), PACMAN, PACMAN, 512, 512);
+                break;
+            case 3: // Left
+                this.drawModalRectWithCustomSizedTexture(x, y, (PACMAN * PACMAN_STATE), GUI_Y + PACMAN, PACMAN, PACMAN, 512, 512);
+                break;
+            case 4: // Right
+                this.drawModalRectWithCustomSizedTexture(x, y, (PACMAN * PACMAN_STATE), GUI_Y, PACMAN, PACMAN, 512, 512);
+                break;
+        }
     }
 
     // TODO: Redo
@@ -748,6 +801,46 @@ public class GuiPacMan extends GuiArcade {
         if (ghostPos[3][0] != 25 && ghostPos[3][1] != 26 && inHouse[3]) { // Clyde
             inHouse[3] = false;
         }
+    }
+
+    private void checkLevel () {
+        // Check if all tempPoints is null. If so next level.
+    }
+
+    private void nextLevel () {
+        // Reset tempPoints, increase level
+        if (level > 256) level++;
+        // if level = 256, end game.
+
+        resetLevel();
+    }
+
+    // Set Ghost back into pen and Pac-Man back into start position.
+    // Blinky Scatter is messed up when 1 life is lost
+    // Pinky leaves pen from the side
+    // Pinky hit box doesnt work well with detecting pacman
+    private void resetLevel () {
+        playerX = 25;
+        playerY = 44;
+        ghostPos = new int[][] {
+                { 25, 20 }, // Blinky
+                { 21, 26 }, // Inky
+                { 25, 26 }, // Pinky
+                { 29, 26 } // Clyde
+        };
+        died = false;
+        playSiren = true;
+        playDeath = true;
+        resetState = true;
+        inHouse = new boolean[] { false, true, true, true };
+        curCounter = 0;
+        for (int i = 0; i < 5; i++) dotCounter[i] = 0;
+        direction[0] = 0;
+        PACMAN_STATE = 0;
+        mode = new int[] { 0, 0, 0, 0 };
+        period = new int[] { 0, 0, 0, 0 };
+        frightened = new boolean[] { false, false, false, false };
+        eaten = new boolean[] { false, false, false, false };
     }
 
     public void drawGhost (int x, int y, int direction, int ghost, boolean frightened, boolean eaten, boolean debug) {
@@ -972,7 +1065,7 @@ public class GuiPacMan extends GuiArcade {
         }
     }
 
-    private int getModeTime (byte level, int period) {
+    private int getModeTime (int level, int period) {
         if (level == 0) { // Level 1
             if (period == 0 || period == 2) return (7 * 20);
             else if (period == 1 || period == 3 || period == 5) return (20 * 20);
@@ -1171,9 +1264,13 @@ public class GuiPacMan extends GuiArcade {
             }
         }
 
-        // TODO: Death Check
-        // TODO: Death Animation
-
+        // Check Pac-Man Ghost Collision
+        for (int i = 0; i < 4; i++) {
+            if ((playX + gameCollision[0].center[0] + 5 + (playerX * speedMultiplier)) == (playX + gameCollision[1].center[0] + 5 + (ghostPos[i][0] * ghostSpeedMultiplier)) && (playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier)) == (playY + gameCollision[1].center[1] + 4 + (ghostPos[i][1] * ghostSpeedMultiplier))) {
+                if (frightened[i]) eaten[i] = true;
+                else died = true;
+            }
+        }
         return false;
     }
 
