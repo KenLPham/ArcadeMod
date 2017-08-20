@@ -101,7 +101,7 @@ public class GuiPacMan extends GuiArcade {
         3 = Pinky
         4 = Clyde
      */
-    private int[] direction = { 0, 0, 0, 0, 0 };
+    private int[] direction = { 0, 0, 1, 1, 1 };
     private int nextDirection = 0;
 
     // Ghost Variables
@@ -111,6 +111,7 @@ public class GuiPacMan extends GuiArcade {
     private boolean[] eaten = { false, false, false, false };
     private boolean[] inHouse = { false, true, true, true };
     private int[] dotCounter = { 0, 0, 0, 0, 0 }; // dotCounter[4] = Global Dot Counter
+    private int curCounter = 0;
 
     private int playX, playY;
     private int playerX = 25, playerY = 44;
@@ -509,6 +510,7 @@ public class GuiPacMan extends GuiArcade {
             new MazeCollision(104, 99, 15, 4, true)
     };
 
+    // TODO: Add Fruit
     private final GameCollision[] gameCollision = new GameCollision[] {
             new GameCollision(14, 14), // Pac Man
             new GameCollision(GHOST, GHOST), // Ghost
@@ -598,6 +600,8 @@ public class GuiPacMan extends GuiArcade {
         inkyAi();
         clydeAi();
 
+        checkHouse();
+
         // Maze Debug
         //drawMazeCollision(true);
 
@@ -627,6 +631,8 @@ public class GuiPacMan extends GuiArcade {
 
         // Pac-Man Collision Check with edibles and ghosts
         checkCenter();
+
+        // Check time since last eaten. 4 second limit for level 1-4. 3 second limit for 5+
 
         // Controls
         if (canMoveLeft(0) && nextDirection == 3) {
@@ -688,6 +694,59 @@ public class GuiPacMan extends GuiArcade {
             } else {
                 nextDirection = 2;
             }
+        }
+    }
+
+    /*
+    private int[][] ghostPos = {
+            { 25, 20 }, // Blinky
+            { 21, 26 }, // Inky
+            { 25, 26 }, // Pinky
+            { 29, 26 } // Clyde
+    };
+     */
+
+    // Ghost's individual counter is deactivated (but not reset) when a life is lost
+    // The global counter is activated and reset everytime a life is lost
+    // Global dot counter release
+    // Pinky = 7
+    // Inky = 17
+    // To deactivate the global counter, Clyde has to be in the house when the counter reaches 32
+    // This will reset the global counter to zero and once again use the ghost's separate counter
+    private int getDotLimit (int level, int ghost) {
+        if (ghost == 2) return 0; // Pinky
+        else if (ghost == 1) { // Inky
+            if (level == 0) return 30;
+            else return 0;
+        } else if (ghost == 3) { // Clyde
+            if (level == 0) return 60;
+            else if (level == 1) return 50;
+            else return 0;
+        }
+        return 0;
+    }
+
+    // TODO: Redo
+    private void checkHouse () {
+        // Some how the check not working is making everything mostly work...
+        if (ghostPos[2][0] != 25 && ghostPos[2][1] != 26 && inHouse[2]) { // Pinky
+            inHouse[2] = false;
+            // Start Inky's dotCounter
+            if (inHouse[1]) {
+                curCounter = 1;
+                ghostPos[1][0] = 25;
+            }
+        }
+        if (ghostPos[1][0] != 25 && ghostPos[1][1] != 26 && inHouse[1]) { // Inky
+            inHouse[1] = false;
+            // Start Clyde's dotCounter
+            if (inHouse[3]) {
+                curCounter = 3;
+                ghostPos[3][0] = 25;
+            }
+        }
+        if (ghostPos[3][0] != 25 && ghostPos[3][1] != 26 && inHouse[3]) { // Clyde
+            inHouse[3] = false;
         }
     }
 
@@ -1103,10 +1162,10 @@ public class GuiPacMan extends GuiArcade {
                         for (int g = 0; g < 4; g++) {
                             if (!inHouse[g]) frightened[g] = true;
                         }
-                    } else {
-                        // Add to dot counter
-                        score += 10;
-                    }
+                    } else score += 10;
+                    dotCounter[4]++;
+                    dotCounter[curCounter]++;
+                    timeSinceEaten = tickCounter;
                     tempPoints[i] = null;
                 }
             }
@@ -1189,37 +1248,71 @@ public class GuiPacMan extends GuiArcade {
     }
 
     private void inkyAi () {
+        if ((tickCounter - ghostMovementTick[1]) >= 2) {
+            ghostMovementTick[1] = tickCounter;
+
+            if (dotCounter[1] >= getDotLimit(level, 1)) {
+                if (!frightened[1]) {
+                    if (mode[1] == 0) direction[2] = pathfinding(2, playX + gameCollision[0].center[0] + 5 + (30 * 4), playY + gameCollision[0].center[1] + 4 + (56 * 4)); // Scatter
+                    else { // Chase
+                        //direction[2] = pathfinding(2, playX + gameCollision[0].center[0] + 5 + ((playerX - 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + ((playerY - 4) * speedMultiplier));
+                    }
+
+                    // Move
+                    if (canMoveUp(2) && direction[2] == 1) ghostPos[1][1]--;
+                    if (canMoveDown(2) && direction[2] == 2) ghostPos[1][1]++;
+                    if (canMoveLeft(2) && direction[2] == 3) ghostPos[1][0]--;
+                    if (canMoveRight(2) && direction[2] == 4) ghostPos[1][0]++;
+                }
+            }
+        }
         drawGhost(ghostPos[1][0], ghostPos[1][1], direction[2], 1, frightened[1], eaten[1], false);
     }
 
     private void pinkyAi () {
-        GlStateManager.color(1, 0, 0);
-        this.drawModalRectWithCustomSizedTexture(playX + 12, playY + 11, GUI_X, MAZE_Y + DOT, 1, 1, 512, 512);
-
-
         if ((tickCounter - ghostMovementTick[2]) >= 2) {
             ghostMovementTick[2] = tickCounter;
 
-            if (!frightened[2]) {
-                if (mode[2] == 0) direction[3] = pathfinding(3, playX + 12, playY + 11); // Scatter
-                else { // Chase
-                    if (direction[0] == 1) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX - 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + ((playerY - 4) * speedMultiplier));
-                    else if (direction[0] == 2) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + (playerX * speedMultiplier), playY + gameCollision[0].center[1] + 4 + ((playerY + 4) * speedMultiplier));
-                    else if (direction[0] == 3) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX - 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier));
-                    else if (direction[0] == 4) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX + 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier));
-                }
+            if (dotCounter[2] >= getDotLimit(level, 2)) {
+                if (!frightened[2]) {
+                    if (mode[2] == 0) direction[3] = pathfinding(3, playX + 12, playY + 11); // Scatter
+                    else { // Chase
+                        if (direction[0] == 1) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX - 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + ((playerY - 4) * speedMultiplier));
+                        else if (direction[0] == 2) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + (playerX * speedMultiplier), playY + gameCollision[0].center[1] + 4 + ((playerY + 4) * speedMultiplier));
+                        else if (direction[0] == 3) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX - 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier));
+                        else if (direction[0] == 4) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX + 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier));
+                    }
 
-                // Move
-                if (canMoveUp(3) && direction[3] == 1) ghostPos[2][1]--;
-                if (canMoveDown(3) && direction[3] == 2) ghostPos[2][1]++;
-                if (canMoveLeft(3) && direction[3] == 3) ghostPos[2][0]--;
-                if (canMoveRight(3) && direction[3] == 4) ghostPos[2][0]++;
+                    // Move
+                    if (canMoveUp(3) && direction[3] == 1) ghostPos[2][1]--;
+                    if (canMoveDown(3) && direction[3] == 2) ghostPos[2][1]++;
+                    if (canMoveLeft(3) && direction[3] == 3) ghostPos[2][0]--;
+                    if (canMoveRight(3) && direction[3] == 4) ghostPos[2][0]++;
+                }
             }
         }
         drawGhost(ghostPos[2][0], ghostPos[2][1], direction[3], 2, frightened[2], eaten[2], false);
     }
 
     private void clydeAi () {
+        if ((tickCounter - ghostMovementTick[3]) >= 2) {
+            ghostMovementTick[3] = tickCounter;
+
+            if (dotCounter[3] >= getDotLimit(level, 3)) {
+                if (!frightened[3]) {
+                    if (mode[3] == 0) direction[4] = pathfinding(4, playX + gameCollision[0].center[0] + 5 + (20 * 4), playY + gameCollision[0].center[1] + 4 + (56 * 4)); // Scatter
+                    else { // Chase
+                        //direction[2] = pathfinding(2, playX + gameCollision[0].center[0] + 5 + ((playerX - 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + ((playerY - 4) * speedMultiplier));
+                    }
+
+                    // Move
+                    if (canMoveUp(4) && direction[4] == 1) ghostPos[3][1]--;
+                    if (canMoveDown(4) && direction[4] == 2) ghostPos[3][1]++;
+                    if (canMoveLeft(4) && direction[4] == 3) ghostPos[3][0]--;
+                    if (canMoveRight(4) && direction[4] == 4) ghostPos[3][0]++;
+                }
+            }
+        }
         drawGhost(ghostPos[3][0], ghostPos[3][1], direction[4], 3, frightened[3], eaten[3], false);
     }
 
@@ -1273,6 +1366,16 @@ public class GuiPacMan extends GuiArcade {
         } else { // x != 0
             if (yDistance != 0) {
                 if (canMoveUp(ghost) && direction[ghost] != 2) {
+                    /*
+                    if (canMoveLeft(ghost) && direction[ghost] != 4) {
+                        double xPredict = Math.abs(targetX - (x - 1));
+                        if (xDistance > xPredict) return 3;
+                    }
+                    if (canMoveRight(ghost) && direction[ghost] != 3) {
+                        double xPredict = Math.abs(targetX - (x + 1));
+                        if (xDistance > xPredict) return 4;
+                    }
+                    */
                     if (!canMoveRight(ghost) || !canMoveLeft(ghost)) return 1;
                     double yPredict = Math.abs(targetY - (y - 1));
                     if (yDistance > yPredict) return 1;

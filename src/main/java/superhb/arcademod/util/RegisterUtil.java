@@ -22,10 +22,8 @@ public class RegisterUtil {
     public static void registerAll (FMLPreInitializationEvent event) {
         registerArcadeMachine(event, ArcadeBlocks.arcadeMachine);
 
-
-
         registerItems(event, ArcadeItems.coin, ArcadeItems.ticket);
-        registerBlocks(event, ArcadeBlocks.invisible); //ArcadeBlocks.coinPusher
+        registerBlocks(event, ArcadeBlocks.invisible, ArcadeBlocks.coinPusher);
         registerBlocksWithOBJModel(event, ArcadeBlocks.prizeBox);
         registerPlushie(event, ArcadeBlocks.plushie);
     }

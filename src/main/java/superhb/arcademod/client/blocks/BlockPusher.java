@@ -1,19 +1,18 @@
 package superhb.arcademod.client.blocks;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.*;
+import superhb.arcademod.Arcade;
 import superhb.arcademod.client.tileentity.TileEntityPusher;
 import superhb.arcademod.util.EnumGame;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockDirectional;
+import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.PropertyDirection;
-import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.block.properties.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
+import net.minecraft.util.math.*;
+import net.minecraft.world.*;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -54,7 +53,7 @@ public class BlockPusher extends Block {
 
     @Override
     public boolean canSpawnInBlock () {
-        return true;
+        return false;
     }
 
     @Override
@@ -65,7 +64,7 @@ public class BlockPusher extends Block {
     @Override
     public AxisAlignedBB getBoundingBox (IBlockState state, IBlockAccess source, BlockPos pos) {
         //return new AxisAlignedBB(0.0D, 0.0D, 0.0D, 16.0D, 32.0D, 16.0D);
-        return new AxisAlignedBB(0.0D, 0.0D, 0.0D, 16.0D, 16.0D, 16.0D);
+        return new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 1.0D, 1.0D);
     }
 
     @Override
@@ -95,6 +94,22 @@ public class BlockPusher extends Block {
         return new BlockStateContainer(this, new IProperty[] { FACING });
     }
     */
+
+    @Override
+    public boolean onBlockActivated (World world, BlockPos pos, IBlockState state, EntityPlayer player, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        if (world.isRemote) player.openGui(Arcade.instance, -2, world, pos.getX(), pos.getY(), pos.getZ());
+
+        /*
+        TileEntity tile = world.getTileEntity(pos);
+
+        if (tile instanceof TileEntityArcade) {
+            TileEntityArcade arcade = (TileEntityArcade)tile;
+
+            if (world.isRemote) player.openGui(Arcade.instance, arcade.getGameID(), world, pos.getX(), pos.getY(), pos.getZ());
+        }
+        */
+        return true;
+    }
 
     @Override
     public void breakBlock (World world, BlockPos pos, IBlockState state) {

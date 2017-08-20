@@ -136,6 +136,7 @@ public class Arcade {
         GameRegistry.registerTileEntity(TileEntityArcade.class, Reference.MODID + ":tile_arcade");
         GameRegistry.registerTileEntity(TileEntityPlushie.class, Reference.MODID + ":tile_plushie");
         GameRegistry.registerTileEntity(TileEntityPrize.class, Reference.MODID + ":tile_prize");
+        GameRegistry.registerTileEntity(TileEntityPusher.class, Reference.MODID + ":tile_pusher");
 
         // Register Event
         if (!disableUpdateNotification) MinecraftForge.EVENT_BUS.register(new UpdateAnnouncer());
