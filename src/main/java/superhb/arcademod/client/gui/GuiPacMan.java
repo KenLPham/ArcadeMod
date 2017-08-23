@@ -49,7 +49,7 @@ public class GuiPacMan extends GuiArcade {
     private static final ResourceLocation texture = new ResourceLocation(Reference.MODID + ":textures/gui/pacman.png");
 
     // Texture Variables
-    private static final int GUI_X = 234, GUI_Y = 300;
+    private static final int GUI_X = 234, GUI_Y = 284; // 300
     private static final int MAZE_X = 224, MAZE_Y = 248;
 
     private static final int GHOST = 14;
@@ -89,12 +89,13 @@ public class GuiPacMan extends GuiArcade {
 
     // Game Variables
     private boolean died = false;
-    private int life = 3;
+    private int life = 2;
     private int level;
     private int score = 0;
     private final int speedMultiplier = 4;
     private final int ghostSpeedMultiplier = 4;
     private boolean blink = false;
+    private boolean start = true;
 
     /*
         0 = Pac Man
@@ -103,7 +104,7 @@ public class GuiPacMan extends GuiArcade {
         3 = Pinky
         4 = Clyde
      */
-    private int[] direction = { 0, 0, 1, 1, 1 };
+    private int[] direction = { 3, 0, 1, 1, 1 };
     private int nextDirection = 0;
 
     // Ghost Variables
@@ -133,6 +134,7 @@ public class GuiPacMan extends GuiArcade {
     private int movementTick = 0, movementSpeed = 1;
     private int modeTick[] = { 0, 0, 0, 0 };
     private int timeSinceEaten = 0;
+    private int startTick = 0;
 
     private boolean pauseModeTimer = false;
 
@@ -541,6 +543,7 @@ public class GuiPacMan extends GuiArcade {
         this.mc.getTextureManager().bindTexture(texture);
         this.drawModalRectWithCustomSizedTexture(xScaled - (GUI_X / 2) + 5, yScaled - (GUI_Y / 2) + 14, GUI_X, 0, MAZE_X, MAZE_Y, 512, 512);
 
+        // TODO: If start = true, draw everything but done let anything move until start = false
         if (!died) {
             // Maze
             if ((tickCounter - energizerTick) >= 6) {
@@ -587,8 +590,7 @@ public class GuiPacMan extends GuiArcade {
                 if (GHOST_STATE == 0) GHOST_STATE = 1;
                 else if (GHOST_STATE == 1) GHOST_STATE = 0;
             }
-            if ((tickCounter - frightTick) >= 70)
-                blink = true;
+            if ((tickCounter - frightTick) >= 70) blink = true; // TODO: Fix fright not working
             if ((tickCounter - frightTick) >= 90) { // TODO: Change fright speed depending on level
                 frightTick = tickCounter;
                 for (int i = 0; i < 4; i++) frightened[i] = false;
@@ -607,30 +609,29 @@ public class GuiPacMan extends GuiArcade {
             //drawMazeCollision(true);
 
             // Pac-Man
-            if ((tickCounter - movementTick) >= 2) {
-                movementTick = tickCounter;
-                if (canMoveUp(0) && direction[0] == 1) {
-                    if (PACMAN_STATE == 0) PACMAN_STATE = 1;
-                    else PACMAN_STATE = 0;
-                    playerY--;
-                } else if (canMoveDown(0) && direction[0] == 2) {
-                    if (PACMAN_STATE == 0) PACMAN_STATE = 1;
-                    else PACMAN_STATE = 0;
-                    playerY++;
-                } else if (canMoveLeft(0) && direction[0] == 3) {
-                    if (PACMAN_STATE == 0) PACMAN_STATE = 1;
-                    else PACMAN_STATE = 0;
-                    playerX--;
-                } else if (canMoveRight(0) && direction[0] == 4) {
-                    if (PACMAN_STATE == 0) PACMAN_STATE = 1;
-                    else PACMAN_STATE = 0;
-                    playerX++;
+            if (!start) {
+                if ((tickCounter - movementTick) >= 2) {
+                    movementTick = tickCounter;
+                    if (canMoveUp(0) && direction[0] == 1) {
+                        if (PACMAN_STATE == 0) PACMAN_STATE = 1;
+                        else PACMAN_STATE = 0;
+                        playerY--;
+                    } else if (canMoveDown(0) && direction[0] == 2) {
+                        if (PACMAN_STATE == 0) PACMAN_STATE = 1;
+                        else PACMAN_STATE = 0;
+                        playerY++;
+                    } else if (canMoveLeft(0) && direction[0] == 3) {
+                        if (PACMAN_STATE == 0) PACMAN_STATE = 1;
+                        else PACMAN_STATE = 0;
+                        playerX--;
+                    } else if (canMoveRight(0) && direction[0] == 4) {
+                        if (PACMAN_STATE == 0) PACMAN_STATE = 1;
+                        else PACMAN_STATE = 0;
+                        playerX++;
+                    }
                 }
             }
             drawPacman(playerX, playerY, direction[0], false);
-
-            // Pac-Man Collision Check with edibles and ghosts
-            checkCenter();
 
             // Check time since last eaten. 4 second limit for level 1-4. 3 second limit for 5+
 
@@ -680,10 +681,22 @@ public class GuiPacMan extends GuiArcade {
                     resetLevel();
                 }
             }
+            this.fontRendererObj.drawString("Game Over", xScaled - (this.fontRendererObj.getStringWidth("Game Over") / 2), yScaled + 8, Color.RED.getRGB());
         }
+        drawLives();
 
+        if ((tickCounter - startTick) >= (20 * 3) && start) start = false;
+        if (start) this.fontRendererObj.drawString("Ready!", xScaled - (this.fontRendererObj.getStringWidth("Ready!") / 2), yScaled + 8, Color.YELLOW.getRGB());
+
+        // Score Text
         this.fontRendererObj.drawString("Score: " + score, xScaled - (GUI_X / 2) + 6, yScaled - (GUI_Y / 2) + 6, Color.WHITE.getRGB());
-        this.fontRendererObj.drawString("Ready!", xScaled - (this.fontRendererObj.getStringWidth("Ready!") / 2), yScaled, Color.YELLOW.getRGB());
+    }
+
+    @Override
+    public void updateScreen () {
+        super.updateScreen();
+        // Pac-Man Collision Check
+        checkCenter();
     }
 
     // TODO: Controls
@@ -762,19 +775,19 @@ public class GuiPacMan extends GuiArcade {
 
         switch (direction[0]) {
             case 0: // Still
-                this.drawModalRectWithCustomSizedTexture(x, y, 0, GUI_Y, PACMAN, PACMAN, 512, 512);
+                this.drawModalRectWithCustomSizedTexture(x, y, 0, GUI_Y + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                 break;
             case 1: // Up
-                this.drawModalRectWithCustomSizedTexture(x, y, (PACMAN * PACMAN_STATE), GUI_Y + (PACMAN * 2), PACMAN, PACMAN, 512, 512);
+                this.drawModalRectWithCustomSizedTexture(x, y, (PACMAN * PACMAN_STATE), GUI_Y + (PACMAN * 2) + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                 break;
             case 2: // Down
-                this.drawModalRectWithCustomSizedTexture(x, y, (PACMAN * PACMAN_STATE), GUI_Y + (PACMAN * 3), PACMAN, PACMAN, 512, 512);
+                this.drawModalRectWithCustomSizedTexture(x, y, (PACMAN * PACMAN_STATE), GUI_Y + (PACMAN * 3) + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                 break;
             case 3: // Left
-                this.drawModalRectWithCustomSizedTexture(x, y, (PACMAN * PACMAN_STATE), GUI_Y + PACMAN, PACMAN, PACMAN, 512, 512);
+                this.drawModalRectWithCustomSizedTexture(x, y, (PACMAN * PACMAN_STATE), GUI_Y + PACMAN + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                 break;
             case 4: // Right
-                this.drawModalRectWithCustomSizedTexture(x, y, (PACMAN * PACMAN_STATE), GUI_Y, PACMAN, PACMAN, 512, 512);
+                this.drawModalRectWithCustomSizedTexture(x, y, (PACMAN * PACMAN_STATE), GUI_Y + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                 break;
         }
     }
@@ -841,6 +854,8 @@ public class GuiPacMan extends GuiArcade {
         period = new int[] { 0, 0, 0, 0 };
         frightened = new boolean[] { false, false, false, false };
         eaten = new boolean[] { false, false, false, false };
+        startTick = 0;
+        start = true;
     }
 
     public void drawGhost (int x, int y, int direction, int ghost, boolean frightened, boolean eaten, boolean debug) {
@@ -989,27 +1004,34 @@ public class GuiPacMan extends GuiArcade {
         }
     }
 
+    public void drawLives () {
+        GlStateManager.color(1.0F, 1.0F, 1.0F);
+
+        if (life == 2 || life == 1) this.drawModalRectWithCustomSizedTexture(playX + PACMAN - 1, playY + 4 + (61 * speedMultiplier), PACMAN, GUI_Y + PACMAN + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
+        if (life == 2) this.drawModalRectWithCustomSizedTexture(playX + (PACMAN * 2) - 1, playY + 4 + (61 * speedMultiplier), PACMAN, GUI_Y + PACMAN + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
+    }
+
+    public void drawFruit () {
+        GlStateManager.color(1.0F, 1.0F, 1.0F);
+    }
+
     public void drawPacman (int x, int y, int direction, boolean debug) {
         GlStateManager.color(1.0F, 1.0F, 1.0F);
         switch (direction) {
             case 0: // Still
-                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), 0, GUI_Y, PACMAN, PACMAN, 512, 512);
+                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), 0, GUI_Y  + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                 break;
             case 1: // Up
-                if (PACMAN_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), 0, GUI_Y , PACMAN, PACMAN, 512, 512);
-                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), PACMAN, GUI_Y + (PACMAN * 2), PACMAN, PACMAN, 512, 512);
+                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), (PACMAN * PACMAN_STATE), GUI_Y + (PACMAN * 2) + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                 break;
             case 2: // Down
-                if (PACMAN_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), 0, GUI_Y , PACMAN, PACMAN, 512, 512);
-                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), PACMAN, GUI_Y + (PACMAN * 3), PACMAN, PACMAN, 512, 512);
+                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), (PACMAN * PACMAN_STATE), GUI_Y + (PACMAN * 3) + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                 break;
             case 3: // Left
-                if (PACMAN_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), 0, GUI_Y, PACMAN, PACMAN, 512, 512);
-                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), PACMAN, GUI_Y + PACMAN, PACMAN, PACMAN, 512, 512);
+                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), (PACMAN * PACMAN_STATE), GUI_Y + PACMAN + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                 break;
             case 4: // Right
-                if (PACMAN_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), 0, GUI_Y , PACMAN, PACMAN, 512, 512);
-                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), PACMAN, GUI_Y , PACMAN, PACMAN, 512, 512);
+                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), (PACMAN * PACMAN_STATE), GUI_Y + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                 break;
         }
 
@@ -1218,15 +1240,19 @@ public class GuiPacMan extends GuiArcade {
 
     Bottom Right
     playX + gameCollision[1].width + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].height + 4 + (y * ghostSpeedMultiplier)
+
+    Center
+    playX + gameCollision[1].center[0] + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].center[1] + 4 + (y * ghostSpeedMultiplier)
      */
 
-    //this.drawModalRectWithCustomSizedTexture(playX + gameCollision[1].center[0] + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].center[1] + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Center
     /** Checks Center collider of Character Collider to see if it collided with PacMan or Ghost or dot/energizer */
     private boolean checkCenter () {
+        int xPlayer = playX + gameCollision[0].center[0] + 5 + (playerX * speedMultiplier);
+        int yPlayer = playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier);
         // Edible Check
         for (int i = 0; i < tempPoints.length; i++) {
             if (tempPoints[i] != null) {
-                if ((playX + gameCollision[0].center[1] + 5 + (playerX * speedMultiplier)) == (playX + 11 + gameCollision[2].center[0] + ((int) tempPoints[i].pos.getX() * 8)) && (playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier)) == (playY + 11 + gameCollision[2].center[1] - 1 + ((int) tempPoints[i].pos.getY() * 8))) {
+                if (xPlayer == (playX + 11 + gameCollision[2].center[0] + ((int)tempPoints[i].pos.getX() * 8)) && yPlayer == (playY + 11 + gameCollision[2].center[1] - 1 + ((int)tempPoints[i].pos.getY() * 8))) {
                     if (WAKA == 0) {
                         this.mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(ArcadeSoundRegistry.PACMAN_WAKA_1, 1.0F));
                         WAKA = 1;
@@ -1253,7 +1279,8 @@ public class GuiPacMan extends GuiArcade {
                         frightTick = 0;
 
                         for (int g = 0; g < 4; g++) {
-                            if (!inHouse[g]) frightened[g] = true;
+                            //if (!inHouse[g]) frightened[g] = true;
+                            frightened[g] = true;
                         }
                     } else score += 10;
                     dotCounter[4]++;
@@ -1266,7 +1293,18 @@ public class GuiPacMan extends GuiArcade {
 
         // Check Pac-Man Ghost Collision
         for (int i = 0; i < 4; i++) {
-            if ((playX + gameCollision[0].center[0] + 5 + (playerX * speedMultiplier)) == (playX + gameCollision[1].center[0] + 5 + (ghostPos[i][0] * ghostSpeedMultiplier)) && (playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier)) == (playY + gameCollision[1].center[1] + 4 + (ghostPos[i][1] * ghostSpeedMultiplier))) {
+            int xGhost = playX + gameCollision[1].center[0] + 5 + (ghostPos[i][0] * ghostSpeedMultiplier);
+            int yGhost = playY + gameCollision[1].center[1] + 4 + (ghostPos[i][1] * ghostSpeedMultiplier);
+
+            if (((xPlayer - 4) == xGhost && yPlayer == yGhost) || (xPlayer == xGhost && (yPlayer - 4) == yGhost)) {
+                if (frightened[i]) eaten[i] = true;
+                else died = true;
+            }
+            if ((xPlayer == xGhost && yPlayer == yGhost) || (xPlayer == xGhost && yPlayer == yGhost)) {
+                if (frightened[i]) eaten[i] = true;
+                else died = true;
+            }
+            if (((xPlayer + 4) == xGhost && yPlayer == yGhost) || (xPlayer == xGhost && (yPlayer + 4) == yGhost)) {
                 if (frightened[i]) eaten[i] = true;
                 else died = true;
             }
