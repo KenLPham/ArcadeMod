@@ -1023,9 +1023,8 @@ public class GuiPacMan extends GuiArcade {
 
     public void drawFruit (int x, int y, boolean debug) {
         GlStateManager.color(1.0F, 1.0F, 1.0F);
-        /*
         // Cherry
-        //this.drawModalRectWithCustomSizedTexture(playX + 6 + (x * 4), playY + 6 + (y * 4), GUI_X + DOT + ENERGIZER + (GHOST * 2), MAZE_Y, CHERRY, CHERRY, 512, 512);
+        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * 4), playY + 4 + (y * 4), GUI_X + DOT + ENERGIZER + (GHOST * 2), MAZE_Y, FRUIT, FRUIT, 512, 512);
         // Strawberry
         //this.drawModalRectWithCustomSizedTexture(playX + 6 + (x * 4), playY + 6 + (y * 4), GUI_X + DOT + ENERGIZER + (GHOST * 2) + CHERRY, MAZE_Y, BERRY_X, BERRY_Y, 512, 512);
         // Peach
@@ -1033,7 +1032,7 @@ public class GuiPacMan extends GuiArcade {
         // Apple
         //this.drawModalRectWithCustomSizedTexture(playX + 6 + (x * 4), playY + 6 + (y * 4), GUI_X + DOT + ENERGIZER + (GHOST * 2) + CHERRY + BERRY_X + PEACH_X, MAZE_Y, APPLE, APPLE, 512, 512);
         // Grapes
-        this.drawModalRectWithCustomSizedTexture(playX + 6 + (x * 4), playY + 5 + (y * 4), GUI_X + DOT + ENERGIZER + (GHOST * 2) + CHERRY + BERRY_X + PEACH_X + APPLE, MAZE_Y, GRAPE_X, GRAPE_Y, 512, 512);
+        //this.drawModalRectWithCustomSizedTexture(playX + 6 + (x * 4), playY + 5 + (y * 4), GUI_X + DOT + ENERGIZER + (GHOST * 2) + CHERRY + BERRY_X + PEACH_X + APPLE, MAZE_Y, GRAPE_X, GRAPE_Y, 512, 512);
         // Galaxian
         //this.drawModalRectWithCustomSizedTexture(playX + 6 + (x * 4), playY + 6 + (y * 4), GUI_X + DOT + ENERGIZER + (GHOST * 2) + CHERRY + BERRY_X + PEACH_X + APPLE + GRAPE_X, MAZE_Y, GALAXIAN, GALAXIAN, 512, 512);
         // Bell
@@ -1043,14 +1042,13 @@ public class GuiPacMan extends GuiArcade {
 
         if (debug) {
             GlStateManager.color(0.0F, 1.0F, 1.0F);
-            this.drawModalRectWithCustomSizedTexture(playX + 6 + (x * speedMultiplier), playY + 6 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Top Left
-            this.drawModalRectWithCustomSizedTexture(playX + 6 + (x * speedMultiplier), playY + gameCollision[getFruitID()].height + 6 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Bottom Left
-            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[getFruitID()].width + 6 + (x * speedMultiplier), playY + 6 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Top Right
-            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[getFruitID()].width + 6 + (x * speedMultiplier), playY + gameCollision[getFruitID()].height + 6 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Bottom Right
+            this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Top Left
+            this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + gameCollision[4].height + 4 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Bottom Left
+            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[4].width + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Top Right
+            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[4].width + 5 + (x * speedMultiplier), playY + gameCollision[4].height + 4 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Bottom Right
 
-            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[getFruitID()].center[0] + 6 + (x * speedMultiplier), playY + gameCollision[getFruitID()].center[1] + 6 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Center
+            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[4].center[0] + 5 + (x * speedMultiplier), playY + gameCollision[4].center[1] + 4 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Center
         }
-        */
     }
 
     /* Fruits, Level, Worth
@@ -1063,16 +1061,6 @@ public class GuiPacMan extends GuiArcade {
         - Level 11 & 12: Bell 3000pt
         - Level 13+: Key 5000pt
      */
-
-    private int getFruitID () {
-        if (level == 0 || level == 4 || level == 5) return 4; // Cherry & Apple
-        if (level >= 1 || level <= 3) return 5; // Strawberry & Peach
-        if (level == 6 || level == 7) return 6; // Grape
-        if (level == 8 || level == 9) return 7; // Galaxian
-        if (level == 10 || level == 11) return 8; // Bell
-        if (level >= 12) return 9; // Key
-        return 4;
-    }
 
     private int getFruitScore () {
         if (level == 0) return 100; // Cherry
@@ -1402,6 +1390,13 @@ public class GuiPacMan extends GuiArcade {
             Arcade.logger.info("Pac-Man has collided with Grape");
         }
         */
+
+        // playX + gameCollision[4].center[0] + 5 + (x * speedMultiplier), playY + gameCollision[4].center[1] + 4 + (y * speedMultiplier)
+
+        // Fruit Collision Detection
+        if ( (playerX <= (playX + gameCollision[4].center[0] + 5 + (25 * speedMultiplier))) && (playerY == (playY + gameCollision[4].center[1] + 4 + (32 * speedMultiplier))) ) {
+            Arcade.logger.info("Collided with Fruit");
+        }
 
         return false;
     }
