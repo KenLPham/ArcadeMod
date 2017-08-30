@@ -3,7 +3,6 @@ package superhb.arcademod.client.gui;
 import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.SoundEvents;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
@@ -85,11 +84,13 @@ public class GuiPacMan extends GuiArcade {
     private int life = 2;
     private int level;
     private int score = 0;
+    private int fruit = 0;
     private final int speedMultiplier = 4;
     private final int ghostSpeedMultiplier = 4;
     private boolean blink = false;
     private boolean start = true;
     private boolean levelComplete = false;
+    private boolean spawnFruit = false;
 
     /*
         0 = Pac Man
@@ -129,6 +130,7 @@ public class GuiPacMan extends GuiArcade {
     private int modeTick[] = { 0, 0, 0, 0 };
     private int timeSinceEaten = 0;
     private int startTick = 0;
+    private int fruitTick = 0, fruitTime = 0;
 
     private boolean pauseModeTimer = false;
 
@@ -601,14 +603,36 @@ public class GuiPacMan extends GuiArcade {
         if (!died) {
             checkHouse();
 
-            // TODO: Fruit timer
-            drawFruit(25, 32, true);
+            // Fruit timer doesn't seem to work
+            if (spawnFruit) {
+                if ((tickCounter - fruitTick) == fruitTime) {
+                    //Arcade.logger.info("Timer done");
+                    fruitTick = tickCounter;
+                    spawnFruit = false;
+                    //if (fruit != 4) fruit += 2;
+                    if (fruit != 2) fruit ++;
+                } else {
+                    //Arcade.logger.info(String.format("Tick: [%d]; FruitTick: [%d]; Diff: [%d]; Time: [%d]", tickCounter, fruitTick, (tickCounter - fruitTick), fruitTime));
+                    drawFruit(25, 32, false);
+                }
+            }
 
             // Maze Debug
             //drawMazeCollision(true);
 
             // Pac-Man
             if (!start) {
+                // Fruit Spawning
+                //if ((fruit != 4 && !spawnFruit) || fruit < 4) {
+                if ((fruit != 2 && !spawnFruit) || fruit < 2) {
+                    if (getWorld().rand.nextFloat() <= 0.0005f) {
+                        //Arcade.logger.info("Spawn fruit");
+                        fruitTick = tickCounter;
+                        fruitTime = getFruitTick();
+                        spawnFruit = true;
+                    }
+                }
+
                 if ((tickCounter - movementTick) >= 2) {
                     movementTick = tickCounter;
                     if (canMoveUp(0) && direction[0] == 1) {
@@ -630,7 +654,7 @@ public class GuiPacMan extends GuiArcade {
                     }
                 }
             }
-            drawPacman(playerX, playerY, direction[0], true);
+            drawPacman(playerX, playerY, direction[0], false);
 
             // Check time since last eaten. 4 second limit for level 1-4. 3 second limit for 5+
 
@@ -684,7 +708,7 @@ public class GuiPacMan extends GuiArcade {
             }
         }
         drawLives();
-        //drawFruit(0, 0, false);
+        drawFruit(50, 61, false);
 
         // if gameOver = true this.fontRendererObj.drawString("Game Over", xScaled - (this.fontRendererObj.getStringWidth("Game Over") / 2), yScaled + 8, Color.RED.getRGB());
         if ((tickCounter - startTick) >= (20 * 3) && start) start = false;
@@ -834,6 +858,8 @@ public class GuiPacMan extends GuiArcade {
 
         if (level < 256) level++;
         // if level = 256, end game.
+
+        fruit = 0;
 
         resetLevel();
     }
@@ -1074,7 +1100,11 @@ public class GuiPacMan extends GuiArcade {
         return 100;
     }
 
-    public void drawPacman (int x, int y, int direction, boolean debug) {
+    private int getFruitTick () {
+        return rand((9 * 20), (10 * 20));
+    }
+
+    private void drawPacman (int x, int y, int direction, boolean debug) {
         GlStateManager.color(1.0F, 1.0F, 1.0F);
         switch (direction) {
             case 0: // Still
@@ -1394,21 +1424,18 @@ public class GuiPacMan extends GuiArcade {
         // playX + gameCollision[4].center[0] + 5 + (x * speedMultiplier), playY + gameCollision[4].center[1] + 4 + (y * speedMultiplier)
 
         // Fruit Collision Detection
-        if ( (playerX <= (playX + gameCollision[4].center[0] + 5 + (25 * speedMultiplier))) && (playerY == (playY + gameCollision[4].center[1] + 4 + (32 * speedMultiplier))) ) {
-            Arcade.logger.info("Collided with Fruit");
-        }
+        if ((xPlayer == (playX + gameCollision[4].center[0] + 5 + (25 * speedMultiplier))) && (yPlayer == (playY + gameCollision[4].center[1] + 4 + (32 * speedMultiplier))) && spawnFruit) {
+            //Arcade.logger.info("Collided with Fruit");
 
+            // Add score for fruit. Increment fruit. Fruit can only spawn max twice a level
+            //if (fruit != 4) fruit++;
+            //score += (getFruitScore() / 2);
+            if (fruit != 2) fruit++;
+            score += getFruitScore();
+            spawnFruit = false;
+        }
         return false;
     }
-
-    /*
-            new GameCollision(12, 12), // Cherry, Apple 4
-            new GameCollision(11, 12), // Berry, Peach 5
-            new GameCollision(11, 14), // Grape 6
-            new GameCollision(11, 11), // Galaxian 7
-            new GameCollision(12, 13), // Bell 8
-            new GameCollision(7, 13) // Key 9
-     */
 
     /* Ghost AI Basics
         - Scatter, Chase, Repeat
@@ -1695,6 +1722,11 @@ public class GuiPacMan extends GuiArcade {
         float blue = Math.round((color.getBlue() / 255.0F) * 100.0F) / 100.0F;
 
         return new float[] { red, green, blue };
+    }
+
+    private int rand (int min, int max) {
+        //return min + getWorld().rand.nextInt() * ((max - min) + 1);
+        return getWorld().rand.nextInt(max + 1 - min) + min;
     }
 
     public class MazeCollision {
