@@ -43,10 +43,7 @@ import java.util.*;
  */
 
 /* ChangeLog
-    1.3.5
  */
-
-// Reload resources with F3+T
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, updateJSON = Reference.UPDATE_URL)
 public class Arcade {
     @SidedProxy(clientSide = Reference.CLIENT_PROXY, serverSide = Reference.SERVER_PROXY)
@@ -137,9 +134,6 @@ public class Arcade {
         GameRegistry.registerTileEntity(TileEntityPlushie.class, Reference.MODID + ":tile_plushie");
         GameRegistry.registerTileEntity(TileEntityPrize.class, Reference.MODID + ":tile_prize");
         GameRegistry.registerTileEntity(TileEntityPusher.class, Reference.MODID + ":tile_pusher");
-
-        // Register Event
-        if (!disableUpdateNotification) MinecraftForge.EVENT_BUS.register(new UpdateAnnouncer());
 
         proxy.preInit(event);
     }

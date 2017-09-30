@@ -11,6 +11,7 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import superhb.arcademod.Arcade;
 
 public class RewardMessage implements IMessage {
     private ItemStack reward;
@@ -38,7 +39,11 @@ public class RewardMessage implements IMessage {
 
     @Override
     public void fromBytes (ByteBuf buf) {
-        reward = ByteBufUtils.readItemStack(buf);
+        try  {
+            reward = ByteBufUtils.readItemStack(buf);
+        } catch (Exception e) {
+            Arcade.logger.info("Error: " + e);
+        }
     }
 
     public ItemStack getReward () {

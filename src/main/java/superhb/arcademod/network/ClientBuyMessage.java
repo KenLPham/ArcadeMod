@@ -8,6 +8,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import superhb.arcademod.Arcade;
 import superhb.arcademod.client.gui.GuiPrize;
 
 public class ClientBuyMessage implements IMessage {
@@ -26,7 +27,11 @@ public class ClientBuyMessage implements IMessage {
 
     @Override
     public void fromBytes (ByteBuf buf) {
-        isEnough = buf.readBoolean();
+        try {
+            isEnough = buf.readBoolean();
+        } catch (Exception e) {
+            Arcade.logger.info("Error: " + e);
+        }
     }
 
     public boolean isEnough () {

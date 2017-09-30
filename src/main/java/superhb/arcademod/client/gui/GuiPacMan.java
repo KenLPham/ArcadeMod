@@ -12,11 +12,13 @@ import superhb.arcademod.api.gui.GuiArcade;
 import superhb.arcademod.client.audio.LoopingSound;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.util.ArcadeSoundRegistry;
+import superhb.arcademod.util.EnumGame;
 import superhb.arcademod.util.KeyHandler;
 
 import java.awt.*;
 import java.io.IOException;
 
+// This is honestly so fucked
 // http://www.gamasutra.com/view/feature/3938/the_pacman_dossier.php?print=1
 // http://gameinternals.com/post/2072558330/understanding-pac-man-ghost-behavior
 public class GuiPacMan extends GuiArcade {
@@ -26,19 +28,6 @@ public class GuiPacMan extends GuiArcade {
     // All ghosts are captured with one energizer, additional 12000 pts
     // Blue time decreases as level goes up
     // Level 19, Ghosts can no longer be eaten
-    // Fruit one shows up after 70 dots eaten, Fruit two shows up after 170 dots eaten
-    // Fruit worth 100 or 5000 depending on level
-    /* Fruits, Level, Worth
-        - Level 1: Cherry 100pt
-        - Level 2: Strawberry 300pt
-        - Level 3 & 4: Peach 500pt
-        - Level 5 & 6: Apple 700pt
-        - Level 7 & 8: Grapes 1000pt
-        - Level 9 & 10: Galaxian (tulip or thunderbird) 2000pt
-        - Level 11 & 12: Bell 3000pt
-        - Level 13+: Key 5000pt
-     */
-    // Fruit shows up between 9-10 seconds
     /* Audio Info
         - Siren plays continuously (unless ghosts are frightened)
         - Waka only plays when eating dots / energizer
@@ -99,8 +88,8 @@ public class GuiPacMan extends GuiArcade {
         3 = Pinky
         4 = Clyde
      */
-    private int[] direction = { 3, 0, 1, 1, 1 };
-    private int nextDirection = 0;
+    private Direction[] direction = { Direction.LEFT, Direction.STAND, Direction.UP, Direction.UP, Direction.UP };
+    private Direction nextDirection = Direction.STAND;
 
     // Ghost Variables
     private int[] mode = { 0, 0, 0, 0 };
@@ -108,7 +97,7 @@ public class GuiPacMan extends GuiArcade {
     private boolean[] frightened = { false, false, false, false };
     private boolean[] eaten = { false, false, false, false };
     private boolean[] inHouse = { false, true, true, true };
-    private int[] dotCounter = { 0, 0, 0, 0, 0 }; // dotCounter[4] = Global Dot Counter
+    private int[] dotCounter = { 0, 0, 0, 0, 0, 0 }; // dotCounter[4] = Global Dot Counter; dotCounter[5] = Level Dot Counter
     private int curCounter = 0;
 
     private int playX, playY;
@@ -132,7 +121,7 @@ public class GuiPacMan extends GuiArcade {
     private int startTick = 0;
     private int fruitTick = 0, fruitTime = 0;
 
-    private boolean pauseModeTimer = false;
+    private boolean pauseModeTimer = false; // I forgot what this was for
 
     private final Color[] ghostColor = {
             new Color(255, 7, 7), // Blinky
@@ -510,12 +499,12 @@ public class GuiPacMan extends GuiArcade {
             new MazeCollision(104, 99, 15, 4, true)
     };
 
+    // TODO: Clean up?
     private final GameCollision[] gameCollision = new GameCollision[] {
             new GameCollision(14, 14), // Pac Man 0
             new GameCollision(GHOST, GHOST), // Ghost 1
             new GameCollision(2, 2), // Dot 2
             new GameCollision(8, 8), // Energizer 3
-
             new GameCollision(14, 14) // Fruit 4
     };
 
@@ -572,7 +561,6 @@ public class GuiPacMan extends GuiArcade {
             -   19    | 0 sec       | 0
             -   20    | 0 sec       | 0
             -   21+   | 0 sec       | 0
-
          */
         // TODO: Scatter, Chase timing
         // Ghost
@@ -586,8 +574,8 @@ public class GuiPacMan extends GuiArcade {
             if (GHOST_STATE == 0) GHOST_STATE = 1;
             else if (GHOST_STATE == 1) GHOST_STATE = 0;
         }
-        if ((tickCounter - frightTick) >= 70) blink = true; // TODO: Fix fright not working
-        if ((tickCounter - frightTick) >= 90) { // TODO: Change fright speed depending on level
+        if ((tickCounter - frightTick) == 70) blink = true; // TODO: Fix fright not working
+        if ((tickCounter - frightTick) == 90) { // TODO: Change fright speed depending on level
             frightTick = tickCounter;
             for (int i = 0; i < 4; i++) frightened[i] = false;
             blink = false;
@@ -599,18 +587,16 @@ public class GuiPacMan extends GuiArcade {
         inkyAi();
         clydeAi();
 
-        // TODO: If start = true, draw everything but dont let anything move until start = false
         if (!died) {
             checkHouse();
 
-            // Fruit timer doesn't seem to work
             if (spawnFruit) {
                 if ((tickCounter - fruitTick) == fruitTime) {
                     //Arcade.logger.info("Timer done");
                     fruitTick = tickCounter;
                     spawnFruit = false;
                     //if (fruit != 4) fruit += 2;
-                    if (fruit != 2) fruit ++;
+                    if (fruit != 2) fruit++;
                 } else {
                     //Arcade.logger.info(String.format("Tick: [%d]; FruitTick: [%d]; Diff: [%d]; Time: [%d]", tickCounter, fruitTick, (tickCounter - fruitTick), fruitTime));
                     drawFruit(25, 32, false);
@@ -625,8 +611,7 @@ public class GuiPacMan extends GuiArcade {
                 // Fruit Spawning
                 //if ((fruit != 4 && !spawnFruit) || fruit < 4) {
                 if ((fruit != 2 && !spawnFruit) || fruit < 2) {
-                    if (getWorld().rand.nextFloat() <= 0.0005f) {
-                        //Arcade.logger.info("Spawn fruit");
+                    if (dotCounter[5] == 70 || dotCounter[5] == 170) {
                         fruitTick = tickCounter;
                         fruitTime = getFruitTick();
                         spawnFruit = true;
@@ -635,19 +620,19 @@ public class GuiPacMan extends GuiArcade {
 
                 if ((tickCounter - movementTick) >= 2) {
                     movementTick = tickCounter;
-                    if (canMoveUp(0) && direction[0] == 1) {
+                    if (canMoveUp(0) && direction[0] == Direction.UP) {
                         if (PACMAN_STATE == 0) PACMAN_STATE = 1;
                         else PACMAN_STATE = 0;
                         playerY--;
-                    } else if (canMoveDown(0) && direction[0] == 2) {
+                    } else if (canMoveDown(0) && direction[0] == Direction.DOWN) {
                         if (PACMAN_STATE == 0) PACMAN_STATE = 1;
                         else PACMAN_STATE = 0;
                         playerY++;
-                    } else if (canMoveLeft(0) && direction[0] == 3) {
+                    } else if (canMoveLeft(0) && direction[0] == Direction.LEFT) {
                         if (PACMAN_STATE == 0) PACMAN_STATE = 1;
                         else PACMAN_STATE = 0;
                         playerX--;
-                    } else if (canMoveRight(0) && direction[0] == 4) {
+                    } else if (canMoveRight(0) && direction[0] == Direction.RIGHT) {
                         if (PACMAN_STATE == 0) PACMAN_STATE = 1;
                         else PACMAN_STATE = 0;
                         playerX++;
@@ -656,23 +641,36 @@ public class GuiPacMan extends GuiArcade {
             }
             drawPacman(playerX, playerY, direction[0], false);
 
-            // Check time since last eaten. 4 second limit for level 1-4. 3 second limit for 5+
+            // TODO: Check time since last eaten. 4 second limit for level 1-4. 3 second limit for 5+. If exceeded, kick a ghost out of house
+            if (level >= 0 && level <= 3) {
+                // 4 second limit
+                if ((tickCounter - timeSinceEaten) == (4 * 20)) {
+                    timeSinceEaten = tickCounter;
+                    // Kick ghost out
+                }
+            } else {
+                // 3 second limit
+                if ((tickCounter - timeSinceEaten) == (3 * 20)) {
+                    timeSinceEaten = tickCounter;
+                    // Kick ghost out
+                }
+            }
 
             checkLevel();
 
             // Controls
-            if (canMoveLeft(0) && nextDirection == 3) {
-                direction[0] = 3;
-                nextDirection = 0;
-            } else if (canMoveRight(0) && nextDirection == 4) {
-                direction[0] = 4;
-                nextDirection = 0;
-            } else if (canMoveUp(0) && nextDirection == 1) {
-                direction[0] = 1;
-                nextDirection = 0;
-            } else if (canMoveDown(0) && nextDirection == 2) {
-                direction[0] = 2;
-                nextDirection = 0;
+            if (canMoveLeft(0) && nextDirection == Direction.LEFT) {
+                direction[0] = Direction.LEFT;
+                nextDirection = Direction.STAND;
+            } else if (canMoveRight(0) && nextDirection == Direction.RIGHT) {
+                direction[0] = Direction.RIGHT;
+                nextDirection = Direction.STAND;
+            } else if (canMoveUp(0) && nextDirection == Direction.UP) {
+                direction[0] = Direction.UP;
+                nextDirection = Direction.STAND;
+            } else if (canMoveDown(0) && nextDirection == Direction.DOWN) {
+                direction[0] = Direction.DOWN;
+                nextDirection = Direction.STAND;
             }
 
             // Sound
@@ -726,13 +724,6 @@ public class GuiPacMan extends GuiArcade {
     }
 
     // TODO: Controls
-    /* Direction ID
-        0 = Still
-        1 = Up
-        2 = Down
-        3 = Left
-        4 = Right
-     */
     @Override
     protected void keyTyped (char typedChar, int keyCode) throws IOException {
         super.keyTyped(typedChar, keyCode);
@@ -740,25 +731,25 @@ public class GuiPacMan extends GuiArcade {
         if (keyCode == KeyHandler.left.getKeyCode()) {
             if (inMenu) {
             } else {
-                nextDirection = 3;
+                nextDirection = Direction.LEFT;
             }
         }
         if (keyCode == KeyHandler.right.getKeyCode()) {
             if (inMenu) {
             } else {
-                nextDirection = 4;
+                nextDirection = Direction.RIGHT;
             }
         }
         if (keyCode == KeyHandler.up.getKeyCode()) {
             if (inMenu) {
             } else {
-                nextDirection = 1;
+                nextDirection = Direction.UP;
             }
         }
         if (keyCode == KeyHandler.down.getKeyCode()) {
             if (inMenu) {
             } else {
-                nextDirection = 2;
+                nextDirection = Direction.DOWN;
             }
         }
     }
@@ -799,7 +790,7 @@ public class GuiPacMan extends GuiArcade {
         int x = playX + 5 + (playerX * speedMultiplier);
         int y = playY + 4 + (playerY * speedMultiplier);
 
-        switch (direction[0]) {
+        switch (direction[0].getDirection()) {
             case 0: // Still
                 this.drawModalRectWithCustomSizedTexture(x, y, 0, GUI_Y + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                 break;
@@ -818,6 +809,7 @@ public class GuiPacMan extends GuiArcade {
         }
     }
 
+    // TODO: Fix ghosts noping the fuck out of the house and not through the door
     // TODO: Redo
     private void checkHouse () {
         // Some how the check not working is making everything mostly work...
@@ -859,6 +851,7 @@ public class GuiPacMan extends GuiArcade {
         if (level < 256) level++;
         // if level = 256, end game.
 
+        dotCounter[5] = 0;
         fruit = 0;
 
         resetLevel();
@@ -884,7 +877,7 @@ public class GuiPacMan extends GuiArcade {
         inHouse = new boolean[] { false, true, true, true };
         curCounter = 0;
         for (int i = 0; i < 5; i++) dotCounter[i] = 0;
-        direction[0] = 0;
+        direction[0] = Direction.STAND;
         PACMAN_STATE = 0;
         mode = new int[] { 0, 0, 0, 0 };
         period = new int[] { 0, 0, 0, 0 };
@@ -894,7 +887,7 @@ public class GuiPacMan extends GuiArcade {
         start = true;
     }
 
-    private void drawGhost (int x, int y, int direction, int ghost, boolean frightened, boolean eaten, boolean debug) {
+    private void drawGhost (int x, int y, Direction direction, int ghost, boolean frightened, boolean eaten, boolean debug) {
         if (!eaten) {
             if (!frightened) {
                 float[] body = colorToFloat(ghostColor[ghost]);
@@ -907,7 +900,7 @@ public class GuiPacMan extends GuiArcade {
 
                 // Eye
                 GlStateManager.color(1.0F, 1.0F, 1.0F);
-                switch (direction) {
+                switch (direction.getDirection()) {
                     case 0: // Still
                         break;
                     case 1: // Up
@@ -985,7 +978,7 @@ public class GuiPacMan extends GuiArcade {
 
             // Eye
             GlStateManager.color(1.0F, 1.0F, 1.0F);
-            switch (direction) {
+            switch (direction.getDirection()) {
                 case 0: // Still
                     break;
                 case 1: // Up
@@ -1040,14 +1033,15 @@ public class GuiPacMan extends GuiArcade {
         }
     }
 
-    public void drawLives () {
+    private void drawLives () {
         GlStateManager.color(1.0F, 1.0F, 1.0F);
 
         if (life == 2 || life == 1) this.drawModalRectWithCustomSizedTexture(playX + PACMAN - 1, playY + 4 + (61 * speedMultiplier), PACMAN, GUI_Y + PACMAN + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
         if (life == 2) this.drawModalRectWithCustomSizedTexture(playX + (PACMAN * 2) - 1, playY + 4 + (61 * speedMultiplier), PACMAN, GUI_Y + PACMAN + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
     }
 
-    public void drawFruit (int x, int y, boolean debug) {
+    // TODO: Make fruit change per level
+    private void drawFruit (int x, int y, boolean debug) {
         GlStateManager.color(1.0F, 1.0F, 1.0F);
         // Cherry
         this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * 4), playY + 4 + (y * 4), GUI_X + DOT + ENERGIZER + (GHOST * 2), MAZE_Y, FRUIT, FRUIT, 512, 512);
@@ -1104,9 +1098,9 @@ public class GuiPacMan extends GuiArcade {
         return rand((9 * 20), (10 * 20));
     }
 
-    private void drawPacman (int x, int y, int direction, boolean debug) {
+    private void drawPacman (int x, int y, Direction direction, boolean debug) {
         GlStateManager.color(1.0F, 1.0F, 1.0F);
-        switch (direction) {
+        switch (direction.getDirection()) {
             case 0: // Still
                 this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), 0, GUI_Y  + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                 break;
@@ -1223,13 +1217,6 @@ public class GuiPacMan extends GuiArcade {
         return 1;
     }
 
-    /* Direction ID
-        0 = Still
-        1 = Up
-        2 = Down
-        3 = Left
-        4 = Right
-     */
     private boolean canMoveLeft (int character) {
         if (character == 0) {
             for (int c = 0; c < mazeCollision.length; c++) {
@@ -1365,14 +1352,15 @@ public class GuiPacMan extends GuiArcade {
                         // Check for energizer sound
                         score += 50;
                         FRIGHT_STATE = 0;
-                        frightTick = 0;
+                        frightTick = tickCounter;
 
                         for (int g = 0; g < 4; g++) {
                             //if (!inHouse[g]) frightened[g] = true;
                             frightened[g] = true;
                         }
                     } else score += 10;
-                    dotCounter[4]++;
+                    dotCounter[5]++; // Level Counter
+                    dotCounter[4]++; // Global Counter
                     dotCounter[curCounter]++;
                     timeSinceEaten = tickCounter;
                     tempPoints[i] = null;
@@ -1389,7 +1377,7 @@ public class GuiPacMan extends GuiArcade {
                 if (frightened[i]) eaten[i] = true;
                 else died = true;
             }
-            if ((xPlayer == xGhost && yPlayer == yGhost) || (xPlayer == xGhost && yPlayer == yGhost)) {
+            if (xPlayer == xGhost && yPlayer == yGhost) {
                 if (frightened[i]) eaten[i] = true;
                 else died = true;
             }
@@ -1398,30 +1386,6 @@ public class GuiPacMan extends GuiArcade {
                 else died = true;
             }
         }
-
-        // Check Pac-Man Fruit Collision
-        // Cherry playX + gameCollision[4].center[0] + 6 + (x * speedMultiplier), playY + gameCollision[4].center[1] + 6 + (y * speedMultiplier) .. 25, 32
-
-        // Cherry or Apple
-        /*
-        if ((xPlayer == (playX + gameCollision[4].center[0] + 6 + (25 * speedMultiplier))) && ((yPlayer + 1) == (playY + gameCollision[4].center[1] + 6 + (32 * speedMultiplier)))) {
-            Arcade.logger.info("Pac-Man has collided with cherry");
-        }
-        */
-        // Berry or Peach
-        /*
-        if ((xPlayer == (playX + gameCollision[5].center[0] + 7 + (25 * speedMultiplier))) && ((yPlayer + 1) == (playY + gameCollision[5].center[1] + 6 + (32 * speedMultiplier)))) {
-            Arcade.logger.info("Pac-Man has collided with Strawberry");
-        }
-        */
-        // Grape
-        /*
-        if ((xPlayer == (playX + gameCollision[6].center[0] + 7 + (25 * speedMultiplier))) && ((yPlayer + 2) == (playY + gameCollision[6].center[1] + 6 + (32 * speedMultiplier)))) {
-            Arcade.logger.info("Pac-Man has collided with Grape");
-        }
-        */
-
-        // playX + gameCollision[4].center[0] + 5 + (x * speedMultiplier), playY + gameCollision[4].center[1] + 4 + (y * speedMultiplier)
 
         // Fruit Collision Detection
         if ((xPlayer == (playX + gameCollision[4].center[0] + 5 + (25 * speedMultiplier))) && (yPlayer == (playY + gameCollision[4].center[1] + 4 + (32 * speedMultiplier))) && spawnFruit) {
@@ -1444,15 +1408,9 @@ public class GuiPacMan extends GuiArcade {
                 - If direction leads to wall, try going up, left, down, right
      */
 
-    /* Direction ID
-        0 = Still
-        1 = Up
-        2 = Down
-        3 = Left
-        4 = Right
-     */
+    // When eaten if ghost is at (25, 20), set to true. When true, move ghost to (25, 26) then set eaten to false and inPlace to false
+    private boolean inPlace[] = { false, false, false, false };
 
-    // TODO: Eaten Movement
     private void blinkyAi () {
         if (!start) {
             if (!died) {
@@ -1477,30 +1435,52 @@ public class GuiPacMan extends GuiArcade {
                         //direction[1] = pathfinding(1, playX + gameCollision[0].center[0] + 5 + (playerX * speedMultiplier), playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier));
 
                         // Move
-                        if (canMoveUp(1) && direction[1] == 1) ghostPos[0][1]--;
-                        if (canMoveDown(1) && direction[1] == 2) ghostPos[0][1]++;
-                        if (canMoveLeft(1) && direction[1] == 3) ghostPos[0][0]--;
-                        if (canMoveRight(1) && direction[1] == 4) ghostPos[0][0]++;
+                        if (canMoveUp(1) && direction[1] == Direction.UP) ghostPos[0][1]--;
+                        if (canMoveDown(1) && direction[1] == Direction.DOWN) ghostPos[0][1]++;
+                        if (canMoveLeft(1) && direction[1] == Direction.LEFT) ghostPos[0][0]--;
+                        if (canMoveRight(1) && direction[1] == Direction.RIGHT) ghostPos[0][0]++;
                     } else { // Fright AI
-                        // TODO: Better AI
-                        // Set Position
-                        if (canMoveUp(1) && direction[1] == 1) ghostPos[0][1]--;
-                        if (canMoveDown(1) && direction[1] == 2) ghostPos[0][1]++;
-                        if (canMoveLeft(1) && direction[1] == 3) ghostPos[0][0]--;
-                        if (canMoveRight(1) && direction[1] == 4) ghostPos[0][0]++;
+                        // TODO: Check dis shit (dis shit currently no work)
+                        // ghostPos[0][0] == (playX + gameCollision[0].center[0] + 5 + (25 * speedMultiplier)) && ghostPos[0][1] == (playY + gameCollision[0].center[1] + 4 + (20 * speedMultiplier))
+                        if (eaten[0]) {
+                            if (ghostPos[0][0] == (playX + gameCollision[0].center[0] + 5 + (25 * speedMultiplier)) && ghostPos[0][1] == (playY + gameCollision[0].center[1] + 4 + (20 * speedMultiplier))) {
+                                // Move down until equal (25, 26) then set eaten to false and leave ghost in house
+                                if (!inPlace[0]) inPlace[0] = true;
+                            } else if (ghostPos[0][0] == (playX + gameCollision[0].center[0] + 5 + (25 * speedMultiplier)) && ghostPos[0][1] == (playY + gameCollision[0].center[1] + 4 + (20 * speedMultiplier))) {
+                                if (inPlace[0]) {
+                                    inPlace[0] = false;
+                                    eaten[0] = false;
+                                }
+                            } else direction[1] = pathfinding(1, playX + gameCollision[0].center[0] + 5 + (25 * speedMultiplier), playY + gameCollision[0].center[1] + 4 + (20 * speedMultiplier));
 
-                        // Add probability to movement
-                        if (canMoveUp(1) && direction[1] != 2) {
-                            if (getWorld().rand.nextInt(2) == 1) direction[1] = 1;
-                        }
-                        if (canMoveDown(1) && direction[1] != 1) {
-                            if (getWorld().rand.nextInt(2) == 1) direction[1] = 2;
-                        }
-                        if (canMoveLeft(1) && direction[1] != 4) {
-                            if (getWorld().rand.nextInt(2) == 1) direction[1] = 3;
-                        }
-                        if (canMoveRight(1) && direction[1] != 3) {
-                            if (getWorld().rand.nextInt(2) == 1) direction[1] = 4;
+                            if (inPlace[0]) direction[1] = pathfinding(1, playX + gameCollision[0].center[0] + 5 + (25 * speedMultiplier), playY + gameCollision[0].center[1] + 4 + (26 * speedMultiplier));
+
+                            // Change eaten speed
+                            if (canMoveUp(1) && direction[1] == Direction.UP) ghostPos[0][1] -= 2;
+                            if (canMoveDown(1) && direction[1] == Direction.DOWN) ghostPos[0][1] += 2;
+                            if (canMoveLeft(1) && direction[1] == Direction.LEFT) ghostPos[0][0] -= 2;
+                            if (canMoveRight(1) && direction[1] == Direction.RIGHT) ghostPos[0][0] += 2;
+                        } else {
+                            // TODO: Better AI
+                            // Set Position
+                            if (canMoveUp(1) && direction[1] == Direction.UP) ghostPos[0][1]--;
+                            if (canMoveDown(1) && direction[1] == Direction.DOWN) ghostPos[0][1]++;
+                            if (canMoveLeft(1) && direction[1] == Direction.LEFT) ghostPos[0][0]--;
+                            if (canMoveRight(1) && direction[1] == Direction.RIGHT) ghostPos[0][0]++;
+
+                            // Add probability to movement
+                            if (canMoveUp(1) && direction[1].getDirection() != Direction.UP.getOpposite()) {
+                                if (getWorld().rand.nextInt(2) == 1) direction[1] = Direction.UP;
+                            }
+                            if (canMoveDown(1) && direction[1].getDirection() != Direction.DOWN.getOpposite()) {
+                                if (getWorld().rand.nextInt(2) == 1) direction[1] = Direction.DOWN;
+                            }
+                            if (canMoveLeft(1) && direction[1].getDirection() != Direction.LEFT.getOpposite()) {
+                                if (getWorld().rand.nextInt(2) == 1) direction[1] = Direction.LEFT;
+                            }
+                            if (canMoveRight(1) && direction[1].getDirection() != Direction.RIGHT.getOpposite()) {
+                                if (getWorld().rand.nextInt(2) == 1) direction[1] = Direction.RIGHT;
+                            }
                         }
                     }
                 }
@@ -1523,10 +1503,10 @@ public class GuiPacMan extends GuiArcade {
                             }
 
                             // Move
-                            if (canMoveUp(2) && direction[2] == 1) ghostPos[1][1]--;
-                            if (canMoveDown(2) && direction[2] == 2) ghostPos[1][1]++;
-                            if (canMoveLeft(2) && direction[2] == 3) ghostPos[1][0]--;
-                            if (canMoveRight(2) && direction[2] == 4) ghostPos[1][0]++;
+                            if (canMoveUp(2) && direction[2] == Direction.UP) ghostPos[1][1]--;
+                            if (canMoveDown(2) && direction[2] == Direction.DOWN) ghostPos[1][1]++;
+                            if (canMoveLeft(2) && direction[2] == Direction.LEFT) ghostPos[1][0]--;
+                            if (canMoveRight(2) && direction[2] == Direction.RIGHT) ghostPos[1][0]++;
                         }
                     }
                 }
@@ -1545,17 +1525,17 @@ public class GuiPacMan extends GuiArcade {
                         if (!frightened[2]) {
                             if (mode[2] == 0) direction[3] = pathfinding(3, playX + 12, playY + 11); // Scatter
                             else { // Chase
-                                if (direction[0] == 1) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX - 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + ((playerY - 4) * speedMultiplier));
-                                else if (direction[0] == 2) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + (playerX * speedMultiplier), playY + gameCollision[0].center[1] + 4 + ((playerY + 4) * speedMultiplier));
-                                else if (direction[0] == 3) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX - 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier));
-                                else if (direction[0] == 4) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX + 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier));
+                                if (direction[0] == Direction.UP) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX - 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + ((playerY - 4) * speedMultiplier));
+                                else if (direction[0] == Direction.DOWN) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + (playerX * speedMultiplier), playY + gameCollision[0].center[1] + 4 + ((playerY + 4) * speedMultiplier));
+                                else if (direction[0] == Direction.LEFT) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX - 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier));
+                                else if (direction[0] == Direction.RIGHT) direction[3] = pathfinding(3, playX + gameCollision[0].center[0] + 5 + ((playerX + 4) * speedMultiplier), playY + gameCollision[0].center[1] + 4 + (playerY * speedMultiplier));
                             }
 
                             // Move
-                            if (canMoveUp(3) && direction[3] == 1) ghostPos[2][1]--;
-                            if (canMoveDown(3) && direction[3] == 2) ghostPos[2][1]++;
-                            if (canMoveLeft(3) && direction[3] == 3) ghostPos[2][0]--;
-                            if (canMoveRight(3) && direction[3] == 4) ghostPos[2][0]++;
+                            if (canMoveUp(3) && direction[3] == Direction.UP) ghostPos[2][1]--;
+                            if (canMoveDown(3) && direction[3] == Direction.DOWN) ghostPos[2][1]++;
+                            if (canMoveLeft(3) && direction[3] == Direction.LEFT) ghostPos[2][0]--;
+                            if (canMoveRight(3) && direction[3] == Direction.RIGHT) ghostPos[2][0]++;
                         }
                     }
                 }
@@ -1578,10 +1558,10 @@ public class GuiPacMan extends GuiArcade {
                             }
 
                             // Move
-                            if (canMoveUp(4) && direction[4] == 1) ghostPos[3][1]--;
-                            if (canMoveDown(4) && direction[4] == 2) ghostPos[3][1]++;
-                            if (canMoveLeft(4) && direction[4] == 3) ghostPos[3][0]--;
-                            if (canMoveRight(4) && direction[4] == 4) ghostPos[3][0]++;
+                            if (canMoveUp(4) && direction[4] == Direction.UP) ghostPos[3][1]--;
+                            if (canMoveDown(4) && direction[4] == Direction.DOWN) ghostPos[3][1]++;
+                            if (canMoveLeft(4) && direction[4] == Direction.LEFT) ghostPos[3][0]--;
+                            if (canMoveRight(4) && direction[4] == Direction.RIGHT) ghostPos[3][0]++;
                         }
                     }
                 }
@@ -1590,9 +1570,7 @@ public class GuiPacMan extends GuiArcade {
         drawGhost(ghostPos[3][0], ghostPos[3][1], direction[4], 3, frightened[3], eaten[3], false);
     }
 
-    private void frightAI (int ghost) {
-
-    }
+    private void frightAI (int ghost) {}
 
     /* Direction ID
         0 = Still
@@ -1605,7 +1583,7 @@ public class GuiPacMan extends GuiArcade {
     // TODO: Gotta do this shit again... yay
     // When going up or down, sometimes makes a u-turn which isn't allowed
     // GL
-    private int pathfinding (int ghost, int targetX, int targetY) {
+    private Direction pathfinding (int ghost, int targetX, int targetY) {
         int x = playX + gameCollision[1].center[0] + 5 + (ghostPos[ghost - 1][0] * ghostSpeedMultiplier);
         int y = playY + gameCollision[1].center[1] + 4 + (ghostPos[ghost - 1][1] * ghostSpeedMultiplier);
 
@@ -1618,28 +1596,28 @@ public class GuiPacMan extends GuiArcade {
 
         if (xDistance == 0) {
             if (yDistance != 0) {
-                if (canMoveUp(ghost) && direction[ghost] != 2) {
+                if (canMoveUp(ghost) && direction[ghost].getDirection() != Direction.UP.getOpposite()) {
                     double yPredict = Math.abs(targetY - (y - 1));
-                    if (yDistance > yPredict) return 1;
+                    if (yDistance > yPredict) return Direction.UP;
                 }
 
-                if (canMoveDown(ghost) && direction[ghost] != 1) {
+                if (canMoveDown(ghost) && direction[ghost].getDirection() != Direction.DOWN.getOpposite()) {
                     double yPredict = Math.abs(targetY - (y + 1));
-                    if (yDistance > yPredict) return 2;
+                    if (yDistance > yPredict) return Direction.DOWN;
                 }
 
                 if (!canMoveDown(ghost) || !canMoveUp(ghost)) {
-                    if (canMoveRight(ghost) && direction[ghost] != 3) return 4;
-                    if (canMoveLeft(ghost) && direction[ghost] != 4) return 3;
+                    if (canMoveRight(ghost) && direction[ghost].getDirection() != Direction.RIGHT.getOpposite()) return Direction.RIGHT;
+                    if (canMoveLeft(ghost) && direction[ghost].getDirection() != Direction.LEFT.getOpposite()) return Direction.LEFT;
                 }
 
                 // Might have to remove
-                if (canMoveRight(ghost) && direction[ghost] != 3) return 4;
-                if (canMoveLeft(ghost) && direction[ghost] != 4) return 3;
+                if (canMoveRight(ghost) && direction[ghost].getDirection() != Direction.LEFT.getOpposite()) return Direction.RIGHT;
+                if (canMoveLeft(ghost) && direction[ghost].getDirection() != Direction.LEFT.getOpposite()) return Direction.LEFT;
             }
         } else { // x != 0
             if (yDistance != 0) {
-                if (canMoveUp(ghost) && direction[ghost] != 2) {
+                if (canMoveUp(ghost) && direction[ghost].getDirection() != Direction.UP.getOpposite()) {
                     /*
                     if (canMoveLeft(ghost) && direction[ghost] != 4) {
                         double xPredict = Math.abs(targetX - (x - 1));
@@ -1650,70 +1628,70 @@ public class GuiPacMan extends GuiArcade {
                         if (xDistance > xPredict) return 4;
                     }
                     */
-                    if (!canMoveRight(ghost) || !canMoveLeft(ghost)) return 1;
+                    if (!canMoveRight(ghost) || !canMoveLeft(ghost)) return Direction.UP;
                     double yPredict = Math.abs(targetY - (y - 1));
-                    if (yDistance > yPredict) return 1;
+                    if (yDistance > yPredict) return Direction.UP;
                 }
 
-                if (canMoveDown(ghost) && direction[ghost] != 1) {
-                    if (!canMoveRight(ghost) || !canMoveLeft(ghost)) return 2;
+                if (canMoveDown(ghost) && direction[ghost].getDirection() != Direction.DOWN.getOpposite()) {
+                    if (!canMoveRight(ghost) || !canMoveLeft(ghost)) return Direction.DOWN;
                     double yPredict = Math.abs(targetY - (y + 1));
-                    if (yDistance > yPredict) return 2;
+                    if (yDistance > yPredict) return Direction.DOWN;
                 }
 
-                if (canMoveLeft(ghost) && direction[ghost] != 4) {
+                if (canMoveLeft(ghost) && direction[ghost].getDirection() != Direction.LEFT.getOpposite()) {
                     double xPredict = Math.abs(targetX - (x - 1));
-                    if (xDistance > xPredict) return 3;
+                    if (xDistance > xPredict) return Direction.LEFT;
                 }
 
-                if (canMoveRight(ghost) && direction[ghost] != 3) {
+                if (canMoveRight(ghost) && direction[ghost].getDirection() != Direction.RIGHT.getOpposite()) {
                     double xPredict = Math.abs(targetX - (x + 1));
-                    if (xDistance > xPredict) return 4;
+                    if (xDistance > xPredict) return Direction.RIGHT;
                 }
 
                 if (!canMoveDown(ghost) || !canMoveUp(ghost)) {
-                    if (canMoveLeft(ghost) && direction[ghost] != 4) return 3;
-                    if (canMoveRight(ghost) && direction[ghost] != 3) return 4;
+                    if (canMoveLeft(ghost) && direction[ghost].getDirection() != Direction.LEFT.getOpposite()) return Direction.LEFT;
+                    if (canMoveRight(ghost) && direction[ghost].getDirection() != Direction.RIGHT.getOpposite()) return Direction.RIGHT;
                 }
             } else { // y == 0
-                if (canMoveLeft(ghost) && direction[ghost] != 4) {
+                if (canMoveLeft(ghost) && direction[ghost].getDirection() != Direction.LEFT.getOpposite()) {
                     if (!canMoveRight(ghost)) {
                         double xPredict = Math.abs(targetX - (x + 1));
-                        if (xDistance > xPredict) return 3;
+                        if (xDistance > xPredict) return Direction.LEFT;
                     }
                     double xPredict = Math.abs(targetX - (x - 1));
-                    if (xDistance > xPredict) return 3;
+                    if (xDistance > xPredict) return Direction.LEFT;
                 }
 
-                if (canMoveRight(ghost) && direction[ghost] == 3) {
-                    if (canMoveLeft(ghost)) return 3;
+                if (canMoveRight(ghost) && direction[ghost] == Direction.LEFT) {
+                    if (canMoveLeft(ghost)) return Direction.LEFT;
                     else {
-                        if (canMoveUp(ghost)) return 1;
-                        if (canMoveDown(ghost)) return 2;
+                        if (canMoveUp(ghost)) return Direction.UP;
+                        if (canMoveDown(ghost)) return Direction.DOWN;
                     }
                 }
 
-                if (canMoveRight(ghost) && direction[ghost] != 3) {
-                    if (!canMoveLeft(ghost)) {
+                if (canMoveRight(ghost) && direction[ghost].getDirection() != Direction.RIGHT.getDirection()) {
+                    if (!canMoveLeft(ghost)) { // can't move left so lets make it move left... wat
                         double xPredict = Math.abs(targetX - (x - 1));
-                        if (xDistance > xPredict) return 3;
+                        if (xDistance > xPredict) return Direction.LEFT;
                     }
                     double xPredict = Math.abs(targetX - (x + 1));
-                    if (xDistance > xPredict) return 4;
+                    if (xDistance > xPredict) return Direction.RIGHT;
                 }
 
                 if (!canMoveLeft(ghost) || !canMoveRight(ghost)) {
-                    if (canMoveUp(ghost) && direction[ghost] != 2) return 1;
-                    if (canMoveDown(ghost) && direction[ghost] != 1) return 2;
+                    if (canMoveUp(ghost) && direction[ghost].getDirection() != Direction.UP.getOpposite()) return Direction.UP;
+                    if (canMoveDown(ghost) && direction[ghost].getDirection() != Direction.DOWN.getOpposite()) return Direction.DOWN;
                 }
             }
         }
 
-        if (canMoveUp(ghost) && direction[ghost] != 2) return 1;
-        if (canMoveLeft(ghost) && direction[ghost] != 4) return 3;
-        if (canMoveDown(ghost) && direction[ghost] != 1) return 2;
-        if (canMoveRight(ghost) && direction[ghost] != 3) return 4;
-        return shouldGo; // This should technically never be called
+        if (canMoveUp(ghost) && direction[ghost].getDirection() != Direction.UP.getOpposite()) return Direction.UP;
+        if (canMoveLeft(ghost) && direction[ghost].getDirection() != Direction.LEFT.getOpposite()) return Direction.LEFT;
+        if (canMoveDown(ghost) && direction[ghost].getDirection() != Direction.DOWN.getOpposite()) return Direction.DOWN;
+        if (canMoveRight(ghost) && direction[ghost].getDirection() != Direction.RIGHT.getOpposite()) return Direction.RIGHT;
+        return Direction.STAND; // This should technically never be called
     }
 
     private float[] colorToFloat (Color color) {
@@ -1725,8 +1703,31 @@ public class GuiPacMan extends GuiArcade {
     }
 
     private int rand (int min, int max) {
-        //return min + getWorld().rand.nextInt() * ((max - min) + 1);
         return getWorld().rand.nextInt(max + 1 - min) + min;
+    }
+
+    public enum Direction {
+        STAND(0, 0),
+        UP(1, 2),
+        DOWN(2, 1),
+        LEFT(3, 4),
+        RIGHT(4, 3);
+
+        private int direction;
+        private int opposite;
+
+        Direction (int direction, int opposite) {
+            this.direction = direction;
+            this.opposite = opposite;
+        }
+
+        public int getDirection () {
+            return direction;
+        }
+
+        public int getOpposite() {
+            return opposite;
+        }
     }
 
     public class MazeCollision {

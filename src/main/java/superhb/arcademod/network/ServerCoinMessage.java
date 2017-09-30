@@ -32,8 +32,12 @@ public class ServerCoinMessage implements IMessage {
 
     @Override
     public void fromBytes (ByteBuf buf) {
-        cost = buf.readInt();
-        stack = ByteBufUtils.readItemStack(buf);
+        try {
+            cost = buf.readInt();
+            stack = ByteBufUtils.readItemStack(buf);
+        } catch (Exception e) {
+            Arcade.logger.info("Error: " + e);
+        }
     }
 
     public int getCost () {

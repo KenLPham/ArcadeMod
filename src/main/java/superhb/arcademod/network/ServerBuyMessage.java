@@ -38,9 +38,13 @@ public class ServerBuyMessage implements IMessage {
 
     @Override
     public void fromBytes (ByteBuf buf) {
-        stack = ByteBufUtils.readItemStack(buf);
-        currency = ByteBufUtils.readItemStack(buf);
-        cost = buf.readInt();
+        try {
+            stack = ByteBufUtils.readItemStack(buf);
+            currency = ByteBufUtils.readItemStack(buf);
+            cost = buf.readInt();
+        } catch (Exception e) {
+            Arcade.logger.info("Error: " + e);
+        }
     }
 
     public ItemStack getStack () {
@@ -81,9 +85,7 @@ public class ServerBuyMessage implements IMessage {
                         // Remove Currency and Give ItemStack if player has enough
                         if (totalCurrency < message.getCost()) ArcadePacketHandler.INSTANCE.sendTo(new ClientBuyMessage(false), player);
                         else if (totalCurrency == message.getCost()) {
-                            for (int[] i : slotIndexes) {
-                                player.inventory.removeStackFromSlot(i[0]);
-                            }
+                            for (int[] i : slotIndexes) player.inventory.removeStackFromSlot(i[0]);
                             player.inventory.addItemStackToInventory(message.getStack());
                             ArcadePacketHandler.INSTANCE.sendTo(new ClientBuyMessage(true), player);
                         } else if (totalCurrency > message.getCost()) {
@@ -93,7 +95,6 @@ public class ServerBuyMessage implements IMessage {
                                     if (slotIndexes.get(i)[1] >= message.getCost()) useSlot = slotIndexes.get(i)[0];
                                 }
                                 player.inventory.decrStackSize(useSlot, message.cost);
-                                Arcade.logger.info(message.getStack().getDisplayName());
                                 player.inventory.addItemStackToInventory(message.getStack());
                             } else if (message.getCost() == 64) { // Equal to 64
                                 int useSlot = 0;

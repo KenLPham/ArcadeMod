@@ -7,6 +7,7 @@ import net.minecraft.util.IThreadListener;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import superhb.arcademod.Arcade;
 import superhb.arcademod.api.gui.GuiArcade;
 
 public class ClientCoinMessage implements IMessage {
@@ -28,8 +29,12 @@ public class ClientCoinMessage implements IMessage {
 
     @Override
     public void fromBytes (ByteBuf buf) {
-        menu = buf.readInt();
-        enoughCoins = buf.readBoolean();
+        try {
+            menu = buf.readInt();
+            enoughCoins = buf.readBoolean();
+        } catch (IndexOutOfBoundsException e) {
+            Arcade.logger.info("Error: " + e);
+        }
     }
 
     public boolean isEnoughCoins () {
