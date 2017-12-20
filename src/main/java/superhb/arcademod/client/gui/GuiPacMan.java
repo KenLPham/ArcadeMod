@@ -437,26 +437,32 @@ public class GuiPacMan extends GuiArcade {
     }
 
     private enum Direction {
-        STAND(0, 0),
-        UP(1, 2),
-        DOWN(2, 1),
-        LEFT(3, 4),
-        RIGHT(4, 3);
+        STAND(0, 0, 0),
+        UP(1, 2, 1),
+        DOWN(2, 1, 1),
+        LEFT(3, 4, 2),
+        RIGHT(4, 3, 2);
 
         private int direction;
         private int opposite;
+        private int axis;
 
-        Direction (int direction, int opposite) {
+        Direction (int direction, int opposite, int axis) {
             this.direction = direction;
             this.opposite = opposite;
+            this.axis = axis;
         }
 
         public int getDirection () {
             return direction;
         }
 
-        public int getOpposite() {
+        public int getOpposite () {
             return opposite;
+        }
+
+        public int getAxis () {
+            return axis;
         }
     }
 
@@ -588,6 +594,8 @@ public class GuiPacMan extends GuiArcade {
         private Mover move (float partialTick) {
             if (desired != current) changeDirection(desired);
 
+            System.out.println(String.format("Til: (%f, %f)\nPos: (%f, %f)", tiles[y][x].getExtendedPosition().getX(), tiles[y][x].getExtendedPosition().getY(), getExtendedPosition().getX() , getExtendedPosition().getY()));
+
             if (moveTick + (tickCounter - moveTick) * partialTick >= 1) {
                 moveTick = tickCounter;
 
@@ -708,8 +716,9 @@ public class GuiPacMan extends GuiArcade {
         int x1, y1;
         int moveX, moveY;
         int extendedX, extendedY;
+        int offsetX, offsetY;
 
-        public Mover (ResourceLocation texture, int x, int y) {
+        private Mover (ResourceLocation texture, int x, int y) {
             // Set Starting Position
             this.x = x;
             this.y = y;
@@ -720,8 +729,11 @@ public class GuiPacMan extends GuiArcade {
         }
 
         public Mover updatePosition (int x, int y) {
-            extendedX = x1 + x + moveX;
-            extendedY = y1 + y + moveY;
+            extendedX = x1 + x + moveX; // x == 154
+            extendedY = y1 + y + moveY; // y == 22
+
+            offsetX = x;
+            offsetY = y;
 
             if ((extendedX - x) % 8 == 0) this.x = (extendedX - x) / 8;
             if ((extendedY - y) % 8 == 0) this.y = (extendedY - y) / 8;
@@ -746,28 +758,18 @@ public class GuiPacMan extends GuiArcade {
         }
 
         public boolean canTurn () {
-            if (tiles[y + 1][x].getExtendedPosition() == getExtendedPositionWithOffset()) {
-                if (current == Direction.LEFT && desired == Direction.DOWN) return true;
-                if (current == Direction.RIGHT && desired == Direction.DOWN) return true;
-            }
-            else {
-                if (current == Direction.LEFT && desired == Direction.RIGHT) return true;
-                if (current == Direction.RIGHT && desired == Direction.LEFT) return true;
-                if (current == Direction.DOWN && desired == Direction.UP) return true;
-                if (current == Direction.UP && desired == Direction.DOWN) return true;
-            }
-            return false;
+            return (extendedX - offsetX) % 8 == 0 && (extendedY - offsetY) % 8 == 0;
         }
 
         public Point getPosition () {
             return new Point(x, y);
         }
 
-        private Point getExtendedPosition () {
+        public Point getExtendedPosition () {
             return new Point(extendedX, extendedY);
         }
 
-        private Point getExtendedPositionWithOffset () {
+        public Point getExtendedPositionWithOffset () {
             return new Point(extendedX, extendedY + 8);
         }
     }
