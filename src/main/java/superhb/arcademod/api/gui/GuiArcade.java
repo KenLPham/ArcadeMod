@@ -18,6 +18,7 @@ import superhb.arcademod.network.ServerCoinMessage;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.util.*;
 
+import java.awt.*;
 import java.io.IOException;
 
 public class GuiArcade extends GuiScreen {
@@ -306,7 +307,23 @@ public class GuiArcade extends GuiScreen {
         tileEntity.saveLeaderboard(leaderboard);
     }
 
-    /*
+    public float[] colorToFloat (Color color) {
+        float red = Math.round((color.getRed() / 255.0F) * 100.0F) / 100.0F;
+        float green = Math.round((color.getGreen() / 255.0F) * 100.0F) / 100.0F;
+        float blue = Math.round((color.getBlue() / 255.0F) * 100.0F) / 100.0F;
+
+        return new float[] { red, green, blue };
+    }
+
+    public void glColor (Color color) {
+        float red = Math.round((color.getRed() / 255.0F) * 100.0F) / 100.0F;
+        float green = Math.round((color.getGreen() / 255.0F) * 100.0F) / 100.0F;
+        float blue = Math.round((color.getBlue() / 255.0F) * 100.0F) / 100.0F;
+
+        GlStateManager.color(red, green, blue);
+    }
+
+    /* Leaderboard code
     static boolean stopChecking = false;
   static int place = 11;
   static int score = 1200;
