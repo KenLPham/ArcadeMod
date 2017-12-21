@@ -6,7 +6,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
-import org.lwjgl.Sys;
 import superhb.arcademod.Arcade;
 import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArcade;
@@ -23,8 +22,8 @@ import java.io.IOException;
 // http://www.gamasutra.com/view/feature/3938/the_pacman_dossier.php?print=1
 // http://gameinternals.com/post/2072558330/understanding-pac-man-ghost-behavior
 public class GuiPacMan extends GuiArcade {
-    // 1 dot = 10 pt
-    // 1 energizer = 50 pt
+    // 1 dot = 10 pt (240 total)
+    // 1 energizer = 50 pt (4 total)
     // Captured Ghost: 1 = 200; 2 = 400; 3 = 800; 4 = 1200;
     // All ghosts are captured with one energizer, additional 12000 pts
     // Blue time decreases as level goes up
@@ -99,6 +98,9 @@ public class GuiPacMan extends GuiArcade {
 
         // Pac-Man
         pacman.drawPlayer().move(partialTick).updatePosition(boardX, boardY);
+
+        // Text
+        this.fontRendererObj.drawString(String.format("%d", (pacman.pelletsEaten * 10)), boardX + 30, boardY - 8, Color.white.getRGB());
     }
 
     @Override
@@ -109,11 +111,6 @@ public class GuiPacMan extends GuiArcade {
         else if (keyCode == KeyHandler.right.getKeyCode()) pacman.desired = Direction.RIGHT;
         else if (keyCode == KeyHandler.down.getKeyCode()) pacman.desired = Direction.DOWN;
         else if (keyCode == KeyHandler.up.getKeyCode()) pacman.desired = Direction.UP;
-
-//        if (keyCode == KeyHandler.left.getKeyCode()) pacman.changeDirection(Direction.LEFT);
-//        else if (keyCode == KeyHandler.right.getKeyCode()) pacman.changeDirection(Direction.RIGHT);
-//        else if (keyCode == KeyHandler.down.getKeyCode()) pacman.changeDirection(Direction.DOWN);
-//        else if (keyCode == KeyHandler.up.getKeyCode()) pacman.changeDirection(Direction.UP);
     }
 
 //    private void drawGhost (int x, int y, Direction direction, int ghost, boolean frightened, boolean eaten, boolean debug) {
@@ -398,7 +395,8 @@ public class GuiPacMan extends GuiArcade {
         for (int i = 0; i < 28; i++) {
             if (i == 0 || (i > 3 && i < 6) || (i > 21 && i < 24) || i == 27) tiles[23][i] = new Tile(i, 23, EnumTile.WALL);
             else if (i == 1 || i == 26) tiles[23][i] = new Tile(i, 23, 2);
-            else if (i > 9 && i < 18) tiles[23][i] = new Tile(i, 23, EnumTile.GHOST_LIMIT);
+            else if ((i > 9 && i < 12) || (i > 15 & i < 18)) tiles[23][i] = new Tile(i, 23, EnumTile.GHOST_LIMIT, 1);
+            else if (i > 12 && i < 15) tiles[23][i] = new Tile(i, 23, EnumTile.GHOST_LIMIT);
             else if (i == 13 || i == 14) tiles[23][i] = new Tile(i, 23, 0);
             else tiles[23][i] = new Tile(i, 23);
         }
@@ -544,10 +542,10 @@ public class GuiPacMan extends GuiArcade {
         }
 
         public Tile drawTile () {
-            if (type == EnumTile.WALL) {
-                glColor(type.getColor());
-                drawModalRectWithCustomSizedTexture(extendedX, extendedY, 234, 264, 8, 8, 512, 512);
-            }
+//            if (type == EnumTile.WALL) {
+//                glColor(type.getColor());
+//                drawModalRectWithCustomSizedTexture(extendedX, extendedY, 234, 264, 8, 8, 512, 512);
+//            }
 
             // Draw Food
             GlStateManager.color(1.0F, 1.0F, 1.0F);
@@ -579,47 +577,43 @@ public class GuiPacMan extends GuiArcade {
         }
     }
 
-    // TODO: Teleport
     private class Player extends Mover {
         int pelletsEaten;
         boolean energizerMode;
 
+        int STATE = 0;
+
         boolean teleport;
         boolean stopped = false;
 
+        // TODO: Try and center at start
         public Player (ResourceLocation texture) {
-            super(texture, 2, 0);
+            //super(108, (23 * 8), 0);
+            super(14, 23);
 
             teleport = false;
             pelletsEaten = 0;
             current = desired = Direction.LEFT;
         }
 
-        // TODO: Figure out how to keep it from turning when not lined up (i think its fixed)
+        // TODO: cornering
         private Mover move (float partialTick) {
             if (desired != current) changeDirection(desired);
 
-//            if (checkTile() == EnumTile.TELE) {
-//                if (x <= 0 && y == 13) {
-//                    current = Direction.LEFT;
-//                    moveX = 0;
-//                    x1 = 27;
-//                }
-//                if (x >= 27 && y == 13) {
-//                    current = Direction.RIGHT;
-//                    moveX = 0;
-//                    x1 = 0;
-//                }
-//            }
+            // TODO: First teleport from left side moves player not all the way to the right
+            // TODO: First teleport from the right side crashes the game
+            // Teleport
+            if (checkTile() == EnumTile.TELE) {
+                if (extendedX <= (offsetX + 2) && y == 14) moveX = 103;
+                if (extendedX >= (offsetX + (27 * 8)) && y == 14) moveX = -106;
+            }
 
-            // This doesn't work that well
-            // moving the x direction doesn't remove dots
-            // doesnt remove when stopped at y
-            if (checkTile() == EnumTile.PLAY) {
-                if (tiles[y][x].edible == 1) {
-                    tiles[y][x].edible = 0;
-                    pelletsEaten++;
-                }
+            System.out.println(moveX);
+
+            // Eat Dots
+            if (tiles[y][x].edible == 1) {
+                tiles[y][x].edible = 0;
+                pelletsEaten++;
             }
 
             if (moveTick + (tickCounter - moveTick) * partialTick >= 1) {
@@ -628,15 +622,19 @@ public class GuiPacMan extends GuiArcade {
                 switch (current) {
                     case LEFT:
                         if (!isBlockedLeft()) moveX--;
+                        else current = Direction.STAND;
                         return this;
                     case RIGHT:
                         if (!isBlockedRight()) moveX++;
+                        else current = Direction.STAND;
                         return this;
                     case UP:
                         if (!isBlocked()) moveY--;
+                        else current = Direction.STAND;
                         return this;
                     case DOWN:
                         if (!isBlockedDown()) moveY++;
+                        else current = Direction.STAND;
                         return this;
                 }
             }
@@ -647,7 +645,7 @@ public class GuiPacMan extends GuiArcade {
             switch (newDirection) {
                 case LEFT:
                     if (current.getAxis() != newDirection.getAxis()) {
-                        if (canTurn()) {
+                        if (onTile()) {
                             if (!isBlockedLeft()) current = newDirection;
                         }
                     } else {
@@ -656,7 +654,7 @@ public class GuiPacMan extends GuiArcade {
                     return this;
                 case RIGHT:
                     if (current.getAxis() != newDirection.getAxis()) {
-                        if (canTurn()) {
+                        if (onTile()) {
                             if (!isBlockedRight()) current = newDirection;
                         }
                     } else {
@@ -665,7 +663,7 @@ public class GuiPacMan extends GuiArcade {
                     return this;
                 case UP:
                     if (current.getAxis() != newDirection.getAxis()) {
-                        if (canTurn()) {
+                        if (onTile()) {
                             if (!isBlocked()) current = newDirection;
                         }
                     } else {
@@ -674,7 +672,7 @@ public class GuiPacMan extends GuiArcade {
                     return this;
                 case DOWN:
                     if (current.getAxis() != newDirection.getAxis()) {
-                        if (canTurn()) {
+                        if (onTile()) {
                             if (!isBlockedDown()) current = newDirection;
                         }
                     } else {
@@ -685,75 +683,54 @@ public class GuiPacMan extends GuiArcade {
             return this;
         }
 
-        private Player drawPlayer () {
-            glColor(Color.MAGENTA);
-            drawModalRectWithCustomSizedTexture(extendedX, extendedY + 8, 234, 264, 8, 8, 512, 512);
+        @Override
+        public Player updatePosition (int x, int y) {
+            super.updatePosition(x, y);
 
-            /*
-            GlStateManager.color(1.0F, 1.0F, 1.0F);
-            switch (current) {
-                case STAND:
-                    drawModalRectWithCustomSizedTexture(extendedX - 4, extendedY + 4, 0, GUI_Y  + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
-                    return this;
-                case LEFT:
-                    drawModalRectWithCustomSizedTexture(extendedX - 4, extendedY + 4, PACMAN * 0, GUI_Y + PACMAN + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
-                    return this;
-                case RIGHT:
-                    drawModalRectWithCustomSizedTexture(extendedX - 4, extendedY + 4, PACMAN, GUI_Y + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
-                    return this;
-                case DOWN:
-                    drawModalRectWithCustomSizedTexture(extendedX - 4, extendedY + 4, PACMAN, GUI_Y + (PACMAN * 3) + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
-                    return this;
-                case UP:
-                    drawModalRectWithCustomSizedTexture(extendedX - 4, extendedY + 4, PACMAN, GUI_Y + (PACMAN * 2) + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
-                    return this;
+            if (onTile()) {
+                if (STATE == 0) STATE = 1;
+                else STATE = 0;
+            }
 
-            }*/
             return this;
         }
 
-//    private void drawPacman (int x, int y, Direction direction, boolean debug) {
-//        GlStateManager.color(1.0F, 1.0F, 1.0F);
-//        switch (direction.getDirection()) {
-//            case 0: // Still
-//                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), 0, GUI_Y  + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
-//                break;
-//            case 1: // Up
-//                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), (PACMAN * PACMAN_STATE), GUI_Y + (PACMAN * 2) + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
-//                break;
-//            case 2: // Down
-//                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), (PACMAN * PACMAN_STATE), GUI_Y + (PACMAN * 3) + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
-//                break;
-//            case 3: // Left
-//                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), (PACMAN * PACMAN_STATE), GUI_Y + PACMAN + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
-//                break;
-//            case 4: // Right
-//                this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), (PACMAN * PACMAN_STATE), GUI_Y + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
-//                break;
-//        }
-//
-//        if (debug) {
-//            GlStateManager.color(0.0F, 1.0F, 0.0F);
-//            this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Top Left
-//            this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * speedMultiplier), playY + gameCollision[0].height + 4 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Bottom Left
-//            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[0].width + 5 + (x * speedMultiplier), playY + 4 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Top Right
-//            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[0].width + 5 + (x * speedMultiplier), playY + gameCollision[0].height + 4 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Bottom Right
-//
-//            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[0].center[0] + 5 + (x * speedMultiplier), playY + gameCollision[0].center[1] + 4 + (y * speedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Center
-//        }
-//    }
+        private Player drawPlayer () {
+            glColor(Color.MAGENTA);
+            drawModalRectWithCustomSizedTexture(extendedX, extendedY, 234, 264, 8, 8, 512, 512);
+
+            GlStateManager.color(1.0F, 1.0F, 1.0F);
+            switch (current) {
+                case STAND:
+                    drawModalRectWithCustomSizedTexture(extendedX - 4, extendedY - 4, 0, GUI_Y  + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
+                    return this;
+                case LEFT:
+                    drawModalRectWithCustomSizedTexture(extendedX - 4, extendedY - 4, PACMAN * STATE, GUI_Y + PACMAN + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
+                    return this;
+                case RIGHT:
+                    drawModalRectWithCustomSizedTexture(extendedX - 4, extendedY - 4, PACMAN * STATE, GUI_Y + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
+                    return this;
+                case DOWN:
+                    drawModalRectWithCustomSizedTexture(extendedX - 4, extendedY - 4, PACMAN * STATE, GUI_Y + (PACMAN * 3) + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
+                    return this;
+                case UP:
+                    drawModalRectWithCustomSizedTexture(extendedX - 4, extendedY - 4, PACMAN * STATE, GUI_Y + (PACMAN * 2) + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
+                    return this;
+            }
+            return this;
+        }
     }
 
     private class Ghost extends Mover {
         EnumGhost info;
 
-        int prevPelletX, prevPelletY;
+        //int prevPelletX, prevPelletY;
 
         boolean scared = false;
         boolean inHouse;
 
         public Ghost (ResourceLocation texture, EnumGhost ghost) {
-            super(texture, ghost.getX(), ghost.getY());
+            super(ghost.getX(), ghost.getY());
             info = ghost;
         }
     }
@@ -768,19 +745,24 @@ public class GuiPacMan extends GuiArcade {
         int extendedX, extendedY;
         int offsetX, offsetY;
 
-        private Mover (ResourceLocation texture, int x, int y) {
+        private Mover (int x, int y) {
             // Set Starting Position
-            this.x = x;
-            this.y = y;
+            //this.x = x;
+            //this.y = y;
             this.x1 = x * 8;
             this.y1 = y * 8;
-            this.extendedX = x + boardX;
-            this.extendedY = y + boardY;
+            //this.extendedX = x + boardX;
+            //this.extendedY = y + boardY;
+        }
+
+        private Mover (int x, int y, int ugh) {
+            this.x1 = x;
+            this.y1 = y;
         }
 
         public Mover updatePosition (int x, int y) {
-            extendedX = x1 + x + moveX; // x == 154
-            extendedY = y1 + y + moveY; // y == 22
+            extendedX = x1 + x + moveX;
+            extendedY = y1 + y + moveY;
 
             offsetX = x;
             offsetY = y;
@@ -788,28 +770,28 @@ public class GuiPacMan extends GuiArcade {
             if ((extendedX - x) % 8 == 0) this.x = (extendedX - x) / 8;
             if ((extendedY - y) % 8 == 0) this.y = (extendedY - y) / 8;
 
-            System.out.println(String.format("Pos: (%f, %f)", getPosition().getX(), getPosition().getY()));
+            //System.out.println(String.format("\nPos: (%f, %f)\nTil: (%f, %f)", getExtendedPosition().getX(), getExtendedPosition().getY(), tiles[this.y][this.x].getExtendedPosition().getX(), tiles[this.y][this.x].getExtendedPosition().getY()));
 
             return this;
         }
 
         public boolean isBlocked () {
-            return tiles[y][x].type == EnumTile.WALL;
+            return tiles[y - 1][x].type == EnumTile.WALL;
         }
 
         public boolean isBlockedDown () {
-            return tiles[y + 2][x].type == EnumTile.WALL || tiles[y + 2][x].type == EnumTile.GHOST_ONLY;
+            return tiles[y + 1][x].type == EnumTile.WALL || tiles[y + 2][x].type == EnumTile.GHOST_ONLY;
         }
 
         public boolean isBlockedLeft () {
-            return tiles[y + 1][Math.max(0, x - 1)].type == EnumTile.WALL;
+            return tiles[y][Math.max(0, x - 1)].type == EnumTile.WALL;
         }
 
         public boolean isBlockedRight () {
-            return tiles[y + 1][Math.min(27, x + 1)].type == EnumTile.WALL;
+            return tiles[y][Math.min(27, x + 1)].type == EnumTile.WALL;
         }
 
-        public boolean canTurn () {
+        public boolean onTile () {
             return (extendedX - offsetX) % 8 == 0 && (extendedY - offsetY) % 8 == 0;
         }
 
