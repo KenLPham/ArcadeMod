@@ -566,6 +566,10 @@ public class GuiPacMan extends GuiArcade {
             return this;
         }
 
+        public int getEdible () {
+            return edible;
+        }
+
         public Point getPosition () {
             return new Point(x, y);
         }
@@ -575,6 +579,7 @@ public class GuiPacMan extends GuiArcade {
         }
     }
 
+    // TODO: Teleport
     private class Player extends Mover {
         int pelletsEaten;
         boolean energizerMode;
@@ -590,11 +595,32 @@ public class GuiPacMan extends GuiArcade {
             current = desired = Direction.LEFT;
         }
 
-        // TODO: Figure out how to keep it from turning when not lined up
+        // TODO: Figure out how to keep it from turning when not lined up (i think its fixed)
         private Mover move (float partialTick) {
             if (desired != current) changeDirection(desired);
 
-            System.out.println(String.format("Til: (%f, %f)\nPos: (%f, %f)", tiles[y][x].getExtendedPosition().getX(), tiles[y][x].getExtendedPosition().getY(), getExtendedPosition().getX() , getExtendedPosition().getY()));
+//            if (checkTile() == EnumTile.TELE) {
+//                if (x <= 0 && y == 13) {
+//                    current = Direction.LEFT;
+//                    moveX = 0;
+//                    x1 = 27;
+//                }
+//                if (x >= 27 && y == 13) {
+//                    current = Direction.RIGHT;
+//                    moveX = 0;
+//                    x1 = 0;
+//                }
+//            }
+
+            // This doesn't work that well
+            // moving the x direction doesn't remove dots
+            // doesnt remove when stopped at y
+            if (checkTile() == EnumTile.PLAY) {
+                if (tiles[y][x].edible == 1) {
+                    tiles[y][x].edible = 0;
+                    pelletsEaten++;
+                }
+            }
 
             if (moveTick + (tickCounter - moveTick) * partialTick >= 1) {
                 moveTick = tickCounter;
@@ -620,16 +646,40 @@ public class GuiPacMan extends GuiArcade {
         private Mover changeDirection (Direction newDirection) {
             switch (newDirection) {
                 case LEFT:
-                    if (!isBlockedLeft()) current = newDirection;
+                    if (current.getAxis() != newDirection.getAxis()) {
+                        if (canTurn()) {
+                            if (!isBlockedLeft()) current = newDirection;
+                        }
+                    } else {
+                        if (!isBlockedLeft()) current = newDirection;
+                    }
                     return this;
                 case RIGHT:
-                    if (!isBlockedRight()) current = newDirection;
+                    if (current.getAxis() != newDirection.getAxis()) {
+                        if (canTurn()) {
+                            if (!isBlockedRight()) current = newDirection;
+                        }
+                    } else {
+                        if (!isBlockedRight()) current = newDirection;
+                    }
                     return this;
                 case UP:
-                    if (!isBlocked()) current = newDirection;
+                    if (current.getAxis() != newDirection.getAxis()) {
+                        if (canTurn()) {
+                            if (!isBlocked()) current = newDirection;
+                        }
+                    } else {
+                        if (!isBlocked()) current = newDirection;
+                    }
                     return this;
                 case DOWN:
-                    if (!isBlockedDown()) current = newDirection;
+                    if (current.getAxis() != newDirection.getAxis()) {
+                        if (canTurn()) {
+                            if (!isBlockedDown()) current = newDirection;
+                        }
+                    } else {
+                        if (!isBlockedDown()) current = newDirection;
+                    }
                     return this;
             }
             return this;
@@ -738,6 +788,8 @@ public class GuiPacMan extends GuiArcade {
             if ((extendedX - x) % 8 == 0) this.x = (extendedX - x) / 8;
             if ((extendedY - y) % 8 == 0) this.y = (extendedY - y) / 8;
 
+            System.out.println(String.format("Pos: (%f, %f)", getPosition().getX(), getPosition().getY()));
+
             return this;
         }
 
@@ -759,6 +811,10 @@ public class GuiPacMan extends GuiArcade {
 
         public boolean canTurn () {
             return (extendedX - offsetX) % 8 == 0 && (extendedY - offsetY) % 8 == 0;
+        }
+
+        public EnumTile checkTile () {
+            return tiles[y][x].type;
         }
 
         public Point getPosition () {
