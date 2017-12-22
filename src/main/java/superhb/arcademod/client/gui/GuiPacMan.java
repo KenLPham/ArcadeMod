@@ -59,7 +59,7 @@ public class GuiPacMan extends GuiArcade {
 
     // Character Variables
     private Player pacman;
-    private Ghost[] ghosts;
+    private Ghost[] ghosts = new Ghost[4];
     private int moveTick = 0;
 
     public GuiPacMan (World world, TileEntityArcade tile, EntityPlayer player) {
@@ -73,6 +73,11 @@ public class GuiPacMan extends GuiArcade {
         // TODO: Remove
         inMenu = false;
         pacman = new Player(texture); // TODO: Call when press start
+
+        ghosts[0] = new Ghost(texture, EnumGhost.BLINKY);
+        ghosts[1] = new Ghost(texture, EnumGhost.INKY);
+        ghosts[2] = new Ghost(texture, EnumGhost.PINKY);
+        ghosts[3] = new Ghost(texture, EnumGhost.CLYDE);
     }
 
     @Override
@@ -99,6 +104,9 @@ public class GuiPacMan extends GuiArcade {
         // Pac-Man
         pacman.drawPlayer().move(partialTick).updatePosition(boardX, boardY);
 
+        // Ghosts
+        ghosts[0].drawGhost().updateTarget().ai().move(partialTick).updatePosition(boardX, boardY);
+
         // Text
         this.fontRendererObj.drawString(String.format("%d", (pacman.pelletsEaten * 10)), boardX + 30, boardY - 8, Color.white.getRGB());
     }
@@ -112,152 +120,6 @@ public class GuiPacMan extends GuiArcade {
         else if (keyCode == KeyHandler.down.getKeyCode()) pacman.desired = Direction.DOWN;
         else if (keyCode == KeyHandler.up.getKeyCode()) pacman.desired = Direction.UP;
     }
-
-//    private void drawGhost (int x, int y, Direction direction, int ghost, boolean frightened, boolean eaten, boolean debug) {
-//        if (!eaten) {
-//            if (!frightened) {
-//                float[] body = colorToFloat(ghostColor[ghost]);
-//                float[] eye = colorToFloat(eyeColor[0]);
-//
-//                GlStateManager.color(body[0], body[1], body[2]);
-//                // Body
-//                if (GHOST_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
-//                else this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
-//
-//                // Eye
-//                GlStateManager.color(1.0F, 1.0F, 1.0F);
-//                switch (direction.getDirection()) {
-//                    case 0: // Still
-//                        break;
-//                    case 1: // Up
-//                        // Eye
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 2, playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        // Pupil
-//                        GlStateManager.color(eye[0], eye[1], eye[2]);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        break;
-//                    case 2: // Down
-//                        // Eye
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 2, playY + 5 + (y * ghostSpeedMultiplier) + 3, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier) + 3, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        // Pupil
-//                        GlStateManager.color(eye[0], eye[1], eye[2]);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier) + 6, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier) + 6, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        break;
-//                    case 3: // Left
-//                        // Eye
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 3, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        // Pupil
-//                        GlStateManager.color(eye[0], eye[1], eye[2]);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 3, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        break;
-//                    case 4: // Right
-//                        // Eye
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        // Pupil
-//                        GlStateManager.color(eye[0], eye[1], eye[2]);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 5, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 7, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        break;
-//                }
-//            } else {
-//                if (FRIGHT_STATE == 0) { // Blue
-//                    // Body
-//                    float[] body = colorToFloat(ghostColor[5]);
-//                    GlStateManager.color(body[0], body[1], body[2]);
-//                    if (GHOST_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
-//                    else this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
-//
-//                    // Pupil
-//                    float[] eye = colorToFloat(eyeColor[1]);
-//                    GlStateManager.color(eye[0], eye[1], eye[2]);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 4, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//
-//                    // Mouth
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 8, GUI_X, MAZE_Y + GHOST, MOUTH_X, MOUTH_Y, 512, 512);
-//                } else if (FRIGHT_STATE == 1) { // White
-//                    // Body
-//                    float[] body = colorToFloat(ghostColor[4]);
-//                    GlStateManager.color(body[0], body[1], body[2]);
-//                    if (GHOST_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
-//                    else this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
-//
-//                    // Pupil
-//                    float[] eye = colorToFloat(eyeColor[2]);
-//                    GlStateManager.color(eye[0], eye[1], eye[2]);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 4, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//
-//                    // Mouth
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 8, GUI_X, MAZE_Y + GHOST, MOUTH_X, MOUTH_Y, 512, 512);
-//                }
-//            }
-//        } else {
-//            float[] eye = colorToFloat(eyeColor[0]);
-//
-//            // Eye
-//            GlStateManager.color(1.0F, 1.0F, 1.0F);
-//            switch (direction.getDirection()) {
-//                case 0: // Still
-//                    break;
-//                case 1: // Up
-//                    // Eye
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 2, playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    // Pupil
-//                    GlStateManager.color(eye[0], eye[1], eye[2]);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    break;
-//                case 2: // Down
-//                    // Eye
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 2, playY + 5 + (y * ghostSpeedMultiplier) + 3, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier) + 3, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    // Pupil
-//                    GlStateManager.color(eye[0], eye[1], eye[2]);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier) + 6, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier) + 6, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    break;
-//                case 3: // Left
-//                    // Eye
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 3, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    // Pupil
-//                    GlStateManager.color(eye[0], eye[1], eye[2]);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 3, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    break;
-//                case 4: // Right
-//                    // Eye
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    // Pupil
-//                    GlStateManager.color(eye[0], eye[1], eye[2]);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 5, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 7, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    break;
-//            }
-//        }
-//
-//        if (debug) {
-//            float[] debugColor = colorToFloat(new Color(230, 30, 100));
-//            GlStateManager.color(debugColor[0], debugColor[1], debugColor[2]);
-//
-//            this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Top Left
-//            this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].height + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Bottom Left
-//            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[1].width + 5 + (x * ghostSpeedMultiplier), playY + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Top Right
-//            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[1].width + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].height + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Bottom Right
-//
-//            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[1].center[0] + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].center[1] + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Center
-//        }
-//    }
 
     private void setupTiles () {
         // Row 0
@@ -465,20 +327,30 @@ public class GuiPacMan extends GuiArcade {
     }
 
     private enum EnumGhost {
-        BLINKY(0, "Blinky", 0, 0),
-        INKY(1, "Inky", 0, 0),
-        PINKY(2, "Pinky", 0, 0),
-        CLYDE(3, "Clyde", 0, 0);
+        BLINKY(0, "Blinky", 1, 1, new Color(255, 7, 7)),
+        INKY(1, "Inky", 1, 1, new Color(7, 255, 255)),
+        PINKY(2, "Pinky", 1, 1, new Color(255, 184, 222)),
+        CLYDE(3, "Clyde", 1, 1, new Color(255, 159, 7));
 
         private int id;
         private String name;
         private int x, y;
+        private Color color;
 
-        EnumGhost (int id, String name, int x, int y) {
+        EnumGhost (int id, String name, int x, int y, Color color) {
             this.id = id;
             this.name = name;
             this.x = x;
             this.y = y;
+            this.color = color;
+        }
+
+        public int getId () {
+            return id;
+        }
+
+        public String getName () {
+            return name;
         }
 
         public int getX () {
@@ -487,6 +359,10 @@ public class GuiPacMan extends GuiArcade {
 
         public int getY () {
             return y;
+        }
+
+        public Color getColor () {
+            return color;
         }
     }
 
@@ -608,7 +484,7 @@ public class GuiPacMan extends GuiArcade {
                 if (extendedX >= (offsetX + (27 * 8)) && y == 14) moveX = -106;
             }
 
-            System.out.println(moveX);
+            //System.out.println(moveX);
 
             // Eat Dots
             if (tiles[y][x].edible == 1) {
@@ -726,14 +602,346 @@ public class GuiPacMan extends GuiArcade {
 
         //int prevPelletX, prevPelletY;
 
-        boolean scared = false;
+        int targetX, targetY;
+
+        boolean scared = false, eaten = false;
         boolean inHouse;
 
         public Ghost (ResourceLocation texture, EnumGhost ghost) {
             super(ghost.getX(), ghost.getY());
             info = ghost;
+
+            current = desired = Direction.RIGHT;
+        }
+
+        private Mover move (float partialTick) {
+            if (desired != current) changeDirection(desired);
+
+            if (moveTick + (tickCounter - moveTick) * partialTick >= 1) {
+                moveTick = tickCounter;
+
+                switch (current) {
+                    case LEFT:
+                        if (!isBlockedLeft()) moveX--;
+                        return this;
+                    case RIGHT:
+                        if (!isBlockedRight()) moveX++;
+                        return this;
+                    case UP:
+                        if (!isBlocked()) moveY--;
+                        return this;
+                    case DOWN:
+                        if (!isBlockedDown()) moveY++;
+                        return this;
+                }
+            }
+            return this;
+        }
+
+        private Mover changeDirection (Direction newDirection) {
+            switch (newDirection) {
+                case LEFT:
+                    if (current.getAxis() != newDirection.getAxis()) {
+                        if (onTile()) {
+                            if (!isBlockedLeft()) current = newDirection;
+                        }
+                    } else {
+                        if (!isBlockedLeft()) current = newDirection;
+                    }
+                    return this;
+                case RIGHT:
+                    if (current.getAxis() != newDirection.getAxis()) {
+                        if (onTile()) {
+                            if (!isBlockedRight()) current = newDirection;
+                        }
+                    } else {
+                        if (!isBlockedRight()) current = newDirection;
+                    }
+                    return this;
+                case UP:
+                    if (current.getAxis() != newDirection.getAxis()) {
+                        if (onTile()) {
+                            if (!isBlocked()) current = newDirection;
+                        }
+                    } else {
+                        if (!isBlocked()) current = newDirection;
+                    }
+                    return this;
+                case DOWN:
+                    if (current.getAxis() != newDirection.getAxis()) {
+                        if (onTile()) {
+                            if (!isBlockedDown()) current = newDirection;
+                        }
+                    } else {
+                        if (!isBlockedDown()) current = newDirection;
+                    }
+                    return this;
+            }
+            return this;
+        }
+
+        // TODO: eh kinda works
+        private Ghost ai () {
+            double disX = Math.sqrt(Math.pow((extendedX - targetX), 2));
+            double disY = Math.sqrt(Math.pow((extendedY - targetY), 2));
+            double dis = Math.sqrt(Math.pow((extendedX - targetX), 2) + Math.pow((extendedY - targetY), 2));
+
+            int tx = (targetX - offsetX) / 8;
+            int ty = (targetY - offsetY) / 8;
+
+            if (isBlockedDown()) {
+                if (isBlockedLeft()) {
+                    if (isBlockedRight()) {
+                    } else {
+                        if (x < tx) desired = Direction.RIGHT;
+                        else if (x > tx) {
+                            if (isBlockedLeft()) desired = Direction.LEFT;
+                            else desired = Direction.LEFT;
+                        }
+                    }
+                } else {
+                    if (x > tx) desired = Direction.LEFT;
+                    else if (x < tx) {
+                        if (isBlockedRight()) desired = Direction.RIGHT;
+                        else desired = Direction.RIGHT;
+                    }
+                }
+            } else {
+                if (isBlockedRight()) {
+                } else {
+                    if (x < tx) desired = Direction.RIGHT;
+                    else if (x > tx) {
+                        if (isBlockedLeft()) desired = Direction.LEFT;
+                        else desired = Direction.LEFT;
+                    }
+                }
+                if (y < ty) desired = Direction.DOWN;
+            }
+
+            return this;
+        }
+
+        private Ghost updateTarget () {
+            switch (info) {
+                case BLINKY:
+                    targetX = (pacman.x * 8) + offsetX;
+                    targetY = (pacman.y * 8) + offsetY;
+                    return this;
+                case INKY:
+                    switch (pacman.current) {
+                        case LEFT:
+                            return this;
+                        case RIGHT:
+                            return this;
+                        case UP:
+                            return this;
+                        case DOWN:
+                            return this;
+                    }
+                    return this;
+                case PINKY:
+                    switch (pacman.current) {
+                        case LEFT:
+                            return this;
+                        case RIGHT:
+                            return this;
+                        case UP:
+                            return this;
+                        case DOWN:
+                            return this;
+                    }
+                    return this;
+                case CLYDE:
+                    switch (pacman.current) {
+                        case LEFT:
+                            return this;
+                        case RIGHT:
+                            return this;
+                        case UP:
+                            return this;
+                        case DOWN:
+                            return this;
+                    }
+                    return this;
+            }
+            return this;
+        }
+
+        private Ghost drawGhost () {
+            // Target
+            glColor(Color.green);
+            drawModalRectWithCustomSizedTexture(targetX, targetY, 234, 264, 8, 8, 512, 512);
+
+            if (scared) glColor(info.getColor());
+            else glColor(info.getColor());
+
+            // hitbox
+            drawModalRectWithCustomSizedTexture(extendedX, extendedY, 234, 264, 8, 8, 512, 512);
+
+            if (!eaten) {
+                // Body
+                //drawModalRectWithCustomSizedTexture(extendedX, extendedY, GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
+                //drawModalRectWithCustomSizedTexture(extendedX, extendedY, GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
+            }
+            return this;
         }
     }
+
+    //            new Color(255, 255, 255), // White
+//            new Color(7, 7, 255) // Blue
+//    };
+//
+//    private final Color[] eyeColor = {
+//            new Color(33, 33, 222),
+//            new Color(245, 245, 255),
+//            new Color(255, 15, 15)
+//    };
+
+    //    private void drawGhost (int x, int y, Direction direction, int ghost, boolean frightened, boolean eaten, boolean debug) {
+//        if (!eaten) {
+//            if (!frightened) {
+//                float[] body = colorToFloat(ghostColor[ghost]);
+//                float[] eye = colorToFloat(eyeColor[0]);
+//
+//                GlStateManager.color(body[0], body[1], body[2]);
+//                // Body
+//                if (GHOST_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
+//                else this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
+//
+//                // Eye
+//                GlStateManager.color(1.0F, 1.0F, 1.0F);
+//                switch (direction.getDirection()) {
+//                    case 0: // Still
+//                        break;
+//                    case 1: // Up
+//                        // Eye
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 2, playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                        // Pupil
+//                        GlStateManager.color(eye[0], eye[1], eye[2]);
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                        break;
+//                    case 2: // Down
+//                        // Eye
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 2, playY + 5 + (y * ghostSpeedMultiplier) + 3, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier) + 3, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                        // Pupil
+//                        GlStateManager.color(eye[0], eye[1], eye[2]);
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier) + 6, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier) + 6, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                        break;
+//                    case 3: // Left
+//                        // Eye
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 3, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                        // Pupil
+//                        GlStateManager.color(eye[0], eye[1], eye[2]);
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 3, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                        break;
+//                    case 4: // Right
+//                        // Eye
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                        // Pupil
+//                        GlStateManager.color(eye[0], eye[1], eye[2]);
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 5, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 7, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                        break;
+//                }
+//            } else {
+//                if (FRIGHT_STATE == 0) { // Blue
+//                    // Body
+//                    float[] body = colorToFloat(ghostColor[5]);
+//                    GlStateManager.color(body[0], body[1], body[2]);
+//                    if (GHOST_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
+//                    else this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
+//
+//                    // Pupil
+//                    float[] eye = colorToFloat(eyeColor[1]);
+//                    GlStateManager.color(eye[0], eye[1], eye[2]);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 4, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//
+//                    // Mouth
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 8, GUI_X, MAZE_Y + GHOST, MOUTH_X, MOUTH_Y, 512, 512);
+//                } else if (FRIGHT_STATE == 1) { // White
+//                    // Body
+//                    float[] body = colorToFloat(ghostColor[4]);
+//                    GlStateManager.color(body[0], body[1], body[2]);
+//                    if (GHOST_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
+//                    else this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
+//
+//                    // Pupil
+//                    float[] eye = colorToFloat(eyeColor[2]);
+//                    GlStateManager.color(eye[0], eye[1], eye[2]);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 4, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//
+//                    // Mouth
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 8, GUI_X, MAZE_Y + GHOST, MOUTH_X, MOUTH_Y, 512, 512);
+//                }
+//            }
+//        } else {
+//            float[] eye = colorToFloat(eyeColor[0]);
+//
+//            // Eye
+//            GlStateManager.color(1.0F, 1.0F, 1.0F);
+//            switch (direction.getDirection()) {
+//                case 0: // Still
+//                    break;
+//                case 1: // Up
+//                    // Eye
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 2, playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                    // Pupil
+//                    GlStateManager.color(eye[0], eye[1], eye[2]);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                    break;
+//                case 2: // Down
+//                    // Eye
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 2, playY + 5 + (y * ghostSpeedMultiplier) + 3, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier) + 3, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                    // Pupil
+//                    GlStateManager.color(eye[0], eye[1], eye[2]);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier) + 6, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier) + 6, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                    break;
+//                case 3: // Left
+//                    // Eye
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 3, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                    // Pupil
+//                    GlStateManager.color(eye[0], eye[1], eye[2]);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 3, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                    break;
+//                case 4: // Right
+//                    // Eye
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+//                    // Pupil
+//                    GlStateManager.color(eye[0], eye[1], eye[2]);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 5, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 7, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+//                    break;
+//            }
+//        }
+//
+//        if (debug) {
+//            float[] debugColor = colorToFloat(new Color(230, 30, 100));
+//            GlStateManager.color(debugColor[0], debugColor[1], debugColor[2]);
+//
+//            this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Top Left
+//            this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].height + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Bottom Left
+//            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[1].width + 5 + (x * ghostSpeedMultiplier), playY + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Top Right
+//            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[1].width + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].height + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Bottom Right
+//
+//            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[1].center[0] + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].center[1] + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Center
+//        }
+//    }
 
     private class Mover {
         Direction direction, current, desired;
@@ -746,13 +954,8 @@ public class GuiPacMan extends GuiArcade {
         int offsetX, offsetY;
 
         private Mover (int x, int y) {
-            // Set Starting Position
-            //this.x = x;
-            //this.y = y;
             this.x1 = x * 8;
             this.y1 = y * 8;
-            //this.extendedX = x + boardX;
-            //this.extendedY = y + boardY;
         }
 
         private Mover (int x, int y, int ugh) {
