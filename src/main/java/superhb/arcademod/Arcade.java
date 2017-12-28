@@ -1,15 +1,13 @@
 package superhb.arcademod;
 
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraftforge.common.ForgeVersion;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.*;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.versioning.ComparableVersion;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import superhb.arcademod.client.UpdateAnnouncer;
+import org.apache.logging.log4j.*;
 import superhb.arcademod.client.ArcadeItems;
 import superhb.arcademod.proxy.CommonProxy;
 import net.minecraft.client.resources.I18n;
@@ -56,6 +54,7 @@ public class Arcade {
     public static final Logger logger = LogManager.getLogger(Reference.MODID);
 
     // Creative Tab
+    @MethodsReturnNonnullByDefault
     public static final CreativeTabs tab = new CreativeTabs(Reference.MODID) {
         @Override
         public ItemStack getTabIconItem() {
@@ -74,11 +73,11 @@ public class Arcade {
 
     // Configuration Variables
     public static boolean disableCoins;
-    public static boolean requireRedstone;
+    private static boolean requireRedstone;
     public static boolean disableUpdateNotification;
 
     // Prize List Variables
-    public static int prizeTotal = 0;
+    private static int prizeTotal = 0;
     public static PrizeList[] prizeList;
     private String[] s_prizeList;
 
@@ -94,7 +93,7 @@ public class Arcade {
     };
 
     // Game Addons
-    public static File gameDir;
+    private static File gameDir;
 
     @EventHandler
     public void preInit (FMLPreInitializationEvent event) {

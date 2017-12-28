@@ -16,9 +16,8 @@ import superhb.arcademod.util.KeyHandler;
 import java.awt.*;
 import java.io.IOException;
 
-// This is honestly so fucked
+// This might not be so fucked anymore
 // http://www.gamasutra.com/view/feature/3938/the_pacman_dossier.php?print=1
-// http://gameinternals.com/post/2072558330/understanding-pac-man-ghost-behavior
 public class GuiPacMan extends GuiArcade {
     // 1 dot = 10 pt (240 total)
     // 1 energizer = 50 pt (4 total)
@@ -83,7 +82,8 @@ public class GuiPacMan extends GuiArcade {
 
     @Override
     public void updateScreen () {
-        super.updateScreen();
+		super.updateScreen();
+    	//tickCounter += 3;
     }
 
     @Override
@@ -93,7 +93,7 @@ public class GuiPacMan extends GuiArcade {
         super.drawScreen(mouseX, mouseY, partialTick);
 
         // Maze
-        this.drawModalRectWithCustomSizedTexture(boardX, boardY, GUI_X, 0, MAZE_X, MAZE_Y, 512, 512);
+        drawModalRectWithCustomSizedTexture(boardX, boardY, GUI_X, 0, MAZE_X, MAZE_Y, 512, 512);
 
         // Edibles
         if ((tickCounter - energizerTick) >= 10) {
@@ -119,7 +119,7 @@ public class GuiPacMan extends GuiArcade {
         pacman.drawPlayer().move(partialTick).updatePosition(boardX, boardY);
 
         // Text
-        this.fontRendererObj.drawString(String.format("%d", (pacman.pelletsEaten * 10 + pacman.energizersEatern * 50)), boardX + 30, boardY - 8, Color.white.getRGB());
+        this.fontRendererObj.drawString(String.format("%d", score), boardX + 30, boardY - 8, Color.white.getRGB());
     }
 
     @Override
@@ -407,19 +407,19 @@ public class GuiPacMan extends GuiArcade {
         int edible = 0; // 0 = none; 1 = dot; 2 = energizer
         EnumTile type;
 
-        public Tile (int x, int y) {
+        Tile (int x, int y) {
             this(x, y, EnumTile.PLAY, 1);
         }
 
-        public Tile (int x, int y, int edible) {
+        Tile (int x, int y, int edible) {
             this(x, y, EnumTile.PLAY, edible);
         }
 
-        public Tile (int x, int y, EnumTile type) {
+        Tile (int x, int y, EnumTile type) {
             this(x, y, type, 0);
         }
 
-        public Tile (int x, int y, EnumTile type, int edible) {
+        Tile (int x, int y, EnumTile type, int edible) {
             this.x = x;
             this.y = y;
             this.extendedX = x * 8 + boardX;
@@ -428,7 +428,7 @@ public class GuiPacMan extends GuiArcade {
             this.edible = edible;
         }
 
-        public Tile drawTile () {
+        Tile drawTile () {
 //            if (type == EnumTile.WALL) {
 //                glColor(type.getColor());
 //                drawModalRectWithCustomSizedTexture(extendedX, extendedY, 234, 264, 8, 8, 512, 512);
@@ -450,42 +450,31 @@ public class GuiPacMan extends GuiArcade {
             return this;
         }
 
-        public Tile updatePosition (int x, int y) {
+        Tile updatePosition (int x, int y) {
             extendedX = this.x * 8 + x;
             extendedY = this.y * 8 + y;
 
             return this;
         }
 
-        public int getEdible () {
-            return edible;
-        }
-
         public Point getPosition () {
             return new Point(x, y);
-        }
-
-        public Point getExtendedPosition () {
-            return new Point(extendedX, extendedY);
         }
     }
 
     private class Player extends Mover {
-        int pelletsEaten, energizersEatern, lives = 3, totalEaten, ghostsEaten; // When scareTime is reached, ghostsEaten must be reset.
-        boolean energizerMode;
+        int lives = 3, foodEaten, ghostsEaten; // When scareTime is reached, ghostsEaten must be reset.
+        boolean energizerMode, canEatGhost;
 
         int STATE = 0;
 
         boolean teleport;
         boolean stopped = false;
 
-        // TODO: Try and center at start
         public Player () {
-            //super(108, (23 * 8), 0);
             super(14, 23);
 
             teleport = false;
-            pelletsEaten = 0;
             current = desired = Direction.LEFT;
         }
 
@@ -493,7 +482,7 @@ public class GuiPacMan extends GuiArcade {
         private Mover move (float partialTick) {
             if (desired != current) changeDirection(desired);
 
-            // Teleport
+            // Teleport (Might have to redo)
             if (checkTile() == EnumTile.TELE) {
                 if (extendedX <= (offsetX + 2) && y == 14) moveX = 103;
                 if (extendedX >= (offsetX + (27 * 8)) && y == 14) moveX = -108;
@@ -503,40 +492,58 @@ public class GuiPacMan extends GuiArcade {
             // Eat Dots
             if (tiles[y][x].edible == 1) {
                 tiles[y][x].edible = 0;
-                pelletsEaten++;
+                foodEaten++;
+                score += 10;
             }
 
             // Eat Energizer
             if (tiles[y][x].edible == 2) {
                 tiles[y][x].edible = 0;
-                energizersEatern++;
+                foodEaten++;
+                score += 50;
                 energizerMode = true;
+				canEatGhost = true; // set to false when ScareTime is done
             }
 
-            if (moveTick + (tickCounter - moveTick) * partialTick >= 1) {
-                moveTick = tickCounter;
+			//System.out.println(" " + (tickCounter + partialTick));
 
-                switch (current) {
-                    case LEFT:
-                        if (!isBlockedLeft()) moveX--;
-                        else current = Direction.STAND;
-                        return this;
-                    case RIGHT:
-                        if (!isBlockedRight()) moveX++;
-                        else current = Direction.STAND;
-                        return this;
-                    case UP:
-                        if (!isBlocked()) moveY--;
-                        else current = Direction.STAND;
-                        return this;
-                    case DOWN:
-                        if (!isBlockedDown()) moveY++;
-                        else current = Direction.STAND;
-                        return this;
-                }
-            }
+            //if ((tickCounter - moveTick) / (float)(1/3) <= 0.666f) {
+            //    moveTick = tickCounter;
+
+			switch (current) {
+				case LEFT:
+					if (!isBlockedLeft()) moveX -= getSpeed();
+					else current = Direction.STAND;
+					return this;
+				case RIGHT:
+					if (!isBlockedRight()) moveX += getSpeed();
+					else current = Direction.STAND;
+					return this;
+				case UP:
+					if (!isBlocked()) moveY -= getSpeed();
+					else current = Direction.STAND;
+					return this;
+				case DOWN:
+					if (!isBlockedDown()) moveY += getSpeed();
+					else current = Direction.STAND;
+					return this;
+			}
+            //}
             return this;
         }
+
+        private float getSpeed () {
+        	if (level == 0) { // Level 1
+				if (!canEatGhost) {
+					if (tiles[y][x].edible != 0) return 0.71f;
+				} else {
+					if (tiles[y][x].edible != 0) return 0.79f;
+					return 0.9f;
+				}
+				return 0.8f;
+			}
+        	return 0.8f;
+		}
 
         private Mover changeDirection (Direction newDirection) {
             switch (newDirection) {
@@ -584,6 +591,7 @@ public class GuiPacMan extends GuiArcade {
         public Player updatePosition (int x, int y) {
             super.updatePosition(x, y);
 
+			// TODO: Jittery with new movement system
             // Animation
             if (onTile()) {
                 if (STATE == 0) STATE = 1;
@@ -660,46 +668,48 @@ public class GuiPacMan extends GuiArcade {
                     inHouse = true;
                 }
             }
-            if (inHouse) { // Let Ghosts go from up -> down and down -> up. Also figure out why it chooses to go down when it has to go up
+            if (inHouse) { // TODO: Let Ghosts go from up -> down and down -> up.
                 if ((x == 13 || x == 14) && y == 11) inHouse = false;
             }
 
             // Scared direction
             if (pacman.energizerMode) {
-                scared = true;
-                switch (current) {
-                    case LEFT:
-                        if (!isBlockedRight()) desired = current = Direction.RIGHT;
-                        else {
-                            if (!isBlocked()) desired = current = Direction.UP;
-                            if (!isBlockedDown()) desired = current = Direction.DOWN;
-                            if (!isBlockedLeft()) desired = current = Direction.LEFT;
-                        }
-                        break;
-                    case RIGHT:
-                        if (!isBlockedLeft()) desired = current = Direction.LEFT;
-                        else {
-                            if (!isBlocked()) desired = current = Direction.UP;
-                            if (!isBlockedDown()) desired = current = Direction.DOWN;
+                if (!eaten) {
+                    scared = true;
+                    switch (current) { // TODO: Simplify?
+                        case LEFT:
                             if (!isBlockedRight()) desired = current = Direction.RIGHT;
-                        }
-                        break;
-                    case UP:
-                        if (!isBlockedDown()) desired = current = Direction.DOWN;
-                        else {
+                            else {
+                                if (!isBlocked()) desired = current = Direction.UP;
+                                if (!isBlockedDown()) desired = current = Direction.DOWN;
+                                if (!isBlockedLeft()) desired = current = Direction.LEFT;
+                            }
+                            break;
+                        case RIGHT:
                             if (!isBlockedLeft()) desired = current = Direction.LEFT;
-                            if (!isBlockedRight()) desired = current = Direction.RIGHT;
-                            if (!isBlocked()) desired = current = Direction.UP;
-                        }
-                        break;
-                    case DOWN:
-                        if (!isBlocked()) desired = current = Direction.UP;
-                        else {
-                            if (!isBlockedLeft()) desired = current = Direction.LEFT;
-                            if (!isBlockedRight()) desired = current = Direction.RIGHT;
+                            else {
+                                if (!isBlocked()) desired = current = Direction.UP;
+                                if (!isBlockedDown()) desired = current = Direction.DOWN;
+                                if (!isBlockedRight()) desired = current = Direction.RIGHT;
+                            }
+                            break;
+                        case UP:
                             if (!isBlockedDown()) desired = current = Direction.DOWN;
-                        }
-                        break;
+                            else {
+                                if (!isBlockedLeft()) desired = current = Direction.LEFT;
+                                if (!isBlockedRight()) desired = current = Direction.RIGHT;
+                                if (!isBlocked()) desired = current = Direction.UP;
+                            }
+                            break;
+                        case DOWN:
+                            if (!isBlocked()) desired = current = Direction.UP;
+                            else {
+                                if (!isBlockedLeft()) desired = current = Direction.LEFT;
+                                if (!isBlockedRight()) desired = current = Direction.RIGHT;
+                                if (!isBlockedDown()) desired = current = Direction.DOWN;
+                            }
+                            break;
+                    }
                 }
 
                 if (info == EnumGhost.CLYDE) pacman.energizerMode = false;
@@ -714,21 +724,35 @@ public class GuiPacMan extends GuiArcade {
 
                 switch (current) {
                     case LEFT:
-                        if (!isBlockedLeft()) moveX--;
+                        if (!isBlockedLeft()) moveX -= getSpeed();
                         return this;
                     case RIGHT:
-                        if (!isBlockedRight()) moveX++;
+                        if (!isBlockedRight()) moveX += getSpeed();
                         return this;
                     case UP:
-                        if (!isBlocked()) moveY--;
+                        if (!isBlocked()) moveY -= getSpeed();
                         return this;
                     case DOWN:
-                        if (!isBlockedDown()) moveY++;
+                        if (!isBlockedDown()) moveY += getSpeed();
                         return this;
                 }
             }
             return this;
         }
+
+        private float getSpeed () {
+        	if (level == 0) { // Level 0
+				if (!eaten) {
+					if (pacman.canEatGhost) {
+						if (tiles[y][x].type == EnumTile.TELE_ZONE) return 0.4f;
+						else return 0.5f;
+					}
+					if (tiles[y][x].type == EnumTile.TELE_ZONE) return 0.4f;
+					return 0.75f;
+				} else return 2;
+			}
+			return 0.75f;
+		}
 
         private Mover changeDirection (Direction newDirection) {
             switch (newDirection) {
@@ -895,7 +919,6 @@ public class GuiPacMan extends GuiArcade {
             return isBlockedDown(x, y);
         }
 
-        // TODO: Scared Target (Random Targets)
         private Point getTarget () {
             if (scared) {
                 return new Point((int)(Math.random() * 28) * 8 + offsetX, (int)(Math.random() * 30) * 8 + offsetY); // Not the best option
@@ -979,6 +1002,7 @@ public class GuiPacMan extends GuiArcade {
 //                    new Color(255, 15, 15) // Red
 
             // TODO: Blink when timer starts to run out
+            // TODO: Fix it so that when eaten and another energizer is eaten, face changes to scared with no body (ghost stays eaten and isn't affected by scare)
             if (scared) {
                 if ((tickCounter - scaredTick) == (scaredTime - 1) * 20) {
                     // 1 second to blink
@@ -990,7 +1014,6 @@ public class GuiPacMan extends GuiArcade {
                 if (BODY_STATE == 0) drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
                 else drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
             }
-
             GlStateManager.color(1.0F, 1.0F, 1.0F);
             if (!scared) {
                 switch (current) {
@@ -1056,7 +1079,7 @@ public class GuiPacMan extends GuiArcade {
         // Position
         int x, y;
         int x1, y1;
-        int moveX, moveY;
+        float moveX, moveY;
         int extendedX, extendedY;
         int offsetX, offsetY;
 
@@ -1073,8 +1096,8 @@ public class GuiPacMan extends GuiArcade {
 //        }
 
         public Mover updatePosition (int x, int y) {
-            extendedX = x1 + x + moveX;
-            extendedY = y1 + y + moveY;
+            extendedX = (int)(x1 + x + moveX);
+            extendedY = (int)(y1 + y + moveY);
 
             offsetX = x;
             offsetY = y;
@@ -1093,36 +1116,28 @@ public class GuiPacMan extends GuiArcade {
             return tiles[y + 1][x].type == EnumTile.WALL || tiles[y + 1][x].type == EnumTile.GHOST_ONLY;
         }
 
-        public boolean isBlockedLeft () {
+        boolean isBlockedLeft () {
             return tiles[y][Math.max(0, x - 1)].type == EnumTile.WALL;
         }
 
-        public boolean isBlockedRight () {
+        boolean isBlockedRight () {
             return tiles[y][Math.min(27, x + 1)].type == EnumTile.WALL;
         }
 
-        public boolean onTile () {
+        boolean onTile () {
             return (extendedX - offsetX) % 8 == 0 && (extendedY - offsetY) % 8 == 0;
         }
 
-        public EnumTile checkTile () {
+        EnumTile checkTile () {
             return tiles[y][x].type;
         }
 
         public Point getPosition () {
             return new Point(x, y);
         }
-
-        public Point getExtendedPosition () {
-            return new Point(extendedX, extendedY);
-        }
-
-        public Point getExtendedPositionWithOffset () {
-            return new Point(extendedX, extendedY + 8);
-        }
     }
 
-    public void getLevelData () {
+    private void getLevelData () {
         // Set bonus fruit
         // Set speeds
         if (level == 0) { // Level 1
