@@ -6,13 +6,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
-import superhb.arcademod.Arcade;
 import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArcade;
 import superhb.arcademod.client.audio.LoopingSound;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.util.ArcadeSoundRegistry;
-import superhb.arcademod.util.EnumGame;
 import superhb.arcademod.util.KeyHandler;
 
 import java.awt.*;
@@ -44,23 +42,25 @@ public class GuiPacMan extends GuiArcade {
     private static final int PUPIL = 2;
     private static final int EYE_X = 4, EYE_Y = 5;
     private static final int MOUTH_X = 12, MOUTH_Y = 2;
-
     private static final int FRUIT = 14;
-
     private static final int PACMAN = 15;
-
     private static final int DOT = 2;
     private static final int ENERGIZER = 8;
+
+    private byte level;
 
     // Board Variables
     private int boardX, boardY;
     private int score;
     private Tile[][] tiles = new Tile[31][28]; // 28x31
+    private int ENERGIZER_STATE = 0;
 
     // Character Variables
     private Player pacman;
     private Ghost[] ghosts = new Ghost[4];
-    private int moveTick = 0;
+    //private int moveTick = 0,
+    private int energizerTick = 0, scatterTick = 0, scaredTick = 0;
+    private int scaredTime = 0, scaredFlash = 0;
 
     public GuiPacMan (World world, TileEntityArcade tile, EntityPlayer player) {
         super(world, tile, player);
@@ -70,14 +70,15 @@ public class GuiPacMan extends GuiArcade {
         // Setup Tiles
         setupTiles();
 
-        // TODO: Remove
+        // TODO: Call when press start
+        getLevelData();
         inMenu = false;
-        pacman = new Player(texture); // TODO: Call when press start
+        pacman = new Player();
 
-        ghosts[0] = new Ghost(texture, EnumGhost.BLINKY);
-        ghosts[1] = new Ghost(texture, EnumGhost.INKY);
-        ghosts[2] = new Ghost(texture, EnumGhost.PINKY);
-        ghosts[3] = new Ghost(texture, EnumGhost.CLYDE);
+        ghosts[0] = new Ghost(EnumGhost.BLINKY); // TODO: Elroy
+        ghosts[1] = new Ghost(EnumGhost.INKY);
+        ghosts[2] = new Ghost(EnumGhost.PINKY);
+        ghosts[3] = new Ghost(EnumGhost.CLYDE);
     }
 
     @Override
@@ -95,20 +96,30 @@ public class GuiPacMan extends GuiArcade {
         this.drawModalRectWithCustomSizedTexture(boardX, boardY, GUI_X, 0, MAZE_X, MAZE_Y, 512, 512);
 
         // Edibles
+        if ((tickCounter - energizerTick) >= 10) {
+            energizerTick = tickCounter;
+
+            if (ENERGIZER_STATE == 0) ENERGIZER_STATE = 1;
+            else ENERGIZER_STATE = 0;
+        }
+
         for (int y = 0; y < 31; y++) {
             for (int x = 0; x < 28; x++) {
                 if (tiles[y][x] != null) tiles[y][x].updatePosition(boardX, boardY).drawTile();
             }
         }
 
+        // Ghosts
+        ghosts[0].drawGhost().ai().move(partialTick).updatePosition(boardX, boardY);
+        ghosts[1].drawGhost().ai().move(partialTick).updatePosition(boardX, boardY);
+        ghosts[2].drawGhost().ai().move(partialTick).updatePosition(boardX, boardY);
+        ghosts[3].drawGhost().ai().move(partialTick).updatePosition(boardX, boardY);
+
         // Pac-Man
         pacman.drawPlayer().move(partialTick).updatePosition(boardX, boardY);
 
-        // Ghosts
-        ghosts[0].drawGhost().updateTarget().ai().move(partialTick).updatePosition(boardX, boardY);
-
         // Text
-        this.fontRendererObj.drawString(String.format("%d", (pacman.pelletsEaten * 10)), boardX + 30, boardY - 8, Color.white.getRGB());
+        this.fontRendererObj.drawString(String.format("%d", (pacman.pelletsEaten * 10 + pacman.energizersEatern * 50)), boardX + 30, boardY - 8, Color.white.getRGB());
     }
 
     @Override
@@ -201,7 +212,7 @@ public class GuiPacMan extends GuiArcade {
         // Row 14
         for (int i = 0; i < 28; i++) {
             if (i == 0 || i == 27) tiles[14][i] = new Tile(i, 14, EnumTile.TELE);
-            else if ((i > 0 && i < 5) || (i > 22 && i < 27)) tiles[14][i] = new Tile(i, 14, EnumTile.TELE_ZONE);
+            else if ((i > 0 && i < 6) || (i > 21 && i < 27)) tiles[14][i] = new Tile(i, 14, EnumTile.TELE_ZONE);
             else if (i == 10 || i == 17) tiles[14][i] = new Tile(i, 14, EnumTile.WALL);
             else if (i > 10 && i < 17) tiles[14][i] = new Tile(i, 14, EnumTile.GHOST_ONLY);
             else if (i == 5 || (i > 6 && i < 10) || (i > 17 && i < 21) || i == 22) tiles[14][i] = new Tile(i, 14, 0);
@@ -257,7 +268,7 @@ public class GuiPacMan extends GuiArcade {
         for (int i = 0; i < 28; i++) {
             if (i == 0 || (i > 3 && i < 6) || (i > 21 && i < 24) || i == 27) tiles[23][i] = new Tile(i, 23, EnumTile.WALL);
             else if (i == 1 || i == 26) tiles[23][i] = new Tile(i, 23, 2);
-            else if ((i > 9 && i < 12) || (i > 15 & i < 18)) tiles[23][i] = new Tile(i, 23, EnumTile.GHOST_LIMIT, 1);
+            else if ((i > 9 && i < 13) || (i > 14 & i < 18)) tiles[23][i] = new Tile(i, 23, EnumTile.GHOST_LIMIT, 1);
             else if (i > 12 && i < 15) tiles[23][i] = new Tile(i, 23, EnumTile.GHOST_LIMIT);
             else if (i == 13 || i == 14) tiles[23][i] = new Tile(i, 23, 0);
             else tiles[23][i] = new Tile(i, 23);
@@ -317,8 +328,8 @@ public class GuiPacMan extends GuiArcade {
             return direction;
         }
 
-        public int getOpposite () {
-            return opposite;
+        public Direction getOpposite () {
+            return values()[opposite];
         }
 
         public int getAxis () {
@@ -327,10 +338,10 @@ public class GuiPacMan extends GuiArcade {
     }
 
     private enum EnumGhost {
-        BLINKY(0, "Blinky", 1, 1, new Color(255, 7, 7)),
-        INKY(1, "Inky", 1, 1, new Color(7, 255, 255)),
-        PINKY(2, "Pinky", 1, 1, new Color(255, 184, 222)),
-        CLYDE(3, "Clyde", 1, 1, new Color(255, 159, 7));
+        BLINKY(0, "Blinky", 14, 11, new Color(255, 7, 7)),
+        INKY(1, "Inky", 12, 14, new Color(7, 255, 255)),
+        PINKY(2, "Pinky", 14, 14, new Color(255, 184, 222)),
+        CLYDE(3, "Clyde", 16, 14, new Color(255, 159, 7));
 
         private int id;
         private String name;
@@ -423,13 +434,18 @@ public class GuiPacMan extends GuiArcade {
 //                drawModalRectWithCustomSizedTexture(extendedX, extendedY, 234, 264, 8, 8, 512, 512);
 //            }
 
+            // TODO: Remove
+            if (type == EnumTile.GHOST_LIMIT || type == EnumTile.TELE_ZONE) {
+                glColor(Color.orange);
+                drawModalRectWithCustomSizedTexture(extendedX, extendedY, 234, 264, 8, 8, 512, 512);
+            }
+
             // Draw Food
             GlStateManager.color(1.0F, 1.0F, 1.0F);
             if (edible == 1) { // Dot
                 drawModalRectWithCustomSizedTexture(extendedX + 3, extendedY + 3, GUI_X, MAZE_Y, DOT, DOT, 512, 512);
             } else if (edible == 2) { // Energizer
-                //if (ENERGIZER_STATE == 0) // TODO: Energizer Blink
-                drawModalRectWithCustomSizedTexture(extendedX, extendedY, GUI_X + DOT, MAZE_Y, ENERGIZER, ENERGIZER, 512, 512);
+                if (ENERGIZER_STATE == 0) drawModalRectWithCustomSizedTexture(extendedX, extendedY, GUI_X + DOT, MAZE_Y, ENERGIZER, ENERGIZER, 512, 512);
             }
             return this;
         }
@@ -437,6 +453,7 @@ public class GuiPacMan extends GuiArcade {
         public Tile updatePosition (int x, int y) {
             extendedX = this.x * 8 + x;
             extendedY = this.y * 8 + y;
+
             return this;
         }
 
@@ -454,7 +471,7 @@ public class GuiPacMan extends GuiArcade {
     }
 
     private class Player extends Mover {
-        int pelletsEaten;
+        int pelletsEaten, energizersEatern, lives = 3, totalEaten, ghostsEaten; // When scareTime is reached, ghostsEaten must be reset.
         boolean energizerMode;
 
         int STATE = 0;
@@ -463,7 +480,7 @@ public class GuiPacMan extends GuiArcade {
         boolean stopped = false;
 
         // TODO: Try and center at start
-        public Player (ResourceLocation texture) {
+        public Player () {
             //super(108, (23 * 8), 0);
             super(14, 23);
 
@@ -476,20 +493,24 @@ public class GuiPacMan extends GuiArcade {
         private Mover move (float partialTick) {
             if (desired != current) changeDirection(desired);
 
-            // TODO: First teleport from left side moves player not all the way to the right
-            // TODO: First teleport from the right side crashes the game
             // Teleport
             if (checkTile() == EnumTile.TELE) {
                 if (extendedX <= (offsetX + 2) && y == 14) moveX = 103;
-                if (extendedX >= (offsetX + (27 * 8)) && y == 14) moveX = -106;
+                if (extendedX >= (offsetX + (27 * 8)) && y == 14) moveX = -108;
             }
 
-            //System.out.println(moveX);
-
+            // TODO: Stop for 1/60th a second when dot is eaten
             // Eat Dots
             if (tiles[y][x].edible == 1) {
                 tiles[y][x].edible = 0;
                 pelletsEaten++;
+            }
+
+            // Eat Energizer
+            if (tiles[y][x].edible == 2) {
+                tiles[y][x].edible = 0;
+                energizersEatern++;
+                energizerMode = true;
             }
 
             if (moveTick + (tickCounter - moveTick) * partialTick >= 1) {
@@ -563,6 +584,7 @@ public class GuiPacMan extends GuiArcade {
         public Player updatePosition (int x, int y) {
             super.updatePosition(x, y);
 
+            // Animation
             if (onTile()) {
                 if (STATE == 0) STATE = 1;
                 else STATE = 0;
@@ -571,10 +593,8 @@ public class GuiPacMan extends GuiArcade {
             return this;
         }
 
+        // TODO: Draw Lives
         private Player drawPlayer () {
-            glColor(Color.MAGENTA);
-            drawModalRectWithCustomSizedTexture(extendedX, extendedY, 234, 264, 8, 8, 512, 512);
-
             GlStateManager.color(1.0F, 1.0F, 1.0F);
             switch (current) {
                 case STAND:
@@ -597,27 +617,99 @@ public class GuiPacMan extends GuiArcade {
         }
     }
 
+    // TODO: Ghost Teleport logic
     private class Ghost extends Mover {
         EnumGhost info;
+        boolean scared = false, eaten = false, scatter = false, inHouse;
+        int SCARED_STATE = 0, BODY_STATE = 0;
+        int dotCounter = 0; // See Home Sweet Home Section
 
-        //int prevPelletX, prevPelletY;
-
-        int targetX, targetY;
-
-        boolean scared = false, eaten = false;
-        boolean inHouse;
-
-        public Ghost (ResourceLocation texture, EnumGhost ghost) {
+        // TODO: Have to set start pos with extended coords
+        public Ghost (EnumGhost ghost) {
             super(ghost.getX(), ghost.getY());
             info = ghost;
 
-            current = desired = Direction.RIGHT;
+            if (ghost != EnumGhost.BLINKY) {
+                inHouse = true;
+                current = desired = Direction.UP;
+            } else current = desired = Direction.LEFT;
         }
 
         private Mover move (float partialTick) {
             if (desired != current) changeDirection(desired);
 
-            if (moveTick + (tickCounter - moveTick) * partialTick >= 1) {
+            if ((extendedX - offsetX) % 4 == 0 && (extendedY - offsetY) % 4 == 0) {
+                if (BODY_STATE == 0) BODY_STATE = 1;
+                else BODY_STATE = 0;
+            }
+
+            // Collision Detection
+            if ((x == pacman.x) && (y == pacman.y)) {
+                if (scared) {
+                    eaten = true;
+                    scared = false;
+                    // add to score
+                }
+                // else kill pacman
+            }
+
+            // TODO: Delay before leaving house
+            if (eaten) {
+                if ((x >= 11 && x <= 16) && (y >= 13 && y <= 15)) {
+                    eaten = false;
+                    inHouse = true;
+                }
+            }
+            if (inHouse) { // Let Ghosts go from up -> down and down -> up. Also figure out why it chooses to go down when it has to go up
+                if ((x == 13 || x == 14) && y == 11) inHouse = false;
+            }
+
+            // Scared direction
+            if (pacman.energizerMode) {
+                scared = true;
+                switch (current) {
+                    case LEFT:
+                        if (!isBlockedRight()) desired = current = Direction.RIGHT;
+                        else {
+                            if (!isBlocked()) desired = current = Direction.UP;
+                            if (!isBlockedDown()) desired = current = Direction.DOWN;
+                            if (!isBlockedLeft()) desired = current = Direction.LEFT;
+                        }
+                        break;
+                    case RIGHT:
+                        if (!isBlockedLeft()) desired = current = Direction.LEFT;
+                        else {
+                            if (!isBlocked()) desired = current = Direction.UP;
+                            if (!isBlockedDown()) desired = current = Direction.DOWN;
+                            if (!isBlockedRight()) desired = current = Direction.RIGHT;
+                        }
+                        break;
+                    case UP:
+                        if (!isBlockedDown()) desired = current = Direction.DOWN;
+                        else {
+                            if (!isBlockedLeft()) desired = current = Direction.LEFT;
+                            if (!isBlockedRight()) desired = current = Direction.RIGHT;
+                            if (!isBlocked()) desired = current = Direction.UP;
+                        }
+                        break;
+                    case DOWN:
+                        if (!isBlocked()) desired = current = Direction.UP;
+                        else {
+                            if (!isBlockedLeft()) desired = current = Direction.LEFT;
+                            if (!isBlockedRight()) desired = current = Direction.RIGHT;
+                            if (!isBlockedDown()) desired = current = Direction.DOWN;
+                        }
+                        break;
+                }
+
+                if (info == EnumGhost.CLYDE) pacman.energizerMode = false;
+            }
+
+            //System.out.println("Tick:" + (moveTick + (tickCounter - moveTick) * partialTick) + "Move:" + moveTick);
+            //System.out.println((moveTick + (tickCounter - moveTick) * partialTick) / (5 * moveTick));
+
+            // TODO: Variable Speed
+            if ((moveTick + (tickCounter - moveTick) * partialTick) >= 1) {
                 moveTick = tickCounter;
 
                 switch (current) {
@@ -645,8 +737,6 @@ public class GuiPacMan extends GuiArcade {
                         if (onTile()) {
                             if (!isBlockedLeft()) current = newDirection;
                         }
-                    } else {
-                        if (!isBlockedLeft()) current = newDirection;
                     }
                     return this;
                 case RIGHT:
@@ -654,8 +744,6 @@ public class GuiPacMan extends GuiArcade {
                         if (onTile()) {
                             if (!isBlockedRight()) current = newDirection;
                         }
-                    } else {
-                        if (!isBlockedRight()) current = newDirection;
                     }
                     return this;
                 case UP:
@@ -663,8 +751,6 @@ public class GuiPacMan extends GuiArcade {
                         if (onTile()) {
                             if (!isBlocked()) current = newDirection;
                         }
-                    } else {
-                        if (!isBlocked()) current = newDirection;
                     }
                     return this;
                 case DOWN:
@@ -672,279 +758,300 @@ public class GuiPacMan extends GuiArcade {
                         if (onTile()) {
                             if (!isBlockedDown()) current = newDirection;
                         }
-                    } else {
-                        if (!isBlockedDown()) current = newDirection;
                     }
                     return this;
             }
             return this;
         }
 
-        // TODO: eh kinda works
+        private double calculateDistance (int x, int y) {
+            //return Math.sqrt(Math.pow((Math.min((27 * 8) + offsetX, Math.max(0, x)) - getTarget().getX()), 2) + Math.pow((Math.max((30 * 8) + offsetY, Math.min(0, y) - getTarget().getY())), 2));
+            return Math.sqrt(Math.pow((x - getTarget().getX()), 2) + Math.pow((y - getTarget().getY()), 2));
+        }
+
+        // TODO: make the ghost less stupid with Ghost Limit Tiles
         private Ghost ai () {
-            double disX = Math.sqrt(Math.pow((extendedX - targetX), 2));
-            double disY = Math.sqrt(Math.pow((extendedY - targetY), 2));
-            double dis = Math.sqrt(Math.pow((extendedX - targetX), 2) + Math.pow((extendedY - targetY), 2));
-
-            int tx = (targetX - offsetX) / 8;
-            int ty = (targetY - offsetY) / 8;
-
-            if (isBlockedDown()) {
-                if (isBlockedLeft()) {
-                    if (isBlockedRight()) {
-                    } else {
-                        if (x < tx) desired = Direction.RIGHT;
-                        else if (x > tx) {
-                            if (isBlockedLeft()) desired = Direction.LEFT;
-                            else desired = Direction.LEFT;
+            if (current == Direction.LEFT) { // Can't Move right
+                if (isBlockedLeft(x - 1, y)) { // is blocked left
+                    if (!isBlockedDown(x - 1, y) && !isBlocked(x - 1, y)) {
+                        if (calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX - 8, extendedY + 8)) desired = Direction.UP;
+                        else desired = Direction.DOWN;
+                    }
+                    if (!isBlocked(x - 1, y) && isBlockedDown(x - 1, y)) desired = Direction.UP;
+                    if (!isBlockedDown(x - 1, y) && isBlocked(x - 1, y)) desired = Direction.DOWN;
+                } else { // is not blocked left
+                    if (!isBlockedDown(x - 1, y) && !isBlocked(x - 1, y)) {
+                        if (calculateDistance(extendedX - 16, extendedY) < calculateDistance(extendedX - 8, extendedY - 8) && calculateDistance(extendedX - 16, extendedY) < calculateDistance(extendedX - 8, extendedY + 8)) desired = Direction.LEFT;
+                        else if ((calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX - 8, extendedY + 8) && calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX - 16, extendedY)) && tiles[y][x].type != EnumTile.GHOST_LIMIT) desired = Direction.UP;
+                        else if (calculateDistance(extendedX - 8, extendedY + 8) < calculateDistance(extendedX - 16, extendedY) && calculateDistance(extendedX - 8, extendedY + 8) < calculateDistance(extendedX - 8, extendedY - 8)) desired = Direction.DOWN;
+                        else if (calculateDistance(extendedX - 8, extendedY + 8) == calculateDistance(extendedX - 16, extendedY) && calculateDistance(extendedX - 16, extendedY) == calculateDistance(extendedX - 8, extendedY - 8)) desired = Direction.DOWN;
+                    }
+                    if (!isBlocked(x - 1, y)) {
+                        if ((calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX - 16, extendedY)) && tiles[y][x].type != EnumTile.GHOST_LIMIT) desired = Direction.UP;
+                    }
+                    if (!isBlockedDown(x - 1, y)) {
+                        if (calculateDistance(extendedX - 8, extendedY + 8) < calculateDistance(extendedX - 16, extendedY)) desired = Direction.DOWN;
+                    }
+                    //if (isBlocked(x - 1, y) && isBlockedDown(x - 1, y)) desired = Direction.LEFT;
+                }
+            }
+            if (current == Direction.RIGHT) { // Can't Move left
+                if (isBlockedRight(x + 1, y)) {
+                    if (!isBlockedDown(x + 1, y) && !isBlocked(x + 1, y)) {
+                        if (calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX + 8, extendedY + 8)) desired = Direction.UP;
+                        else desired = Direction.DOWN;
+                    }
+                    if (!isBlocked(x + 1, y) && isBlockedDown(x + 1, y)) desired = Direction.UP;
+                    if (!isBlockedDown(x + 1, y) && isBlocked(x + 1, y)) desired = Direction.DOWN;
+                } else {
+                    if (!isBlockedDown(x + 1, y) && !isBlocked(x + 1, y)) {
+                        if ((calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX + 8, extendedY + 8) && calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX + 16, extendedY)) && tiles[y][x].type != EnumTile.GHOST_LIMIT) desired = Direction.UP;
+                        else if (calculateDistance(extendedX + 8, extendedY + 8) < calculateDistance(extendedX + 8, extendedY - 8) && calculateDistance(extendedX + 8, extendedY + 8) < calculateDistance(extendedX + 16, extendedY)) desired = Direction.DOWN;
+                        else if (calculateDistance(extendedX + 16, extendedY) < calculateDistance(extendedX + 8, extendedY + 8) && calculateDistance(extendedX + 16, extendedY) < calculateDistance(extendedX + 8, extendedY - 8)) desired = Direction.RIGHT;
+                        else if ((calculateDistance(extendedX + 16, extendedY) == calculateDistance(extendedX + 8, extendedY + 8) && calculateDistance(extendedX + 8, extendedY + 8) == calculateDistance(extendedX + 8, extendedY - 8)) && tiles[y][x].type != EnumTile.GHOST_LIMIT) desired = Direction.UP;
+                    }
+                    if (!isBlocked(x + 1, y)) {
+                        if ((calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX + 16, extendedY)) && tiles[y][x].type != EnumTile.GHOST_LIMIT) desired = Direction.UP;
+                    }
+                    if (!isBlockedDown(x + 1, y)) {
+                        if (calculateDistance(extendedX + 8, extendedY + 8) < calculateDistance(extendedX + 16, extendedY)) desired = Direction.DOWN;
+                    }
+                    //if (isBlocked(x + 1, y) && isBlockedDown(x + 1, y)) desired = Direction.RIGHT;
+                }
+            }
+            if (current == Direction.UP) { // Can't move down
+                if (isBlocked(x, y - 1)) {
+                    if (!isBlockedLeft(x, y - 1) && !isBlockedRight(x, y - 1)) {
+                        if (tiles[y - 1][x - 1].type == EnumTile.GHOST_LIMIT) desired = Direction.RIGHT;
+                        else if (tiles[y - 1][x + 1].type == EnumTile.GHOST_LIMIT) desired = Direction.LEFT;
+                        else {
+                            if (calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX + 8, extendedY - 8)) desired = Direction.LEFT;
+                            else desired = Direction.RIGHT;
                         }
                     }
+                    if (!isBlockedLeft(x, y - 1) && isBlockedRight(x, y - 1)) desired = Direction.LEFT;
+                    if (!isBlockedRight(x, y - 1) && isBlockedLeft(x, y - 1)) desired = Direction.RIGHT;
                 } else {
-                    if (x > tx) desired = Direction.LEFT;
-                    else if (x < tx) {
-                        if (isBlockedRight()) desired = Direction.RIGHT;
+                    if (!isBlockedRight(x, y - 1) && !isBlockedLeft(x, y - 1)) {
+                        if (calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX + 8, extendedY - 8) && calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX, extendedY - 16)) desired = Direction.LEFT;
+                        else if (calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX - 8, extendedY - 8) && calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX, extendedY - 16)) desired = Direction.RIGHT;
+                        else if (calculateDistance(extendedX, extendedY - 16) < calculateDistance(extendedX - 8, extendedY - 8) && calculateDistance(extendedX, extendedY - 16) < calculateDistance(extendedX + 8, extendedY - 8)) desired = Direction.UP;
+                        else if (calculateDistance(extendedX - 8, extendedY - 8) == calculateDistance(extendedX + 8, extendedY - 8) && calculateDistance(extendedX + 8, extendedY - 8) == calculateDistance(extendedX, extendedY - 16)) desired = Direction.LEFT;
+                    }
+                    if (!isBlockedLeft(x, y - 1)) {
+                        if (calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX, extendedY - 16)) desired = Direction.LEFT;
+                    }
+                    if (!isBlockedRight(x, y - 1)) {
+                        if (calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX, extendedY - 16)) desired = Direction.RIGHT;
+                    }
+                    //if (isBlockedLeft(x, y - 1) && isBlockedRight(x, y - 1)) desired = Direction.UP;
+                }
+            }
+            if (current == Direction.DOWN) { // Can't move up
+                if (isBlockedDown(x, y + 1)) { // is blocked down
+                    if (!isBlockedLeft(x, y + 1) && !isBlockedRight(x, y + 1)) {
+                        if (calculateDistance(extendedX - 8, extendedY + 8) < calculateDistance(extendedX + 8, extendedY + 8)) desired = Direction.LEFT;
                         else desired = Direction.RIGHT;
                     }
-                }
-            } else {
-                if (isBlockedRight()) {
+                    if (!isBlockedRight(x, y + 1) && isBlockedLeft(x, y + 1)) desired = Direction.RIGHT;
+                    if (!isBlockedLeft(x, y + 1) && isBlockedRight(x, y + 1)) desired = Direction.LEFT;
                 } else {
-                    if (x < tx) desired = Direction.RIGHT;
-                    else if (x > tx) {
-                        if (isBlockedLeft()) desired = Direction.LEFT;
-                        else desired = Direction.LEFT;
+                    if (!isBlockedLeft(x, y + 1) && !isBlockedRight(x, y + 1)) {
+                        if (calculateDistance(extendedX - 8, extendedY + 8) < calculateDistance(extendedX + 8, extendedY + 8) && calculateDistance(extendedX - 8, extendedY + 8) < calculateDistance(extendedX, extendedY + 16)) desired = Direction.LEFT;
+                        else if (calculateDistance(extendedX + 8, extendedY + 8) < calculateDistance(extendedX - 8, extendedY + 8) && calculateDistance(extendedX + 8, extendedY + 8) < calculateDistance(extendedX, extendedY + 16)) desired = Direction.RIGHT;
+                        else if (calculateDistance(extendedX, extendedY + 16) < calculateDistance(extendedX - 8, extendedY + 8) && calculateDistance(extendedX, extendedY + 16) < calculateDistance(extendedX + 8, extendedY + 8)) desired = Direction.DOWN;
+                        else if (calculateDistance(extendedX, extendedY + 16) == calculateDistance(extendedX - 8, extendedY + 8) && calculateDistance(extendedX - 8, extendedY + 8) == calculateDistance(extendedX + 8, extendedY + 8)) desired = Direction.RIGHT;
                     }
+                    if (!isBlockedLeft(x, y + 1)) {
+                        if (calculateDistance(extendedX - 8, extendedY + 8) < calculateDistance(extendedX, extendedY + 16)) desired = Direction.LEFT;
+                    }
+                    if (!isBlockedRight(x, y + 1)) {
+                        if (calculateDistance(extendedX + 8, extendedY + 8) < calculateDistance(extendedX, extendedY + 16)) desired = Direction.RIGHT;
+                    }
+                    //if (isBlockedLeft(x, y + 1) && isBlockedRight(x, y + 1)) desired = Direction.DOWN;
                 }
-                if (y < ty) desired = Direction.DOWN;
             }
-
             return this;
         }
 
-        private Ghost updateTarget () {
-            switch (info) {
-                case BLINKY:
-                    targetX = (pacman.x * 8) + offsetX;
-                    targetY = (pacman.y * 8) + offsetY;
-                    return this;
-                case INKY:
-                    switch (pacman.current) {
-                        case LEFT:
-                            return this;
-                        case RIGHT:
-                            return this;
-                        case UP:
-                            return this;
-                        case DOWN:
-                            return this;
-                    }
-                    return this;
-                case PINKY:
-                    switch (pacman.current) {
-                        case LEFT:
-                            return this;
-                        case RIGHT:
-                            return this;
-                        case UP:
-                            return this;
-                        case DOWN:
-                            return this;
-                    }
-                    return this;
-                case CLYDE:
-                    switch (pacman.current) {
-                        case LEFT:
-                            return this;
-                        case RIGHT:
-                            return this;
-                        case UP:
-                            return this;
-                        case DOWN:
-                            return this;
-                    }
-                    return this;
+        private boolean isBlocked (int x, int y) {
+            return tiles[Math.max(0, y - 1)][Math.max(0, x)].type == EnumTile.WALL;
+        }
+
+        private boolean isBlockedDown (int x, int y) {
+            return (eaten || inHouse) ? tiles[Math.min(30, y + 1)][Math.max(0, x)].type == EnumTile.WALL : tiles[Math.min(30, y + 1)][Math.max(0, x)].type == EnumTile.WALL || tiles[Math.min(30, y + 1)][x].type == EnumTile.GHOST_ONLY;
+        }
+
+        private boolean isBlockedLeft (int x, int y) {
+            return tiles[y][Math.max(0, x - 1)].type == EnumTile.WALL || tiles[y][Math.max(0, x - 1)].type == EnumTile.TELE_ZONE;
+        }
+
+        private boolean isBlockedRight (int x, int y) {
+            return tiles[y][Math.min(27, x + 1)].type == EnumTile.WALL || tiles[y][Math.min(27, x + 1)].type == EnumTile.TELE_ZONE;
+        }
+
+        @Override
+        public boolean isBlockedDown () {
+            return isBlockedDown(x, y);
+        }
+
+        // TODO: Scared Target (Random Targets)
+        private Point getTarget () {
+            if (scared) {
+                return new Point((int)(Math.random() * 28) * 8 + offsetX, (int)(Math.random() * 30) * 8 + offsetY); // Not the best option
+            } else if (eaten) {
+                return new Point((13 * 8) + offsetX, (15 * 8) + offsetY);
+            } else if (inHouse) {
+                return new Point((13 * 8) + offsetX, (11 * 8) + offsetY);
+            } else {
+                switch (info) {
+                    case BLINKY:
+                        return scatter ? new Point((27 * 8), 0) : new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY);
+                    case INKY:
+                        switch (pacman.current) { // Scatter Bottom Right
+                            case STAND:
+                                return scatter ? new Point((27 * 8), (30 * 8)) : new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY);
+                            case LEFT:
+                                return scatter ? new Point((27 * 8), (30 * 8)) : new Point(((pacman.getPosition().x - 3) * 8) + offsetX, ((pacman.getPosition().y + 1) * 8) + offsetY);
+                            case RIGHT:
+                                return scatter ? new Point((27 * 8), (30 * 8)) : new Point(((pacman.getPosition().x + 3) * 8) + offsetX, ((pacman.getPosition().y - 1) * 8) + offsetY);
+                            case UP:
+                                return scatter ? new Point((27 * 8), (30 * 8)) : new Point(((pacman.getPosition().x - 1) * 8) + offsetX, ((pacman.getPosition().y - 7) * 8) + offsetY);
+                            case DOWN:
+                                return scatter ? new Point((27 * 8), (30 * 8)) : new Point(((pacman.getPosition().x - 4) * 8) + offsetX, ((pacman.getPosition().y + 2) * 8) + offsetY);
+                        }
+                    case PINKY:
+                        switch (pacman.current) { // Scatter Top Left
+                            case STAND:
+                                return scatter ? new Point(0, 0) : new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY);
+                            case LEFT:
+                                return scatter ? new Point(0, 0) : new Point((pacman.getPosition().x * 8) + offsetX - (4 * 8), (pacman.getPosition().y * 8) + offsetY);
+                            case RIGHT:
+                                return scatter ? new Point(0, 0) : new Point((pacman.getPosition().x * 8) + offsetX + (4 * 8), (pacman.getPosition().y * 8) + offsetY);
+                            case UP:
+                                return scatter ? new Point(0, 0) : new Point((pacman.getPosition().x * 8) + offsetX - (4 * 8), (pacman.getPosition().y * 8) + offsetY - (4 * 8));
+                            case DOWN:
+                                return scatter ? new Point(0, 0) : new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY + (4 * 8));
+                        }
+                    case CLYDE:
+                        // Scatter Bottom Left
+                        // if pac man is more 8 tiles away from him. target is pacman's local
+                        // if pac man is less than 8 tiles away. target is his scatter target
+                        // diameter = 19
+
+                        // TODO: Something is wrong. I think if x goes to negative it thinks ghost is in range
+                        if (scatter) return new Point(offsetX, (30 * 8) + offsetY);
+                        else {
+                            // Clyde proximity
+                            for (int i = 0; i < 4; i++) {
+                                if ((extendedX <= (pacman.extendedX + (8 * 8)) && extendedX >= (pacman.extendedX - (8 * 8))) && (extendedY <= (pacman.extendedY - (8 * i)))) return new Point(offsetX, (30 * 8) + offsetY);
+                            }
+                            for (int i = 1; i < 4; i++) {
+                                if ((extendedX <= (pacman.extendedX + (8 * 8)) && extendedX >= (pacman.extendedX - (8 * 8))) && (extendedY <= (pacman.extendedY + (8 * i)))) return new Point(offsetX, (30 * 8) + offsetY);
+                            }
+                            for (int i = 4; i < 6; i++) {
+                                if ((extendedX <= (pacman.extendedX + (8 * 7)) && extendedX >= (pacman.extendedX - (8 * 7))) && (extendedY <= (pacman.extendedY - (8 * i)))) return new Point(offsetX, (30 * 8) + offsetY);
+                            }
+                            for (int i = 4; i < 6; i++) {
+                                if ((extendedX <= (pacman.extendedX + (8 * 7)) && extendedX >= (pacman.extendedX - (8 * 7))) && (extendedY <= (pacman.extendedY + (8 * i)))) return new Point(offsetX, (30 * 8) + offsetY);
+                            }
+                            if ((extendedX <= (pacman.extendedX + (8 * 6)) && extendedX >= (pacman.extendedX - (8 * 6))) && (extendedY <= (pacman.extendedY - (8 * 6)))) return new Point(offsetX, (30 * 8) + offsetY);
+                            if ((extendedX <= (pacman.extendedX + (8 * 6)) && extendedX >= (pacman.extendedX - (8 * 6))) && (extendedY <= (pacman.extendedY + (8 * 6)))) return new Point(offsetX, (30 * 8) + offsetY);
+                            if ((extendedX <= (pacman.extendedX + (8 * 5)) && extendedX >= (pacman.extendedX - (8 * 5))) && (extendedY <= (pacman.extendedY - (8 * 7)))) return new Point(offsetX, (30 * 8) + offsetY);
+                            if ((extendedX <= (pacman.extendedX + (8 * 5)) && extendedX >= (pacman.extendedX - (8 * 5))) && (extendedY <= (pacman.extendedY + (8 * 7)))) return new Point(offsetX, (30 * 8) + offsetY);
+                            if ((extendedX <= (pacman.extendedX + (8 * 3)) && extendedX >= (pacman.extendedX - (8 * 3))) && (extendedY <= (pacman.extendedY - (8 * 8)))) return new Point(offsetX, (30 * 8) + offsetY);
+                            if ((extendedX <= (pacman.extendedX + (8 * 3)) && extendedX >= (pacman.extendedX - (8 * 3))) && (extendedY <= (pacman.extendedY + (8 * 8)))) return new Point(offsetX, (30 * 8) + offsetY);
+
+                            return new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY);
+                        }
+                }
             }
-            return this;
+            return null;
         }
 
         private Ghost drawGhost () {
-            // Target
+            // Target TODO: Remove
             glColor(Color.green);
-            drawModalRectWithCustomSizedTexture(targetX, targetY, 234, 264, 8, 8, 512, 512);
+            drawModalRectWithCustomSizedTexture(getTarget().x, getTarget().y, 234, 264, 8, 8, 512, 512);
 
-            if (scared) glColor(info.getColor());
-            else glColor(info.getColor());
+//                    new Color(33, 33, 222), // Blue
+//                    new Color(245, 245, 255), // White
+//                    new Color(255, 15, 15) // Red
 
-            // hitbox
-            drawModalRectWithCustomSizedTexture(extendedX, extendedY, 234, 264, 8, 8, 512, 512);
-
+            // TODO: Blink when timer starts to run out
+            if (scared) {
+                if ((tickCounter - scaredTick) == (scaredTime - 1) * 20) {
+                    // 1 second to blink
+                }
+                glColor(new Color(33, 33, 222));
+            } else glColor(info.getColor());
             if (!eaten) {
                 // Body
-                //drawModalRectWithCustomSizedTexture(extendedX, extendedY, GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
-                //drawModalRectWithCustomSizedTexture(extendedX, extendedY, GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
+                if (BODY_STATE == 0) drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
+                else drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
+            }
+
+            GlStateManager.color(1.0F, 1.0F, 1.0F);
+            if (!scared) {
+                switch (current) {
+                    case LEFT:
+                        // Eye
+                        drawModalRectWithCustomSizedTexture(extendedX - 2, extendedY, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+                        drawModalRectWithCustomSizedTexture(extendedX + EYE_X, extendedY, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+
+                        // Pupil
+                        glColor(new Color(33, 33, 222));
+                        drawModalRectWithCustomSizedTexture(extendedX - 2, extendedY + 2, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+                        drawModalRectWithCustomSizedTexture(extendedX + EYE_X, extendedY + 2, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+                        break;
+                    case RIGHT:
+                        // Eye
+                        drawModalRectWithCustomSizedTexture(extendedX, extendedY, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+                        drawModalRectWithCustomSizedTexture(extendedX + EYE_X + 2, extendedY, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+
+                        // Pupil
+                        glColor(new Color(33, 33, 222));
+                        drawModalRectWithCustomSizedTexture(extendedX + 2, extendedY + 2, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+                        drawModalRectWithCustomSizedTexture(extendedX + EYE_X + 4, extendedY + 2, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+                        break;
+                    case UP:
+                        // Eye
+                        drawModalRectWithCustomSizedTexture(extendedX - 1, extendedY - 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+                        drawModalRectWithCustomSizedTexture(extendedX + EYE_X + 1, extendedY - 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+
+                        // Pupil
+                        glColor(new Color(33, 33, 222));
+                        drawModalRectWithCustomSizedTexture(extendedX, extendedY - 2, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+                        drawModalRectWithCustomSizedTexture(extendedX + EYE_X + 2, extendedY - 2, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+                        break;
+                    case DOWN:
+                        // Eye
+                        drawModalRectWithCustomSizedTexture(extendedX - 1, extendedY + 1, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+                        drawModalRectWithCustomSizedTexture(extendedX + EYE_X + 1, extendedY + 1, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
+
+                        // Pupil
+                        glColor(new Color(33, 33, 222));
+                        drawModalRectWithCustomSizedTexture(extendedX, extendedY + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+                        drawModalRectWithCustomSizedTexture(extendedX + EYE_X + 2, extendedY + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+                        break;
+                }
+            } else { // Is Scared
+                // TODO: Blink when timer starts to run out
+                glColor(new Color(245, 245, 255));
+                // Pupil
+                drawModalRectWithCustomSizedTexture(extendedX + 1, extendedY + 1, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+                drawModalRectWithCustomSizedTexture(extendedX + EYE_X + 1, extendedY + 1, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
+                // Mouth
+                drawModalRectWithCustomSizedTexture(extendedX - 2, extendedY + 5, GUI_X, MAZE_Y + GHOST, MOUTH_X, MOUTH_Y, 512, 512);
             }
             return this;
         }
     }
 
-    //            new Color(255, 255, 255), // White
-//            new Color(7, 7, 255) // Blue
-//    };
-//
-//    private final Color[] eyeColor = {
-//            new Color(33, 33, 222),
-//            new Color(245, 245, 255),
-//            new Color(255, 15, 15)
-//    };
-
-    //    private void drawGhost (int x, int y, Direction direction, int ghost, boolean frightened, boolean eaten, boolean debug) {
-//        if (!eaten) {
-//            if (!frightened) {
-//                float[] body = colorToFloat(ghostColor[ghost]);
-//                float[] eye = colorToFloat(eyeColor[0]);
-//
-//                GlStateManager.color(body[0], body[1], body[2]);
-//                // Body
-//                if (GHOST_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
-//                else this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
-//
-//                // Eye
-//                GlStateManager.color(1.0F, 1.0F, 1.0F);
-//                switch (direction.getDirection()) {
-//                    case 0: // Still
-//                        break;
-//                    case 1: // Up
-//                        // Eye
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 2, playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        // Pupil
-//                        GlStateManager.color(eye[0], eye[1], eye[2]);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        break;
-//                    case 2: // Down
-//                        // Eye
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 2, playY + 5 + (y * ghostSpeedMultiplier) + 3, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier) + 3, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        // Pupil
-//                        GlStateManager.color(eye[0], eye[1], eye[2]);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier) + 6, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier) + 6, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        break;
-//                    case 3: // Left
-//                        // Eye
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 3, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        // Pupil
-//                        GlStateManager.color(eye[0], eye[1], eye[2]);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 3, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        break;
-//                    case 4: // Right
-//                        // Eye
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                        // Pupil
-//                        GlStateManager.color(eye[0], eye[1], eye[2]);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 5, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 7, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                        break;
-//                }
-//            } else {
-//                if (FRIGHT_STATE == 0) { // Blue
-//                    // Body
-//                    float[] body = colorToFloat(ghostColor[5]);
-//                    GlStateManager.color(body[0], body[1], body[2]);
-//                    if (GHOST_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
-//                    else this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
-//
-//                    // Pupil
-//                    float[] eye = colorToFloat(eyeColor[1]);
-//                    GlStateManager.color(eye[0], eye[1], eye[2]);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 4, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//
-//                    // Mouth
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 8, GUI_X, MAZE_Y + GHOST, MOUTH_X, MOUTH_Y, 512, 512);
-//                } else if (FRIGHT_STATE == 1) { // White
-//                    // Body
-//                    float[] body = colorToFloat(ghostColor[4]);
-//                    GlStateManager.color(body[0], body[1], body[2]);
-//                    if (GHOST_STATE == 0) this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
-//                    else this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 10 + GHOST, MAZE_Y, GHOST, GHOST, 512, 512);
-//
-//                    // Pupil
-//                    float[] eye = colorToFloat(eyeColor[2]);
-//                    GlStateManager.color(eye[0], eye[1], eye[2]);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 4, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//
-//                    // Mouth
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 8, GUI_X, MAZE_Y + GHOST, MOUTH_X, MOUTH_Y, 512, 512);
-//                }
-//            }
-//        } else {
-//            float[] eye = colorToFloat(eyeColor[0]);
-//
-//            // Eye
-//            GlStateManager.color(1.0F, 1.0F, 1.0F);
-//            switch (direction.getDirection()) {
-//                case 0: // Still
-//                    break;
-//                case 1: // Up
-//                    // Eye
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 2, playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier), GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    // Pupil
-//                    GlStateManager.color(eye[0], eye[1], eye[2]);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    break;
-//                case 2: // Down
-//                    // Eye
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 2, playY + 5 + (y * ghostSpeedMultiplier) + 3, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 4, playY + 5 + (y * ghostSpeedMultiplier) + 3, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    // Pupil
-//                    GlStateManager.color(eye[0], eye[1], eye[2]);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier) + 6, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier) + 6, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    break;
-//                case 3: // Left
-//                    // Eye
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 3, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    // Pupil
-//                    GlStateManager.color(eye[0], eye[1], eye[2]);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 1, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 3, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    break;
-//                case 4: // Right
-//                    // Eye
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 3, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 5, playY + 5 + (y * ghostSpeedMultiplier) + 2, GUI_X + 6, MAZE_Y + ENERGIZER, EYE_X, EYE_Y, 512, 512);
-//                    // Pupil
-//                    GlStateManager.color(eye[0], eye[1], eye[2]);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + 5, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier) + EYE_X + 7, playY + 5 + (y * ghostSpeedMultiplier) + 4, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
-//                    break;
-//            }
-//        }
-//
-//        if (debug) {
-//            float[] debugColor = colorToFloat(new Color(230, 30, 100));
-//            GlStateManager.color(debugColor[0], debugColor[1], debugColor[2]);
-//
-//            this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Top Left
-//            this.drawModalRectWithCustomSizedTexture(playX + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].height + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Bottom Left
-//            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[1].width + 5 + (x * ghostSpeedMultiplier), playY + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Top Right
-//            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[1].width + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].height + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Bottom Right
-//
-//            this.drawModalRectWithCustomSizedTexture(playX + gameCollision[1].center[0] + 5 + (x * ghostSpeedMultiplier), playY + gameCollision[1].center[1] + 4 + (y * ghostSpeedMultiplier), GUI_X, MAZE_Y + DOT, 1, 1, 512, 512); // Center
-//        }
-//    }
-
     private class Mover {
-        Direction direction, current, desired;
+        Direction current, desired;
+
+        int moveTick = 0;
 
         // Position
         int x, y;
@@ -954,14 +1061,16 @@ public class GuiPacMan extends GuiArcade {
         int offsetX, offsetY;
 
         private Mover (int x, int y) {
-            this.x1 = x * 8;
+            this.x1 = (x * 8) - 4;
             this.y1 = y * 8;
+            this.x = x;
+            this.y = y;
         }
 
-        private Mover (int x, int y, int ugh) {
-            this.x1 = x;
-            this.y1 = y;
-        }
+//        private Mover (int x, int y, int ugh) {
+//            this.x1 = x;
+//            this.y1 = y;
+//        }
 
         public Mover updatePosition (int x, int y) {
             extendedX = x1 + x + moveX;
@@ -973,17 +1082,15 @@ public class GuiPacMan extends GuiArcade {
             if ((extendedX - x) % 8 == 0) this.x = (extendedX - x) / 8;
             if ((extendedY - y) % 8 == 0) this.y = (extendedY - y) / 8;
 
-            //System.out.println(String.format("\nPos: (%f, %f)\nTil: (%f, %f)", getExtendedPosition().getX(), getExtendedPosition().getY(), tiles[this.y][this.x].getExtendedPosition().getX(), tiles[this.y][this.x].getExtendedPosition().getY()));
-
             return this;
         }
 
         public boolean isBlocked () {
-            return tiles[y - 1][x].type == EnumTile.WALL;
+            return tiles[Math.max(0, y - 1)][x].type == EnumTile.WALL;
         }
 
         public boolean isBlockedDown () {
-            return tiles[y + 1][x].type == EnumTile.WALL || tiles[y + 2][x].type == EnumTile.GHOST_ONLY;
+            return tiles[y + 1][x].type == EnumTile.WALL || tiles[y + 1][x].type == EnumTile.GHOST_ONLY;
         }
 
         public boolean isBlockedLeft () {
@@ -1015,6 +1122,95 @@ public class GuiPacMan extends GuiArcade {
         }
     }
 
+    public void getLevelData () {
+        // Set bonus fruit
+        // Set speeds
+        if (level == 0) { // Level 1
+            scaredTime = 6;
+            scaredFlash = 5;
+        }
+        if (level == 1) { // Level 2
+            scaredTime = 5;
+            scaredFlash = 5;
+        }
+        if (level == 2) { // Level 3
+            scaredTime = 4;
+            scaredFlash = 5;
+        }
+        if (level == 3) { // Level 4
+            scaredTime = 3;
+            scaredFlash = 5;
+        }
+        if (level == 4) { // Level 5
+            scaredTime = 2;
+            scaredFlash = 5;
+        }
+        if (level == 5) { // Level 6
+            scaredTime = 5;
+            scaredFlash = 5;
+        }
+        if (level == 6) { // Level 7
+            scaredTime = 2;
+            scaredFlash = 5;
+        }
+        if (level == 7) { // Level 8
+            scaredTime = 2;
+            scaredFlash = 5;
+        }
+        if (level == 8) { // Level 9
+            scaredTime = 1;
+            scaredFlash = 3;
+        }
+        if (level == 9) { // Level 10
+            scaredTime = 5;
+            scaredFlash = 5;
+        }
+        if (level == 10) { // Level 11
+            scaredTime = 2;
+            scaredFlash = 5;
+        }
+        if (level == 11) { // Level 12
+            scaredTime = 1;
+            scaredFlash = 3;
+        }
+        if (level == 12) { // Level 13
+            scaredTime = 1;
+            scaredFlash = 3;
+        }
+        if (level == 13) { // Level 14
+            scaredTime = 3;
+            scaredFlash = 5;
+        }
+        if (level == 14) { // Level 15
+            scaredTime = 1;
+            scaredFlash = 3;
+        }
+        if (level == 15) { // Level 16
+            scaredTime = 1;
+            scaredFlash = 3;
+        }
+        if (level == 16) { // Level 17
+            scaredTime = 0;
+            scaredFlash = 0;
+        }
+        if (level == 17) { // Level 18
+            scaredTime = 1;
+            scaredFlash = 3;
+        }
+        if (level == 18) { // Level 19
+            scaredTime = 0;
+            scaredFlash = 0;
+        }
+        if (level == 19) { // Level 20
+            scaredTime = 0;
+            scaredFlash = 0;
+        }
+        if (level >= 20) { // Level 21+
+            scaredTime = 0;
+            scaredFlash = 0;
+        }
+    }
+
 //    // Animation Variables
 //    private int PACMAN_STATE = 0;
 //    private int FRIGHT_STATE = 0;
@@ -1023,7 +1219,6 @@ public class GuiPacMan extends GuiArcade {
 //    private int ENERGIZER_STATE = 0;
 //    private boolean resetState = true;
 //
-//    // TODO: Audio
 //    // Audio Variables
 //    private int WAKA = 0;
 //    private int ENERGIZER_SOUND = 0;
@@ -1462,7 +1657,6 @@ public class GuiPacMan extends GuiArcade {
 //            new MazeCollision(104, 99, 15, 4, true)
 //    };
 //
-//    // TODO: Clean up?
 //    private final GameCollision[] gameCollision = new GameCollision[] {
 //            new GameCollision(14, 14), // Pac Man 0
 //            new GameCollision(GHOST, GHOST), // Ghost 1
@@ -1477,7 +1671,6 @@ public class GuiPacMan extends GuiArcade {
 //        setTexture(texture, 512, 512);
 //
 //        tempPoints = ediblePoint.clone();
-//        // TODO: Remove
 //        inMenu = false;
 //    }
 //
@@ -1525,7 +1718,6 @@ public class GuiPacMan extends GuiArcade {
 //            -   20    | 0 sec       | 0
 //            -   21+   | 0 sec       | 0
 //         */
-//        // TODO: Scatter, Chase timing
 //        // Ghost
 //        if ((tickCounter - blinkTick) >= 5 && blink) {
 //            blinkTick = tickCounter;
@@ -1537,15 +1729,14 @@ public class GuiPacMan extends GuiArcade {
 //            if (GHOST_STATE == 0) GHOST_STATE = 1;
 //            else if (GHOST_STATE == 1) GHOST_STATE = 0;
 //        }
-//        if ((tickCounter - frightTick) == 70) blink = true; // TODO: Fix fright not working
-//        if ((tickCounter - frightTick) == 90) { // TODO: Change fright speed depending on level
+//        if ((tickCounter - frightTick) == 70) blink = true;
+//        if ((tickCounter - frightTick) == 90) {
 //            frightTick = tickCounter;
 //            for (int i = 0; i < 4; i++) frightened[i] = false;
 //            blink = false;
 //        }
 //        blinkyAi();
 //
-//        // TODO: Implement AI
 //        pinkyAi();
 //        inkyAi();
 //        clydeAi();
@@ -1603,8 +1794,6 @@ public class GuiPacMan extends GuiArcade {
 //                }
 //            }
 //            drawPacman(playerX, playerY, direction[0], false);
-//
-//            // TODO: Check time since last eaten. 4 second limit for level 1-4. 3 second limit for 5+. If exceeded, kick a ghost out of house
 //            if (level >= 0 && level <= 3) {
 //                // 4 second limit
 //                if ((tickCounter - timeSinceEaten) == (4 * 20)) {
@@ -1686,7 +1875,6 @@ public class GuiPacMan extends GuiArcade {
 //        checkCenter();
 //    }
 //
-//    // TODO: Controls
 //    @Override
 //    protected void keyTyped (char typedChar, int keyCode) throws IOException {
 //        super.keyTyped(typedChar, keyCode);
@@ -1772,8 +1960,6 @@ public class GuiPacMan extends GuiArcade {
 //        }
 //    }
 //
-//    // TODO: Fix ghosts noping the fuck out of the house and not through the door
-//    // TODO: Redo
 //    private void checkHouse () {
 //        // Some how the check not working is making everything mostly work...
 //        if (ghostPos[2][0] != 25 && ghostPos[2][1] != 26 && inHouse[2]) { // Pinky
@@ -2003,7 +2189,6 @@ public class GuiPacMan extends GuiArcade {
 //        if (life == 2) this.drawModalRectWithCustomSizedTexture(playX + (PACMAN * 2) - 1, playY + 4 + (61 * speedMultiplier), PACMAN, GUI_Y + PACMAN + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
 //    }
 //
-//    // TODO: Make fruit change per level
 //    private void drawFruit (int x, int y, boolean debug) {
 //        GlStateManager.color(1.0F, 1.0F, 1.0F);
 //        // Cherry
@@ -2403,7 +2588,6 @@ public class GuiPacMan extends GuiArcade {
 //                        if (canMoveLeft(1) && direction[1] == Direction.LEFT) ghostPos[0][0]--;
 //                        if (canMoveRight(1) && direction[1] == Direction.RIGHT) ghostPos[0][0]++;
 //                    } else { // Fright AI
-//                        // TODO: Check dis shit (dis shit currently no work)
 //                        // ghostPos[0][0] == (playX + gameCollision[0].center[0] + 5 + (25 * speedMultiplier)) && ghostPos[0][1] == (playY + gameCollision[0].center[1] + 4 + (20 * speedMultiplier))
 //                        if (eaten[0]) {
 //                            if (ghostPos[0][0] == (playX + gameCollision[0].center[0] + 5 + (25 * speedMultiplier)) && ghostPos[0][1] == (playY + gameCollision[0].center[1] + 4 + (20 * speedMultiplier))) {
@@ -2424,7 +2608,6 @@ public class GuiPacMan extends GuiArcade {
 //                            if (canMoveLeft(1) && direction[1] == Direction.LEFT) ghostPos[0][0] -= 2;
 //                            if (canMoveRight(1) && direction[1] == Direction.RIGHT) ghostPos[0][0] += 2;
 //                        } else {
-//                            // TODO: Better AI
 //                            // Set Position
 //                            if (canMoveUp(1) && direction[1] == Direction.UP) ghostPos[0][1]--;
 //                            if (canMoveDown(1) && direction[1] == Direction.DOWN) ghostPos[0][1]++;
@@ -2543,7 +2726,6 @@ public class GuiPacMan extends GuiArcade {
 //        4 = Right
 //     */
 //
-//    // TODO: Gotta do this shit again... yay
 //    // When going up or down, sometimes makes a u-turn which isn't allowed
 //    // GL
 //    private Direction pathfinding (int ghost, int targetX, int targetY) {
