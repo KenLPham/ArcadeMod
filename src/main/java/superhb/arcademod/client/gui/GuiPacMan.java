@@ -110,13 +110,13 @@ public class GuiPacMan extends GuiArcade {
         }
 
         // Ghosts
-        ghosts[0].drawGhost().ai().move(partialTick).updatePosition(boardX, boardY);
-        ghosts[1].drawGhost().ai().move(partialTick).updatePosition(boardX, boardY);
-        ghosts[2].drawGhost().ai().move(partialTick).updatePosition(boardX, boardY);
-        ghosts[3].drawGhost().ai().move(partialTick).updatePosition(boardX, boardY);
+        ghosts[0].drawGhost().ai().move().updatePosition(boardX, boardY);
+        ghosts[1].drawGhost().ai().move().updatePosition(boardX, boardY);
+        ghosts[2].drawGhost().ai().move().updatePosition(boardX, boardY);
+        ghosts[3].drawGhost().ai().move().updatePosition(boardX, boardY);
 
         // Pac-Man
-        pacman.drawPlayer().move(partialTick).updatePosition(boardX, boardY);
+        pacman.drawPlayer().move().updatePosition(boardX, boardY);
 
         // Text
         this.fontRendererObj.drawString(String.format("%d", score), boardX + 30, boardY - 8, Color.white.getRGB());
@@ -468,18 +468,23 @@ public class GuiPacMan extends GuiArcade {
 
         int STATE = 0;
 
+        int prevX, prevY;
+
         boolean teleport;
         boolean stopped = false;
 
         public Player () {
             super(14, 23);
 
-            teleport = false;
+            prevX = 14;
+            prevY = 23;
+
+            teleport = false; // TODO: Remove?
             current = desired = Direction.LEFT;
         }
 
         // TODO: cornering
-        private Mover move (float partialTick) {
+        private Mover move () {
             if (desired != current) changeDirection(desired);
 
             // Teleport (Might have to redo)
@@ -488,7 +493,6 @@ public class GuiPacMan extends GuiArcade {
                 if (extendedX >= (offsetX + (27 * 8)) && y == 14) moveX = -108;
             }
 
-            // TODO: Stop for 1/60th a second when dot is eaten
             // Eat Dots
             if (tiles[y][x].edible == 1) {
                 tiles[y][x].edible = 0;
@@ -504,11 +508,6 @@ public class GuiPacMan extends GuiArcade {
                 energizerMode = true;
 				canEatGhost = true; // set to false when ScareTime is done
             }
-
-			//System.out.println(" " + (tickCounter + partialTick));
-
-            //if ((tickCounter - moveTick) / (float)(1/3) <= 0.666f) {
-            //    moveTick = tickCounter;
 
 			switch (current) {
 				case LEFT:
@@ -528,7 +527,6 @@ public class GuiPacMan extends GuiArcade {
 					else current = Direction.STAND;
 					return this;
 			}
-            //}
             return this;
         }
 
@@ -542,6 +540,28 @@ public class GuiPacMan extends GuiArcade {
 				}
 				return 0.8f;
 			}
+            if (level >= 1 && level <= 3) { // Level 2-4
+                if (!canEatGhost) {
+                    if (tiles[y][x].edible != 0) return 0.79f; // Dot Speed
+                } else {
+                    if (tiles[y][x].edible != 0) return 0.83f; // Fright Dot Speed
+                    return 0.95f; // Fright Speed
+                }
+                return 0.9f; // Regular Speed
+            }
+            if (level >= 4 && level <= 19) { // Level 5-20
+                if (!canEatGhost) {
+                    if (tiles[y][x].edible != 0) return 0.87f; // Dot Speed
+                } else {
+                    if (tiles[y][x].edible != 0) return 0.87f; // Fright Dot Speed
+                    return 1; // Fright Speed
+                }
+                return 1; // Regular Speed
+            }
+            if (level >= 20) { // Level 21+
+                if (tiles[y][x].edible != 0) return 0.79f; // Dot Speed
+                return 0.9f; // Regular Speed
+            }
         	return 0.8f;
 		}
 
@@ -593,11 +613,12 @@ public class GuiPacMan extends GuiArcade {
 
 			// TODO: Jittery with new movement system
             // Animation
-            if (onTile()) {
+            if ((this.x != prevX) || (this.y != prevY)) {
+                prevX = this.x;
+                prevY = this.y;
                 if (STATE == 0) STATE = 1;
                 else STATE = 0;
             }
-
             return this;
         }
 
@@ -632,7 +653,6 @@ public class GuiPacMan extends GuiArcade {
         int SCARED_STATE = 0, BODY_STATE = 0;
         int dotCounter = 0; // See Home Sweet Home Section
 
-        // TODO: Have to set start pos with extended coords
         public Ghost (EnumGhost ghost) {
             super(ghost.getX(), ghost.getY());
             info = ghost;
@@ -643,7 +663,7 @@ public class GuiPacMan extends GuiArcade {
             } else current = desired = Direction.LEFT;
         }
 
-        private Mover move (float partialTick) {
+        private Mover move () {
             if (desired != current) changeDirection(desired);
 
             if ((extendedX - offsetX) % 4 == 0 && (extendedY - offsetY) % 4 == 0) {
@@ -656,7 +676,7 @@ public class GuiPacMan extends GuiArcade {
                 if (scared) {
                     eaten = true;
                     scared = false;
-                    // add to score
+                    // add to score (200, 400, 800, 1000)
                 }
                 // else kill pacman
             }
@@ -715,42 +735,59 @@ public class GuiPacMan extends GuiArcade {
                 if (info == EnumGhost.CLYDE) pacman.energizerMode = false;
             }
 
-            //System.out.println("Tick:" + (moveTick + (tickCounter - moveTick) * partialTick) + "Move:" + moveTick);
-            //System.out.println((moveTick + (tickCounter - moveTick) * partialTick) / (5 * moveTick));
-
-            // TODO: Variable Speed
-            if ((moveTick + (tickCounter - moveTick) * partialTick) >= 1) {
-                moveTick = tickCounter;
-
-                switch (current) {
-                    case LEFT:
-                        if (!isBlockedLeft()) moveX -= getSpeed();
-                        return this;
-                    case RIGHT:
-                        if (!isBlockedRight()) moveX += getSpeed();
-                        return this;
-                    case UP:
-                        if (!isBlocked()) moveY -= getSpeed();
-                        return this;
-                    case DOWN:
-                        if (!isBlockedDown()) moveY += getSpeed();
-                        return this;
-                }
+            switch (current) {
+                case LEFT:
+                    if (!isBlockedLeft()) moveX -= getSpeed();
+                    return this;
+                case RIGHT:
+                    if (!isBlockedRight()) moveX += getSpeed();
+                    return this;
+                case UP:
+                    if (!isBlocked()) moveY -= getSpeed();
+                    return this;
+                case DOWN:
+                    if (!isBlockedDown()) moveY += getSpeed();
+                    return this;
             }
             return this;
         }
 
+        // TODO: Elroy Speed
         private float getSpeed () {
-        	if (level == 0) { // Level 0
+        	if (level == 0) { // Level 1
 				if (!eaten) {
-					if (pacman.canEatGhost) {
-						if (tiles[y][x].type == EnumTile.TELE_ZONE) return 0.4f;
-						else return 0.5f;
+					if (scared) {
+						if (tiles[y][x].type == EnumTile.TELE_ZONE) return 0.4f; // Tunnel Speed
+						else return 0.5f; // Scared Speed
 					}
-					if (tiles[y][x].type == EnumTile.TELE_ZONE) return 0.4f;
-					return 0.75f;
-				} else return 2;
+					if (tiles[y][x].type == EnumTile.TELE_ZONE) return 0.4f; // Tunnel Speed
+					return 0.75f; // Normal Speed
+				} else return 2; // Eaten Speed TODO: Make it so faster speeds don't get ghosts going willy nilly (it seems that when the ghost is eaten while pacman is moving it gets fucked up)
 			}
+			if (level >= 1 && level <= 3) { // Level 2-4
+                if (!eaten) {
+                    if (scared) {
+                        if (tiles[y][x].type == EnumTile.TELE_ZONE) return 0.45f; // Tunnel Speed
+                        else return 0.55f; // Scared Speed
+                    }
+                    if (tiles[y][x].type == EnumTile.TELE_ZONE) return 0.45f; // Tunnel Speed
+                    return 0.85f; // Normal Speed
+                } else return 2; // Eaten Speed
+            }
+            if (level >= 4 && level <= 15 && level == 17) { // Level 5-16, 18
+                if (!eaten) {
+                    if (scared) {
+                        if (tiles[y][x].type == EnumTile.TELE_ZONE) return 0.5f; // Tunnel Speed
+                        else return 0.6f; // Scared Speed
+                    }
+                    if (tiles[y][x].type == EnumTile.TELE_ZONE) return 0.5f; // Tunnel Speed
+                    return 0.95f; // Normal Speed
+                } else return 2; // Eaten Speed
+            }
+            if (level == 16 || level >= 18) { // Level 17, 19+
+                if (tiles[y][x].type == EnumTile.TELE_ZONE) return 0.45f; // Tunnel Speed
+                return 0.95f; // Normal Speed
+            }
 			return 0.75f;
 		}
 
@@ -921,6 +958,7 @@ public class GuiPacMan extends GuiArcade {
 
         private Point getTarget () {
             if (scared) {
+                //return new Point(offsetX, offsetY);
                 return new Point((int)(Math.random() * 28) * 8 + offsetX, (int)(Math.random() * 30) * 8 + offsetY); // Not the best option
             } else if (eaten) {
                 return new Point((13 * 8) + offsetX, (15 * 8) + offsetY);
