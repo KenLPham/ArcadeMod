@@ -8,6 +8,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.lwjgl.input.Keyboard;
 import superhb.arcademod.Arcade;
@@ -18,6 +19,7 @@ import superhb.arcademod.network.ServerCoinMessage;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.util.*;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.io.IOException;
 
@@ -53,8 +55,10 @@ public class GuiArcade extends GuiScreen {
     private TileEntityArcade tileEntity;
     private EntityPlayer player; // TODO: Remove player?
     private World world;
+    private BlockPos pos;
 
-    public GuiArcade (World world, TileEntityArcade tileEntity, EntityPlayer player) {
+    public GuiArcade (World world, TileEntityArcade tileEntity, @Nullable BlockPos pos, EntityPlayer player) {
+        this.pos = pos;
         this.world = world;
         this.tileEntity = tileEntity;
         this.player = player;
@@ -233,6 +237,26 @@ public class GuiArcade extends GuiScreen {
         return world;
     }
 
+    /**
+     * Returns position of block by GUIHandler.
+     * Used officially to play sounds
+     *
+     * @return BlockPos
+     */
+    public BlockPos getPos () {
+        return pos;
+    }
+
+    /**
+     * Returns player entity passed by GUIHandler
+     * Used officially to play sounds
+     *
+     * @return EntityPlayer
+     */
+    public EntityPlayer getPlayer () {
+        return player;
+    }
+
     @Override
     public void updateScreen () {
         if (useTick) tickCounter++;
@@ -290,6 +314,11 @@ public class GuiArcade extends GuiScreen {
         this.guiTop = Math.round((height / 2) / scale) - (ySize / 2); //(this.height - this.ySize) / 2;
 
         if (useCoins()) this.buttonList.add(insertCoin = new GuiSoundButton(0, (guiLeft + buttonX), (guiTop + buttonY), buttonWidth, buttonHeight, scale, I18n.format("button.arcademod:insert.locale"), ArcadeSoundRegistry.INSERT_COIN));
+    }
+
+    // TODO: Use it stop all sounds
+    @Override
+    public void onGuiClosed () {
     }
 
     // UNUSED

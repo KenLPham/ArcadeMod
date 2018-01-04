@@ -118,7 +118,7 @@ public class GuiTetrominoes extends GuiArcade {
     };
 
     public GuiTetrominoes (World world, TileEntityArcade tileEntity, EntityPlayer player) {
-        super(world, tileEntity, player);
+        super(world, tileEntity, null, player);
         setGuiSize(GUI_X, GUI_Y, 0.9F);
         setTexture(texture);
         setOffset(-30, 0);

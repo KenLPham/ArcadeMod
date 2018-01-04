@@ -1,9 +1,11 @@
 package superhb.arcademod.util;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import superhb.arcademod.Reference;
+import superhb.arcademod.client.audio.LoopingSound;
 
 public class ArcadeSoundRegistry {
     public static SoundEvent INSERT_COIN;
@@ -37,7 +39,7 @@ public class ArcadeSoundRegistry {
         PACMAN_LIFE = registerSound("effect.pacman_life");
     }
 
-    private static SoundEvent registerSound(String name) {
+    private static SoundEvent registerSound (String name) {
         final ResourceLocation sound = new ResourceLocation(Reference.MODID, name);
         return GameRegistry.register(new SoundEvent(sound).setRegistryName(sound));
     }

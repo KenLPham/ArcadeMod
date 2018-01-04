@@ -1,10 +1,10 @@
 package superhb.arcademod.client.gui;
 
-import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArcade;
@@ -13,6 +13,7 @@ import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.util.ArcadeSoundRegistry;
 import superhb.arcademod.util.KeyHandler;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.io.IOException;
 
@@ -46,13 +47,20 @@ public class GuiPacMan extends GuiArcade {
     private static final int DOT = 2;
     private static final int ENERGIZER = 8;
 
-    private byte level;
+    // Audio Variables
+    private float volume = 1f; // TODO: Create volume slider in game settings (separate volume sliders for different sounds?)
+    private int waka;
+    private boolean playSiren = true;
+    private LoopingSound normalSiren;
+
+    // Siren is played normally. When Energizer is eaten fast siren is played and normal siren stops. When ghost is eaten, even faster siren is played (stops when ghost is not longer eaten or when ghosts aren't scared anymore)
 
     // Board Variables
     private int boardX, boardY;
     private int score;
     private Tile[][] tiles = new Tile[31][28]; // 28x31
     private int ENERGIZER_STATE = 0;
+    private byte level;
 
     // Character Variables
     private Player pacman;
@@ -61,13 +69,15 @@ public class GuiPacMan extends GuiArcade {
     private int energizerTick = 0, scatterTick = 0, scaredTick = 0;
     private int scaredTime = 0, scaredFlash = 0;
 
-    public GuiPacMan (World world, TileEntityArcade tile, EntityPlayer player) {
-        super(world, tile, player);
+    public GuiPacMan (World world, TileEntityArcade tile, @Nullable BlockPos pos, EntityPlayer player) {
+        super(world, tile, pos, player);
         setGuiSize(GUI_X, GUI_Y, 0.8F);
         setTexture(texture, 512, 512);
 
         // Setup Tiles
         setupTiles();
+
+        normalSiren = new LoopingSound(ArcadeSoundRegistry.PACMAN_SIREN, SoundCategory.BLOCKS);
 
         // TODO: Call when press start
         getLevelData();
@@ -83,7 +93,13 @@ public class GuiPacMan extends GuiArcade {
     @Override
     public void updateScreen () {
 		super.updateScreen();
-    	//tickCounter += 3;
+
+        //TODO: Figure out how to play looping sounds
+        /*if (playSiren) {
+            mc.getSoundHandler().playSound(normalSiren);
+            playSiren = false;
+        }
+        if (normalSiren.isDonePlaying()) System.out.print("done playing");*/
     }
 
     @Override
@@ -110,10 +126,10 @@ public class GuiPacMan extends GuiArcade {
         }
 
         // Ghosts
-        ghosts[0].drawGhost().ai().move().updatePosition(boardX, boardY);
-        ghosts[1].drawGhost().ai().move().updatePosition(boardX, boardY);
-        ghosts[2].drawGhost().ai().move().updatePosition(boardX, boardY);
-        ghosts[3].drawGhost().ai().move().updatePosition(boardX, boardY);
+        ghosts[0].drawGhost().ai().update().move().updatePosition(boardX, boardY);
+        ghosts[1].drawGhost().ai().update().move().updatePosition(boardX, boardY);
+        ghosts[2].drawGhost().ai().update().move().updatePosition(boardX, boardY);
+        ghosts[3].drawGhost().ai().update().move().updatePosition(boardX, boardY);
 
         // Pac-Man
         pacman.drawPlayer().move().updatePosition(boardX, boardY);
@@ -130,181 +146,6 @@ public class GuiPacMan extends GuiArcade {
         else if (keyCode == KeyHandler.right.getKeyCode()) pacman.desired = Direction.RIGHT;
         else if (keyCode == KeyHandler.down.getKeyCode()) pacman.desired = Direction.DOWN;
         else if (keyCode == KeyHandler.up.getKeyCode()) pacman.desired = Direction.UP;
-    }
-
-    private void setupTiles () {
-        // Row 0
-        for (int i = 0; i < 28; i++) tiles[0][i] = new Tile(i, 0, EnumTile.WALL);
-        // Row 1
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 12 && i < 15) || i == 27) tiles[1][i] = new Tile(i, 1, EnumTile.WALL);
-            else tiles[1][i] = new Tile(i, 1);
-        }
-        // Row 2
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[2][i] = new Tile(i, 2, EnumTile.WALL);
-            else tiles[2][i] = new Tile(i, 2);
-        }
-        // Row 3
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[3][i] = new Tile(i, 3, EnumTile.WALL);
-            else if (i == 1 || i == 26) tiles[3][i] = new Tile(i, 3, 2);
-            else tiles[3][i] = new Tile(i, 3);
-        }
-        // Row 4
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[4][i] = new Tile(i, 4, EnumTile.WALL);
-            else tiles[4][i] = new Tile(i, 4);
-        }
-        // Row 5
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || i == 27) tiles[5][i] = new Tile(i, 5, EnumTile.WALL);
-            else tiles[5][i] = new Tile(i, 5);
-        }
-        // Row 6
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[6][i] = new Tile(i, 6, EnumTile.WALL);
-            else tiles[6][i] = new Tile(i, 6);
-        }
-        // Row 7
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[7][i] = new Tile(i, 7, EnumTile.WALL);
-            else tiles[7][i] = new Tile(i, 7);
-        }
-        // Row 8
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 6 && i < 9) || (i > 12 && i < 15) || (i > 18 && i < 21) || i == 27) tiles[8][i] = new Tile(i, 8, EnumTile.WALL);
-            else tiles[8][i] = new Tile(i, 8);
-        }
-        // Row 9
-        for (int i = 0; i < 28; i++) {
-            if ((i >= 0 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 28)) tiles[9][i] = new Tile(i, 9, EnumTile.WALL);
-            else if (i == 12 || i == 15) tiles[9][i] = new Tile(i, 9, 0);
-            else tiles[9][i] = new Tile(i, 9);
-        }
-        // Row 10
-        for (int i = 0; i < 28; i++) {
-            if ((i >= 0 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 28)) tiles[10][i] = new Tile(i, 10, EnumTile.WALL);
-            else if (i == 12 || i == 15) tiles[10][i] = new Tile(i, 10, 0);
-            else tiles[10][i] = new Tile(i, 10);
-        }
-        // Row 11
-        for (int i = 0; i < 28; i++) {
-            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[11][i] = new Tile(i, 11, EnumTile.WALL);
-            else if (i == 9 || i == 18) tiles[11][i] = new Tile(i, 11, 0);
-            else if (i > 9 && i < 18) tiles[11][i] = new Tile(i, 11, EnumTile.GHOST_LIMIT);
-            else tiles[11][i] = new Tile(i, 11);
-        }
-        // Row 12
-        for (int i = 0; i < 28; i++) {
-            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 13) || (i > 14 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[12][i] = new Tile(i, 12, EnumTile.WALL);
-            else if (i == 9 || i == 18) tiles[12][i] = new Tile(i, 12, 0);
-            else if (i == 13 || i == 14) tiles[12][i] = new Tile(i, 12, EnumTile.GHOST_ONLY);
-            else tiles[12][i] = new Tile(i, 12);
-        }
-        // Row 13
-        for (int i = 0; i < 28; i++) {
-            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || i == 10 || i == 17 || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[13][i] = new Tile(i, 13, EnumTile.WALL);
-            else if (i == 9 || i == 18) tiles[13][i] = new Tile(i, 13, 0);
-            else if (i > 10 && i < 17) tiles[13][i] = new Tile(i, 13, EnumTile.GHOST_ONLY);
-            else tiles[13][i] = new Tile(i, 13);
-        }
-        // Row 14
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || i == 27) tiles[14][i] = new Tile(i, 14, EnumTile.TELE);
-            else if ((i > 0 && i < 6) || (i > 21 && i < 27)) tiles[14][i] = new Tile(i, 14, EnumTile.TELE_ZONE);
-            else if (i == 10 || i == 17) tiles[14][i] = new Tile(i, 14, EnumTile.WALL);
-            else if (i > 10 && i < 17) tiles[14][i] = new Tile(i, 14, EnumTile.GHOST_ONLY);
-            else if (i == 5 || (i > 6 && i < 10) || (i > 17 && i < 21) || i == 22) tiles[14][i] = new Tile(i, 14, 0);
-            else tiles[14][i] = new Tile(i, 14);
-        }
-        // Row 15
-        for (int i = 0; i < 28; i++) {
-            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || i == 10 || i == 17 || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[15][i] = new Tile(i, 15, EnumTile.WALL);
-            else if (i == 9 || i == 18) tiles[15][i] = new Tile(i, 15, 0);
-            else if (i > 10 && i < 17) tiles[15][i] = new Tile(i, 15, EnumTile.GHOST_ONLY);
-            else tiles[15][i] = new Tile(i, 15);
-        }
-        // Row 16
-        for (int i = 0; i < 28; i++) {
-            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[16][i] = new Tile(i, 16, EnumTile.WALL);
-            else if (i == 9 || i == 18) tiles[16][i] = new Tile(i, 16, 0);
-            else tiles[16][i] = new Tile(i, 16);
-        }
-        // Row 17
-        for (int i = 0; i < 28; i++) {
-            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[17][i] = new Tile(i, 17, EnumTile.WALL);
-            else if (i > 8 && i < 19) tiles[17][i] = new Tile(i, 17, 0);
-            else tiles[17][i] = new Tile(i, 17);
-        }
-        // Row 18
-        for (int i = 0; i < 28; i++) {
-            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[18][i] = new Tile(i, 18, EnumTile.WALL);
-            else if (i == 9 || i == 18) tiles[18][i] = new Tile(i, 18, 0);
-            else tiles[18][i] = new Tile(i, 18);
-        }
-        // Row 19
-        for (int i = 0; i < 28; i++) {
-            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[19][i] = new Tile(i, 19, EnumTile.WALL);
-            else if (i == 9 || i == 18) tiles[19][i] = new Tile(i, 19, 0);
-            else tiles[19][i] = new Tile(i, 19);
-        }
-        // Row 20
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 12 && i < 15) || i == 27) tiles[20][i] = new Tile(i, 20, EnumTile.WALL);
-            else tiles[20][i] = new Tile(i, 20);
-        }
-        // Row 21
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[21][i] = new Tile(i, 21, EnumTile.WALL);
-            else tiles[21][i] = new Tile(i, 21);
-        }
-        // Row 22
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[22][i] = new Tile(i, 22, EnumTile.WALL);
-            else tiles[22][i] = new Tile(i, 22);
-        }
-        // Row 23
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 3 && i < 6) || (i > 21 && i < 24) || i == 27) tiles[23][i] = new Tile(i, 23, EnumTile.WALL);
-            else if (i == 1 || i == 26) tiles[23][i] = new Tile(i, 23, 2);
-            else if ((i > 9 && i < 13) || (i > 14 & i < 18)) tiles[23][i] = new Tile(i, 23, EnumTile.GHOST_LIMIT, 1);
-            else if (i > 12 && i < 15) tiles[23][i] = new Tile(i, 23, EnumTile.GHOST_LIMIT);
-            else if (i == 13 || i == 14) tiles[23][i] = new Tile(i, 23, 0);
-            else tiles[23][i] = new Tile(i, 23);
-        }
-        // Row 24
-        for (int i = 0; i < 28; i++) {
-            if ((i >= 0 && i < 3) || (i > 3 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 24) || i > 24) tiles[24][i] = new Tile(i, 24, EnumTile.WALL);
-            else tiles[24][i] = new Tile(i, 24);
-        }
-        // Row 25
-        for (int i = 0; i < 28; i++) {
-            if ((i >= 0 && i < 3) || (i > 3 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 24) || i > 24) tiles[25][i] = new Tile(i, 25, EnumTile.WALL);
-            else tiles[25][i] = new Tile(i, 25);
-        }
-        // Row 26
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 6 && i < 9) || (i > 12 && i < 15) || (i > 18 && i < 21) || i == 27) tiles[26][i] = new Tile(i, 26, EnumTile.WALL);
-            else  tiles[26][i] = new Tile(i, 26);
-        }
-        // Row 27
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 1 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 26) || i == 27) tiles[27][i] = new Tile(i, 27, EnumTile.WALL);
-            else  tiles[27][i] = new Tile(i, 27);
-        }
-        // Row 28
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || (i > 1 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 26) || i == 27) tiles[28][i] = new Tile(i, 28, EnumTile.WALL);
-            else  tiles[28][i] = new Tile(i, 28);
-        }
-        // Row 29
-        for (int i = 0; i < 28; i++) {
-            if (i == 0 || i == 27) tiles[29][i] = new Tile(i, 29, EnumTile.WALL);
-            else tiles[29][i] = new Tile(i, 29);
-        }
-        // Row 30
-        for (int i = 0; i < 28; i++) tiles[30][i] = new Tile(i, 30, EnumTile.WALL);
     }
 
     private enum Direction {
@@ -487,10 +328,10 @@ public class GuiPacMan extends GuiArcade {
         private Mover move () {
             if (desired != current) changeDirection(desired);
 
-            // Teleport (Might have to redo)
+            // Teleport
             if (checkTile() == EnumTile.TELE) {
-                if (extendedX <= (offsetX + 2) && y == 14) moveX = 103;
-                if (extendedX >= (offsetX + (27 * 8)) && y == 14) moveX = -108;
+                if (extendedX <= (offsetX + 2)) moveX = 103;
+                if (extendedX >= (offsetX + (27 * 8))) moveX = -103;
             }
 
             // Eat Dots
@@ -498,6 +339,7 @@ public class GuiPacMan extends GuiArcade {
                 tiles[y][x].edible = 0;
                 foodEaten++;
                 score += 10;
+                playWaka();
             }
 
             // Eat Energizer
@@ -506,6 +348,7 @@ public class GuiPacMan extends GuiArcade {
                 foodEaten++;
                 score += 50;
                 energizerMode = true;
+                scaredTick = tickCounter;
 				canEatGhost = true; // set to false when ScareTime is done
             }
 
@@ -528,6 +371,39 @@ public class GuiPacMan extends GuiArcade {
 					return this;
 			}
             return this;
+        }
+
+        private void playWaka () {
+            if (waka == 0) {
+                getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_1, SoundCategory.BLOCKS, volume, 1.0f);
+                waka++;
+                return;
+            }
+            if (waka == 1) {
+                getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_2, SoundCategory.BLOCKS, volume, 1.0f);
+                waka++;
+                return;
+            }
+            if (waka == 2) {
+                getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_3, SoundCategory.BLOCKS, volume, 1.0f);
+                waka++;
+                return;
+            }
+            if (waka == 3) {
+                getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_4, SoundCategory.BLOCKS, volume, 1.0f);
+                waka++;
+                return;
+            }
+            if (waka == 4) {
+                getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_5, SoundCategory.BLOCKS, 1.0f, 1.0f);
+                waka++;
+                return;
+            }
+            if (waka == 5) {
+                getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_6, SoundCategory.BLOCKS, 1.0f, 1.0f);
+                waka = 0;
+                return;
+            }
         }
 
         private float getSpeed () {
@@ -611,7 +487,6 @@ public class GuiPacMan extends GuiArcade {
         public Player updatePosition (int x, int y) {
             super.updatePosition(x, y);
 
-			// TODO: Jittery with new movement system
             // Animation
             if ((this.x != prevX) || (this.y != prevY)) {
                 prevX = this.x;
@@ -646,12 +521,12 @@ public class GuiPacMan extends GuiArcade {
         }
     }
 
-    // TODO: Ghost Teleport logic
     private class Ghost extends Mover {
         EnumGhost info;
-        boolean scared = false, eaten = false, scatter = false, inHouse;
+        boolean scared = false, eaten = false, scatter = true, inHouse, blink;
         int SCARED_STATE = 0, BODY_STATE = 0;
         int dotCounter = 0; // See Home Sweet Home Section
+        int modeTime, mode, blinks;
 
         public Ghost (EnumGhost ghost) {
             super(ghost.getX(), ghost.getY());
@@ -663,33 +538,25 @@ public class GuiPacMan extends GuiArcade {
             } else current = desired = Direction.LEFT;
         }
 
+        private boolean isEven (int n) {
+            return n % 2 == 0;
+        }
+
         private Mover move () {
             if (desired != current) changeDirection(desired);
 
-            if ((extendedX - offsetX) % 4 == 0 && (extendedY - offsetY) % 4 == 0) {
-                if (BODY_STATE == 0) BODY_STATE = 1;
-                else BODY_STATE = 0;
-            }
-
-            // Collision Detection
-            if ((x == pacman.x) && (y == pacman.y)) {
-                if (scared) {
-                    eaten = true;
-                    scared = false;
-                    // add to score (200, 400, 800, 1000)
+            // Teleport
+            if (checkTile() == EnumTile.TELE_ZONE || checkTile() == EnumTile.TELE) {
+                if (info == EnumGhost.BLINKY || info == EnumGhost.PINKY) {
+                    if ((extendedX <= (offsetX + 2)) && y == 14) moveX = 100;
+                    if ((extendedX >= (offsetX + (26 * 8))) && y == 14) moveX = -103;
+                } else if (info == EnumGhost.INKY) {
+                    if (extendedX <= (offsetX + 2) && y == 14) moveX = 116;
+                    if (extendedX >= (offsetX + (26 * 8)) && y == 14) moveX = -85;
+                } else if (info == EnumGhost.CLYDE) {
+                    if (extendedX <= (offsetX + 2) && y == 14) moveX = 84;
+                    if (extendedX >= (offsetX + (26 * 8)) && y == 14) moveX = -120;
                 }
-                // else kill pacman
-            }
-
-            // TODO: Delay before leaving house
-            if (eaten) {
-                if ((x >= 11 && x <= 16) && (y >= 13 && y <= 15)) {
-                    eaten = false;
-                    inHouse = true;
-                }
-            }
-            if (inHouse) { // TODO: Let Ghosts go from up -> down and down -> up.
-                if ((x == 13 || x == 14) && y == 11) inHouse = false;
             }
 
             // Scared direction
@@ -731,7 +598,6 @@ public class GuiPacMan extends GuiArcade {
                             break;
                     }
                 }
-
                 if (info == EnumGhost.CLYDE) pacman.energizerMode = false;
             }
 
@@ -762,7 +628,7 @@ public class GuiPacMan extends GuiArcade {
 					}
 					if (tiles[y][x].type == EnumTile.TELE_ZONE) return 0.4f; // Tunnel Speed
 					return 0.75f; // Normal Speed
-				} else return 2; // Eaten Speed TODO: Make it so faster speeds don't get ghosts going willy nilly (it seems that when the ghost is eaten while pacman is moving it gets fucked up)
+				} else return 2; // Eaten Speed
 			}
 			if (level >= 1 && level <= 3) { // Level 2-4
                 if (!eaten) {
@@ -790,6 +656,99 @@ public class GuiPacMan extends GuiArcade {
             }
 			return 0.75f;
 		}
+
+		private Ghost update () {
+            // Collision Detection
+            //if (((x == pacman.x) && (y == pacman.y)) && ((extendedX == pacman.extendedX) && (extendedY == pacman.extendedY))) {
+            //if ((extendedX == pacman.extendedX) && (extendedY == pacman.extendedY)) {
+            //if ((x == pacman.x) && (y == pacman.y)) {
+            if ((((extendedX - offsetX) / 8) == ((pacman.extendedX - offsetX) / 8)) && (((extendedY - offsetY) / 8) == ((pacman.extendedY - offsetY) / 8))) {
+                if (scared) {
+                    switch (current) {
+                        case LEFT:
+                            if (!isEven(extendedX)) moveX += 1;
+                            break;
+                        case RIGHT:
+                            if (!isEven(extendedX)) moveX -= 1;
+                            break;
+                        case UP:
+                            if (!isEven(extendedY)) moveY += 1;
+                            break;
+                        case DOWN:
+                            if (!isEven(extendedY)) moveY -= 1;
+                            break;
+                    }
+                    eaten = true;
+                    scared = false;
+
+                    if (pacman.ghostsEaten == 0) score += 200;
+                    else if (pacman.ghostsEaten == 1) score += 400;
+                    else if (pacman.ghostsEaten == 2) score += 800;
+                    else if (pacman.ghostsEaten == 3) score += 1000;
+                    pacman.ghostsEaten++;
+                }
+                // else kill pacman (if eaten doesnt do shit)
+            }
+
+            // House Logic
+            // TODO: Delay before leaving house
+            if (eaten) {
+                if ((x >= 11 && x <= 16) && (y >= 13 && y <= 15)) {
+                    eaten = false;
+                    inHouse = true;
+                }
+            }
+            if (inHouse) { // TODO: Let Ghosts go from up -> down and down -> up.
+                if ((x == 13 || x == 14) && y == 11) inHouse = false;
+            }
+
+            // TODO: If the ghosts enter frightened mode, the scatter/chase timer is paused
+            // Mode switching logic
+            if (level == 0) { // Level 1
+                if (mode == 0) { // Scatter
+                    modeTime = 7;
+                } else if (mode == 1) { // Chase
+                    modeTime = 20;
+                } else if (mode == 2) { // Scatter
+                    modeTime = 7;
+                } else if (mode == 3) { // Chase
+                    modeTime = 20;
+                } else if (mode == 4) { // Scatter
+                    modeTime = 5;
+                } else if (mode == 5) { // Chase
+                    modeTime = 20;
+                } else if (mode == 6) { // Scatter
+                    modeTime = 5;
+                } else if (mode >= 7) { // Chase
+                    modeTime = 0;
+                }
+            }
+
+            if (modeTime == 0) scatter = false;
+            else {
+                if ((tickCounter - scatterTick) == (modeTime * 20)) {
+                    if (info == EnumGhost.CLYDE) scatterTick = tickCounter;
+                    mode++;
+                    scatter = !scatter;
+                }
+            }
+
+            // TODO: Get working better
+            // Blink Animation
+            if (blink) {
+                if ((extendedX - offsetX) % 4 == 0 && (extendedY - offsetY) % 4 == 0) {
+                    if (SCARED_STATE == 0) {
+                        SCARED_STATE = 1;
+                        //if (info == EnumGhost.CLYDE) blinks++;
+                    } else {
+                        SCARED_STATE = 0;
+                        //if (info == EnumGhost.CLYDE) blinks++;
+                    }
+                }
+            }
+            //if (blinks == scaredFlash) blink = false;
+		    return this;
+        }
 
         private Mover changeDirection (Direction newDirection) {
             switch (newDirection) {
@@ -831,6 +790,7 @@ public class GuiPacMan extends GuiArcade {
         }
 
         // TODO: make the ghost less stupid with Ghost Limit Tiles
+        // TODO: make ghosts want to go thru tunnel if pacman is on opposite side and it will be quicker
         private Ghost ai () {
             if (current == Direction.LEFT) { // Can't Move right
                 if (isBlockedLeft(x - 1, y)) { // is blocked left
@@ -843,12 +803,12 @@ public class GuiPacMan extends GuiArcade {
                 } else { // is not blocked left
                     if (!isBlockedDown(x - 1, y) && !isBlocked(x - 1, y)) {
                         if (calculateDistance(extendedX - 16, extendedY) < calculateDistance(extendedX - 8, extendedY - 8) && calculateDistance(extendedX - 16, extendedY) < calculateDistance(extendedX - 8, extendedY + 8)) desired = Direction.LEFT;
-                        else if ((calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX - 8, extendedY + 8) && calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX - 16, extendedY)) && tiles[y][x].type != EnumTile.GHOST_LIMIT) desired = Direction.UP;
+                        else if ((calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX - 8, extendedY + 8) && calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX - 16, extendedY))) desired = Direction.UP;
                         else if (calculateDistance(extendedX - 8, extendedY + 8) < calculateDistance(extendedX - 16, extendedY) && calculateDistance(extendedX - 8, extendedY + 8) < calculateDistance(extendedX - 8, extendedY - 8)) desired = Direction.DOWN;
                         else if (calculateDistance(extendedX - 8, extendedY + 8) == calculateDistance(extendedX - 16, extendedY) && calculateDistance(extendedX - 16, extendedY) == calculateDistance(extendedX - 8, extendedY - 8)) desired = Direction.DOWN;
                     }
                     if (!isBlocked(x - 1, y)) {
-                        if ((calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX - 16, extendedY)) && tiles[y][x].type != EnumTile.GHOST_LIMIT) desired = Direction.UP;
+                        if ((calculateDistance(extendedX - 8, extendedY - 8) < calculateDistance(extendedX - 16, extendedY))) desired = Direction.UP;
                     }
                     if (!isBlockedDown(x - 1, y)) {
                         if (calculateDistance(extendedX - 8, extendedY + 8) < calculateDistance(extendedX - 16, extendedY)) desired = Direction.DOWN;
@@ -866,13 +826,13 @@ public class GuiPacMan extends GuiArcade {
                     if (!isBlockedDown(x + 1, y) && isBlocked(x + 1, y)) desired = Direction.DOWN;
                 } else {
                     if (!isBlockedDown(x + 1, y) && !isBlocked(x + 1, y)) {
-                        if ((calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX + 8, extendedY + 8) && calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX + 16, extendedY)) && tiles[y][x].type != EnumTile.GHOST_LIMIT) desired = Direction.UP;
+                        if ((calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX + 8, extendedY + 8) && calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX + 16, extendedY))) desired = Direction.UP;
                         else if (calculateDistance(extendedX + 8, extendedY + 8) < calculateDistance(extendedX + 8, extendedY - 8) && calculateDistance(extendedX + 8, extendedY + 8) < calculateDistance(extendedX + 16, extendedY)) desired = Direction.DOWN;
                         else if (calculateDistance(extendedX + 16, extendedY) < calculateDistance(extendedX + 8, extendedY + 8) && calculateDistance(extendedX + 16, extendedY) < calculateDistance(extendedX + 8, extendedY - 8)) desired = Direction.RIGHT;
-                        else if ((calculateDistance(extendedX + 16, extendedY) == calculateDistance(extendedX + 8, extendedY + 8) && calculateDistance(extendedX + 8, extendedY + 8) == calculateDistance(extendedX + 8, extendedY - 8)) && tiles[y][x].type != EnumTile.GHOST_LIMIT) desired = Direction.UP;
+                        else if ((calculateDistance(extendedX + 16, extendedY) == calculateDistance(extendedX + 8, extendedY + 8) && calculateDistance(extendedX + 8, extendedY + 8) == calculateDistance(extendedX + 8, extendedY - 8))) desired = Direction.UP;
                     }
                     if (!isBlocked(x + 1, y)) {
-                        if ((calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX + 16, extendedY)) && tiles[y][x].type != EnumTile.GHOST_LIMIT) desired = Direction.UP;
+                        if ((calculateDistance(extendedX + 8, extendedY - 8) < calculateDistance(extendedX + 16, extendedY))) desired = Direction.UP;
                     }
                     if (!isBlockedDown(x + 1, y)) {
                         if (calculateDistance(extendedX + 8, extendedY + 8) < calculateDistance(extendedX + 16, extendedY)) desired = Direction.DOWN;
@@ -944,11 +904,11 @@ public class GuiPacMan extends GuiArcade {
         }
 
         private boolean isBlockedLeft (int x, int y) {
-            return tiles[y][Math.max(0, x - 1)].type == EnumTile.WALL || tiles[y][Math.max(0, x - 1)].type == EnumTile.TELE_ZONE;
+            return tiles[y][Math.max(0, x - 1)].type == EnumTile.WALL;
         }
 
         private boolean isBlockedRight (int x, int y) {
-            return tiles[y][Math.min(27, x + 1)].type == EnumTile.WALL || tiles[y][Math.min(27, x + 1)].type == EnumTile.TELE_ZONE;
+            return tiles[y][Math.min(27, x + 1)].type == EnumTile.WALL;
         }
 
         @Override
@@ -958,7 +918,6 @@ public class GuiPacMan extends GuiArcade {
 
         private Point getTarget () {
             if (scared) {
-                //return new Point(offsetX, offsetY);
                 return new Point((int)(Math.random() * 28) * 8 + offsetX, (int)(Math.random() * 30) * 8 + offsetY); // Not the best option
             } else if (eaten) {
                 return new Point((13 * 8) + offsetX, (15 * 8) + offsetY);
@@ -967,32 +926,32 @@ public class GuiPacMan extends GuiArcade {
             } else {
                 switch (info) {
                     case BLINKY:
-                        return scatter ? new Point((27 * 8), 0) : new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY);
+                        return scatter ? new Point((23 * 8) + offsetX, offsetY) : new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY);
                     case INKY:
                         switch (pacman.current) { // Scatter Bottom Right
                             case STAND:
-                                return scatter ? new Point((27 * 8), (30 * 8)) : new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY);
+                                return scatter ? new Point((27 * 8) + offsetX, (30 * 8) + offsetY) : new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY);
                             case LEFT:
-                                return scatter ? new Point((27 * 8), (30 * 8)) : new Point(((pacman.getPosition().x - 3) * 8) + offsetX, ((pacman.getPosition().y + 1) * 8) + offsetY);
+                                return scatter ? new Point((27 * 8) + offsetX, (30 * 8) + offsetY) : new Point(((pacman.getPosition().x - 3) * 8) + offsetX, ((pacman.getPosition().y + 1) * 8) + offsetY);
                             case RIGHT:
-                                return scatter ? new Point((27 * 8), (30 * 8)) : new Point(((pacman.getPosition().x + 3) * 8) + offsetX, ((pacman.getPosition().y - 1) * 8) + offsetY);
+                                return scatter ? new Point((27 * 8) + offsetX, (30 * 8) + offsetY) : new Point(((pacman.getPosition().x + 3) * 8) + offsetX, ((pacman.getPosition().y - 1) * 8) + offsetY);
                             case UP:
-                                return scatter ? new Point((27 * 8), (30 * 8)) : new Point(((pacman.getPosition().x - 1) * 8) + offsetX, ((pacman.getPosition().y - 7) * 8) + offsetY);
+                                return scatter ? new Point((27 * 8) + offsetX, (30 * 8) + offsetY) : new Point(((pacman.getPosition().x - 1) * 8) + offsetX, ((pacman.getPosition().y - 7) * 8) + offsetY);
                             case DOWN:
-                                return scatter ? new Point((27 * 8), (30 * 8)) : new Point(((pacman.getPosition().x - 4) * 8) + offsetX, ((pacman.getPosition().y + 2) * 8) + offsetY);
+                                return scatter ? new Point((27 * 8) + offsetX, (30 * 8) + offsetY) : new Point(((pacman.getPosition().x - 4) * 8) + offsetX, ((pacman.getPosition().y + 2) * 8) + offsetY);
                         }
                     case PINKY:
-                        switch (pacman.current) { // Scatter Top Left
+                        switch (pacman.current) { // Scatter Top Left (4,0)
                             case STAND:
-                                return scatter ? new Point(0, 0) : new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY);
+                                return scatter ? new Point((4 * 8) + offsetX, offsetY) : new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY);
                             case LEFT:
-                                return scatter ? new Point(0, 0) : new Point((pacman.getPosition().x * 8) + offsetX - (4 * 8), (pacman.getPosition().y * 8) + offsetY);
+                                return scatter ? new Point((4 * 8) + offsetX, offsetY) : new Point((pacman.getPosition().x * 8) + offsetX - (4 * 8), (pacman.getPosition().y * 8) + offsetY);
                             case RIGHT:
-                                return scatter ? new Point(0, 0) : new Point((pacman.getPosition().x * 8) + offsetX + (4 * 8), (pacman.getPosition().y * 8) + offsetY);
+                                return scatter ? new Point((4 * 8) + offsetX, offsetY) : new Point((pacman.getPosition().x * 8) + offsetX + (4 * 8), (pacman.getPosition().y * 8) + offsetY);
                             case UP:
-                                return scatter ? new Point(0, 0) : new Point((pacman.getPosition().x * 8) + offsetX - (4 * 8), (pacman.getPosition().y * 8) + offsetY - (4 * 8));
+                                return scatter ? new Point((4 * 8) + offsetX, offsetY) : new Point((pacman.getPosition().x * 8) + offsetX - (4 * 8), (pacman.getPosition().y * 8) + offsetY - (4 * 8));
                             case DOWN:
-                                return scatter ? new Point(0, 0) : new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY + (4 * 8));
+                                return scatter ? new Point((4 * 8) + offsetX, offsetY) : new Point((pacman.getPosition().x * 8) + offsetX, (pacman.getPosition().y * 8) + offsetY + (4 * 8));
                         }
                     case CLYDE:
                         // Scatter Bottom Left
@@ -1031,22 +990,28 @@ public class GuiPacMan extends GuiArcade {
         }
 
         private Ghost drawGhost () {
+            // Animation
+            // TODO: Fix jittering
+            if ((extendedX - offsetX) % 4 == 0 && (extendedY - offsetY) % 4 == 0) {
+                if (BODY_STATE == 0) BODY_STATE = 1;
+                else BODY_STATE = 0;
+            }
+
             // Target TODO: Remove
             glColor(Color.green);
             drawModalRectWithCustomSizedTexture(getTarget().x, getTarget().y, 234, 264, 8, 8, 512, 512);
 
-//                    new Color(33, 33, 222), // Blue
-//                    new Color(245, 245, 255), // White
-//                    new Color(255, 15, 15) // Red
-
-            // TODO: Blink when timer starts to run out
-            // TODO: Fix it so that when eaten and another energizer is eaten, face changes to scared with no body (ghost stays eaten and isn't affected by scare)
             if (scared) {
-                if ((tickCounter - scaredTick) == (scaredTime - 1) * 20) {
-                    // 1 second to blink
+                if ((tickCounter - scaredTick) == (scaredTime - 1) * 20) blink = true;
+                if ((tickCounter - scaredTick) == scaredTime * 20) { // TODO: Blinking
+                    if (info == EnumGhost.CLYDE) scaredTick = tickCounter;
+                    scared = pacman.canEatGhost = blink = false;
+                    SCARED_STATE = blinks = pacman.ghostsEaten = 0;
                 }
-                glColor(new Color(33, 33, 222));
-            } else glColor(info.getColor());
+                if (SCARED_STATE == 0) glColor(new Color(33, 33, 222));
+                else glColor(new Color(245, 245, 255));
+            }
+            else glColor(info.getColor());
             if (!eaten) {
                 // Body
                 if (BODY_STATE == 0) drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, GUI_X + 10, MAZE_Y, GHOST, GHOST, 512, 512);
@@ -1097,8 +1062,8 @@ public class GuiPacMan extends GuiArcade {
                         break;
                 }
             } else { // Is Scared
-                // TODO: Blink when timer starts to run out
-                glColor(new Color(245, 245, 255));
+                if (SCARED_STATE == 0) glColor(new Color(245, 245, 255));
+                else glColor(new Color(255, 15, 15));
                 // Pupil
                 drawModalRectWithCustomSizedTexture(extendedX + 1, extendedY + 1, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
                 drawModalRectWithCustomSizedTexture(extendedX + EYE_X + 1, extendedY + 1, GUI_X, MAZE_Y + DOT, PUPIL, PUPIL, 512, 512);
@@ -1111,8 +1076,6 @@ public class GuiPacMan extends GuiArcade {
 
     private class Mover {
         Direction current, desired;
-
-        int moveTick = 0;
 
         // Position
         int x, y;
@@ -1127,11 +1090,6 @@ public class GuiPacMan extends GuiArcade {
             this.x = x;
             this.y = y;
         }
-
-//        private Mover (int x, int y, int ugh) {
-//            this.x1 = x;
-//            this.y1 = y;
-//        }
 
         public Mover updatePosition (int x, int y) {
             extendedX = (int)(x1 + x + moveX);
@@ -1262,6 +1220,181 @@ public class GuiPacMan extends GuiArcade {
             scaredTime = 0;
             scaredFlash = 0;
         }
+    }
+
+    private void setupTiles () {
+        // Row 0
+        for (int i = 0; i < 28; i++) tiles[0][i] = new Tile(i, 0, EnumTile.WALL);
+        // Row 1
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 12 && i < 15) || i == 27) tiles[1][i] = new Tile(i, 1, EnumTile.WALL);
+            else tiles[1][i] = new Tile(i, 1);
+        }
+        // Row 2
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[2][i] = new Tile(i, 2, EnumTile.WALL);
+            else tiles[2][i] = new Tile(i, 2);
+        }
+        // Row 3
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[3][i] = new Tile(i, 3, EnumTile.WALL);
+            else if (i == 1 || i == 26) tiles[3][i] = new Tile(i, 3, 2);
+            else tiles[3][i] = new Tile(i, 3);
+        }
+        // Row 4
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[4][i] = new Tile(i, 4, EnumTile.WALL);
+            else tiles[4][i] = new Tile(i, 4);
+        }
+        // Row 5
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || i == 27) tiles[5][i] = new Tile(i, 5, EnumTile.WALL);
+            else tiles[5][i] = new Tile(i, 5);
+        }
+        // Row 6
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[6][i] = new Tile(i, 6, EnumTile.WALL);
+            else tiles[6][i] = new Tile(i, 6);
+        }
+        // Row 7
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[7][i] = new Tile(i, 7, EnumTile.WALL);
+            else tiles[7][i] = new Tile(i, 7);
+        }
+        // Row 8
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 6 && i < 9) || (i > 12 && i < 15) || (i > 18 && i < 21) || i == 27) tiles[8][i] = new Tile(i, 8, EnumTile.WALL);
+            else tiles[8][i] = new Tile(i, 8);
+        }
+        // Row 9
+        for (int i = 0; i < 28; i++) {
+            if ((i >= 0 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 28)) tiles[9][i] = new Tile(i, 9, EnumTile.WALL);
+            else if (i == 12 || i == 15) tiles[9][i] = new Tile(i, 9, 0);
+            else tiles[9][i] = new Tile(i, 9);
+        }
+        // Row 10
+        for (int i = 0; i < 28; i++) {
+            if ((i >= 0 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 28)) tiles[10][i] = new Tile(i, 10, EnumTile.WALL);
+            else if (i == 12 || i == 15) tiles[10][i] = new Tile(i, 10, 0);
+            else tiles[10][i] = new Tile(i, 10);
+        }
+        // Row 11
+        for (int i = 0; i < 28; i++) {
+            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[11][i] = new Tile(i, 11, EnumTile.WALL);
+            else if (i == 9 || i == 18) tiles[11][i] = new Tile(i, 11, 0);
+            else if (i > 9 && i < 18) tiles[11][i] = new Tile(i, 11, EnumTile.GHOST_LIMIT);
+            else tiles[11][i] = new Tile(i, 11);
+        }
+        // Row 12
+        for (int i = 0; i < 28; i++) {
+            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 13) || (i > 14 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[12][i] = new Tile(i, 12, EnumTile.WALL);
+            else if (i == 9 || i == 18) tiles[12][i] = new Tile(i, 12, 0);
+            else if (i == 13 || i == 14) tiles[12][i] = new Tile(i, 12, EnumTile.GHOST_ONLY);
+            else tiles[12][i] = new Tile(i, 12);
+        }
+        // Row 13
+        for (int i = 0; i < 28; i++) {
+            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || i == 10 || i == 17 || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[13][i] = new Tile(i, 13, EnumTile.WALL);
+            else if (i == 9 || i == 18) tiles[13][i] = new Tile(i, 13, 0);
+            else if (i > 10 && i < 17) tiles[13][i] = new Tile(i, 13, EnumTile.GHOST_ONLY);
+            else tiles[13][i] = new Tile(i, 13);
+        }
+        // Row 14
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || i == 27) tiles[14][i] = new Tile(i, 14, EnumTile.TELE);
+            else if ((i > 0 && i < 6) || (i > 21 && i < 27)) tiles[14][i] = new Tile(i, 14, EnumTile.TELE_ZONE);
+            else if (i == 10 || i == 17) tiles[14][i] = new Tile(i, 14, EnumTile.WALL);
+            else if (i > 10 && i < 17) tiles[14][i] = new Tile(i, 14, EnumTile.GHOST_ONLY);
+            else if (i == 5 || (i > 6 && i < 10) || (i > 17 && i < 21) || i == 22) tiles[14][i] = new Tile(i, 14, 0);
+            else tiles[14][i] = new Tile(i, 14);
+        }
+        // Row 15
+        for (int i = 0; i < 28; i++) {
+            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || i == 10 || i == 17 || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[15][i] = new Tile(i, 15, EnumTile.WALL);
+            else if (i == 9 || i == 18) tiles[15][i] = new Tile(i, 15, 0);
+            else if (i > 10 && i < 17) tiles[15][i] = new Tile(i, 15, EnumTile.GHOST_ONLY);
+            else tiles[15][i] = new Tile(i, 15);
+        }
+        // Row 16
+        for (int i = 0; i < 28; i++) {
+            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[16][i] = new Tile(i, 16, EnumTile.WALL);
+            else if (i == 9 || i == 18) tiles[16][i] = new Tile(i, 16, 0);
+            else tiles[16][i] = new Tile(i, 16);
+        }
+        // Row 17
+        for (int i = 0; i < 28; i++) {
+            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[17][i] = new Tile(i, 17, EnumTile.WALL);
+            else if (i > 8 && i < 19) tiles[17][i] = new Tile(i, 17, 0);
+            else tiles[17][i] = new Tile(i, 17);
+        }
+        // Row 18
+        for (int i = 0; i < 28; i++) {
+            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[18][i] = new Tile(i, 18, EnumTile.WALL);
+            else if (i == 9 || i == 18) tiles[18][i] = new Tile(i, 18, 0);
+            else tiles[18][i] = new Tile(i, 18);
+        }
+        // Row 19
+        for (int i = 0; i < 28; i++) {
+            if ((i >= 0 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 28)) tiles[19][i] = new Tile(i, 19, EnumTile.WALL);
+            else if (i == 9 || i == 18) tiles[19][i] = new Tile(i, 19, 0);
+            else tiles[19][i] = new Tile(i, 19);
+        }
+        // Row 20
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 12 && i < 15) || i == 27) tiles[20][i] = new Tile(i, 20, EnumTile.WALL);
+            else tiles[20][i] = new Tile(i, 20);
+        }
+        // Row 21
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[21][i] = new Tile(i, 21, EnumTile.WALL);
+            else tiles[21][i] = new Tile(i, 21);
+        }
+        // Row 22
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 1 && i < 6) || (i > 6 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 21) || (i > 21 && i < 26) || i == 27) tiles[22][i] = new Tile(i, 22, EnumTile.WALL);
+            else tiles[22][i] = new Tile(i, 22);
+        }
+        // Row 23
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 3 && i < 6) || (i > 21 && i < 24) || i == 27) tiles[23][i] = new Tile(i, 23, EnumTile.WALL);
+            else if (i == 1 || i == 26) tiles[23][i] = new Tile(i, 23, 2);
+            else if ((i > 9 && i < 13) || (i > 14 & i < 18)) tiles[23][i] = new Tile(i, 23, EnumTile.GHOST_LIMIT, 1);
+            else if (i > 12 && i < 15) tiles[23][i] = new Tile(i, 23, EnumTile.GHOST_LIMIT);
+            else if (i == 13 || i == 14) tiles[23][i] = new Tile(i, 23, 0);
+            else tiles[23][i] = new Tile(i, 23);
+        }
+        // Row 24
+        for (int i = 0; i < 28; i++) {
+            if ((i >= 0 && i < 3) || (i > 3 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 24) || i > 24) tiles[24][i] = new Tile(i, 24, EnumTile.WALL);
+            else tiles[24][i] = new Tile(i, 24);
+        }
+        // Row 25
+        for (int i = 0; i < 28; i++) {
+            if ((i >= 0 && i < 3) || (i > 3 && i < 6) || (i > 6 && i < 9) || (i > 9 && i < 18) || (i > 18 && i < 21) || (i > 21 && i < 24) || i > 24) tiles[25][i] = new Tile(i, 25, EnumTile.WALL);
+            else tiles[25][i] = new Tile(i, 25);
+        }
+        // Row 26
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 6 && i < 9) || (i > 12 && i < 15) || (i > 18 && i < 21) || i == 27) tiles[26][i] = new Tile(i, 26, EnumTile.WALL);
+            else  tiles[26][i] = new Tile(i, 26);
+        }
+        // Row 27
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 1 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 26) || i == 27) tiles[27][i] = new Tile(i, 27, EnumTile.WALL);
+            else  tiles[27][i] = new Tile(i, 27);
+        }
+        // Row 28
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || (i > 1 && i < 12) || (i > 12 && i < 15) || (i > 15 && i < 26) || i == 27) tiles[28][i] = new Tile(i, 28, EnumTile.WALL);
+            else  tiles[28][i] = new Tile(i, 28);
+        }
+        // Row 29
+        for (int i = 0; i < 28; i++) {
+            if (i == 0 || i == 27) tiles[29][i] = new Tile(i, 29, EnumTile.WALL);
+            else tiles[29][i] = new Tile(i, 29);
+        }
+        // Row 30
+        for (int i = 0; i < 28; i++) tiles[30][i] = new Tile(i, 30, EnumTile.WALL);
     }
 
 //    // Animation Variables

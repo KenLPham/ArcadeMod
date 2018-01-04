@@ -10,56 +10,49 @@
 	"effect.insert": {
 		"sounds": [
 			{
-				"name": "arcademod:insert_coin",
-				"stream": true
+				"name": "arcademod:insert_coin"
 			}
 		]
 	},
 	"effect.pacman_waka_1": {
 		"sounds": [
 			{
-				"name": "arcademod:pacman/waka.1",
-				"stream": true
+				"name": "arcademod:pacman/waka.1"
 			}
 		]
 	},
 	"effect.pacman_waka_2": {
 		"sounds": [
 			{
-				"name": "arcademod:pacman/waka.2",
-				"stream": true
+				"name": "arcademod:pacman/waka.2"
 			}
 		]
 	},
 	"effect.pacman_waka_3": {
 		"sounds": [
 			{
-				"name": "arcademod:pacman/waka.3",
-				"stream": true
+				"name": "arcademod:pacman/waka.3"
 			}
 		]
 	},
 	"effect.pacman_waka_4": {
 		"sounds": [
 			{
-				"name": "arcademod:pacman/waka.4",
-				"stream": true
+				"name": "arcademod:pacman/waka.4"
 			}
 		]
 	},
 	"effect.pacman_waka_5": {
 		"sounds": [
 			{
-				"name": "arcademod:pacman/waka.5",
-				"stream": true
+				"name": "arcademod:pacman/waka.5"
 			}
 		]
 	},
 	"effect.pacman_waka_6": {
 		"sounds": [
 			{
-				"name": "arcademod:pacman/waka.6",
-				"stream": true
+				"name": "arcademod:pacman/waka.6"
 			}
 		]
 	},

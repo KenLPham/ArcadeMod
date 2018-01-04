@@ -38,6 +38,7 @@ import java.util.*;
     - Skeeball
     - Claw Machine
     - Coin Pusher
+    - Stacker (The game with the square that has to line up)
  */
 
 /* ChangeLog

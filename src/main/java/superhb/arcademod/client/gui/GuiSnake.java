@@ -34,7 +34,7 @@ public class GuiSnake extends GuiArcade {
     private static final int POINT = 3;
 
     public GuiSnake (World world, TileEntityArcade tileEntity, EntityPlayer player) {
-        super(world, tileEntity, player);
+        super(world, tileEntity, null, player);
         setGuiSize(GUI_X, GUI_Y);
         setButtonPos((GUI_X / 2) - (buttonWidth / 2), GUI_Y - 32);
         setTexture(texture);
