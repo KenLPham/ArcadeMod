@@ -17,7 +17,6 @@ import javax.annotation.Nullable;
 import java.awt.*;
 import java.io.IOException;
 
-// This might not be so fucked anymore
 // http://www.gamasutra.com/view/feature/3938/the_pacman_dossier.php?print=1
 public class GuiPacMan extends GuiArcade {
     // 1 dot = 10 pt (240 total)
@@ -51,9 +50,12 @@ public class GuiPacMan extends GuiArcade {
     private float volume = 1f; // TODO: Create volume slider in game settings (separate volume sliders for different sounds?)
     private int waka;
     private boolean playSiren = true;
-    private LoopingSound normalSiren;
 
-    // Siren is played normally. When Energizer is eaten fast siren is played and normal siren stops. When ghost is eaten, even faster siren is played (stops when ghost is not longer eaten or when ghosts aren't scared anymore)
+    // ==Audio==
+    // Siren is played normally. When Energizer is eaten fast siren is
+    // played and normal siren stops. When ghost is eaten, even faster
+    // siren is played (stops when ghost is not longer eaten or when
+    // ghosts aren't scared anymore)
 
     // Board Variables
     private int boardX, boardY;
@@ -77,7 +79,7 @@ public class GuiPacMan extends GuiArcade {
         // Setup Tiles
         setupTiles();
 
-        normalSiren = new LoopingSound(ArcadeSoundRegistry.PACMAN_SIREN, SoundCategory.BLOCKS);
+        tile.playSound(ArcadeSoundRegistry.PACMAN_SIREN);
 
         // TODO: Call when press start
         getLevelData();
@@ -93,13 +95,6 @@ public class GuiPacMan extends GuiArcade {
     @Override
     public void updateScreen () {
 		super.updateScreen();
-
-        //TODO: Figure out how to play looping sounds
-        /*if (playSiren) {
-            mc.getSoundHandler().playSound(normalSiren);
-            playSiren = false;
-        }
-        if (normalSiren.isDonePlaying()) System.out.print("done playing");*/
     }
 
     @Override
@@ -395,12 +390,12 @@ public class GuiPacMan extends GuiArcade {
                 return;
             }
             if (waka == 4) {
-                getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_5, SoundCategory.BLOCKS, 1.0f, 1.0f);
+                getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_5, SoundCategory.BLOCKS, volume, 1.0f);
                 waka++;
                 return;
             }
             if (waka == 5) {
-                getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_6, SoundCategory.BLOCKS, 1.0f, 1.0f);
+                getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_6, SoundCategory.BLOCKS, volume, 1.0f);
                 waka = 0;
                 return;
             }
@@ -496,8 +491,7 @@ public class GuiPacMan extends GuiArcade {
             }
             return this;
         }
-
-        // TODO: Draw Lives
+        
         private Player drawPlayer () {
             GlStateManager.color(1.0F, 1.0F, 1.0F);
             switch (current) {
@@ -517,6 +511,16 @@ public class GuiPacMan extends GuiArcade {
                     drawModalRectWithCustomSizedTexture(extendedX - 4, extendedY - 4, PACMAN * STATE, GUI_Y + (PACMAN * 2) + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
                     return this;
             }
+            return this;
+        }
+
+        private Player drawLives () {
+            GlStateManager.color(1.0F, 1.0F, 1.0F);
+
+            for (int i = 0; i < lives; i++) {
+                drawModalRectWithCustomSizedTexture(4 + (i * 10), 200, PACMAN * STATE, GUI_Y + (PACMAN * 2) + (300 - GUI_Y), PACMAN, PACMAN, 512, 512);
+            }
+
             return this;
         }
     }
@@ -657,6 +661,7 @@ public class GuiPacMan extends GuiArcade {
 			return 0.75f;
 		}
 
+		// TODO: Elroy
 		private Ghost update () {
             // Collision Detection
             //if (((x == pacman.x) && (y == pacman.y)) && ((extendedX == pacman.extendedX) && (extendedY == pacman.extendedY))) {
@@ -699,6 +704,7 @@ public class GuiPacMan extends GuiArcade {
                 }
             }
             if (inHouse) { // TODO: Let Ghosts go from up -> down and down -> up.
+                // Begin dotCounter. wait for set value before changing target.
                 if ((x == 13 || x == 14) && y == 11) inHouse = false;
             }
 

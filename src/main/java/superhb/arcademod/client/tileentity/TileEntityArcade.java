@@ -1,6 +1,7 @@
 package superhb.arcademod.client.tileentity;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.NetworkManager;
@@ -8,6 +9,8 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -15,6 +18,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
+import superhb.arcademod.client.audio.LoopingSound;
 
 import javax.annotation.Nullable;
 
@@ -22,6 +26,11 @@ import javax.annotation.Nullable;
 //https://github.com/CJMinecraft01/BitOfEverything/blob/master/src/main/java/cjminecraft/bitofeverything/tileentity/TileEntityBlockBreaker.java
 public class TileEntityArcade extends TileEntity implements ITickable {
     private int game = 0;
+
+    // Sound Variables
+    private SoundEvent soundEvent;
+    private boolean isPlaying, shouldStart, shouldStop;
+    private float volume = 1f;
 
     // Leaderboard TODO: Leaderboard
     //private NBTTagList leaderboard;
@@ -60,6 +69,17 @@ public class TileEntityArcade extends TileEntity implements ITickable {
 
     @Override
     public void update () {
+        // Sound System
+        // https://github.com/rykar/TheRealMcrafters-Siren-Mod/blob/master/main/java/mcrafter/SirenMod/sirens/nuclear/NuclearSirenTileEntity.java
+        if (!isPlaying && shouldStart) {
+            shouldStart = false;
+            shouldStop = false;
+            isPlaying = true;
+            LoopingSound sound = new LoopingSound((TileEntityArcade)world.getTileEntity(pos), soundEvent, SoundCategory.BLOCKS, volume);
+            Minecraft.getMinecraft().getSoundHandler().playSound(sound);
+        }
+
+        // Power System
         if (world != null && !world.isRemote) {
             if (!world.isBlockPowered(pos)) { // Not Powered
                 // Do not emit light
@@ -67,6 +87,23 @@ public class TileEntityArcade extends TileEntity implements ITickable {
                 // Emit light
             }
         }
+    }
+
+    public void playSound (SoundEvent soundEvent) {
+        shouldStart = true;
+        this.soundEvent = soundEvent;
+    }
+
+    public boolean shouldStop () {
+        return shouldStart;
+    }
+
+    public void stop () {
+        shouldStop = false;
+    }
+
+    public void setVolume (float volume) {
+        this.volume = volume;
     }
 
     @Override

@@ -88,6 +88,9 @@ public class BlockPlushie extends Block implements IBlockVariant {
         return false;
     }
 
+    /**
+     * Get item to drop when harvested
+     */
     @Override
     public Item getItemDropped (IBlockState state, Random rand, int fortune) {
         return Item.getItemFromBlock(this);
@@ -118,6 +121,9 @@ public class BlockPlushie extends Block implements IBlockVariant {
         return state.getBoundingBox(world, pos).offset(pos);
     }
 
+    /**
+     * Called when a user uses the creative pick block button on this block
+     */
     @Override
     public ItemStack getPickBlock (IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
         TileEntity tile = world.getTileEntity(pos);
@@ -166,6 +172,9 @@ public class BlockPlushie extends Block implements IBlockVariant {
         return 0;
     }
 
+    /**
+     * Gets the metadata of the item this Block can drop.
+     */
     @Override
     public void breakBlock (World world, BlockPos pos, IBlockState state) {
         super.breakBlock(world, pos, state);
