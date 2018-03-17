@@ -93,13 +93,6 @@ public class GuiPacMan extends GuiArcade {
     @Override
     public void updateScreen () {
 		super.updateScreen();
-
-        //TODO: Figure out how to play looping sounds
-        /*if (playSiren) {
-            mc.getSoundHandler().playSound(normalSiren);
-            playSiren = false;
-        }
-        if (normalSiren.isDonePlaying()) System.out.print("done playing");*/
     }
 
     @Override
