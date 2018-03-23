@@ -43,7 +43,8 @@
     "1.3.4": "- Added Prize Counter model\n- Removed Ticket recipe\n- Added Prize Counter recipe",
     "1.3.5": "- Fixed Update Announcer\n- Fixed compatibility with servers",
     "1.3.6": "Fixed Snake and Tetris being too slow on certain systems",
-    "1.3.7": "Optimized Tetris"
+    "1.3.7": "Optimized Tetris",
+    "2.0.0": "Added Pac-Man"
   },
   "promos": {
     "1.12-latest": "1.0.0",
