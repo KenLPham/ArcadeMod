@@ -9,6 +9,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArcade;
+import superhb.arcademod.client.ArcadeItems;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.util.ArcadeSoundRegistry;
 import superhb.arcademod.util.KeyHandler;
@@ -22,8 +23,7 @@ import java.util.ArrayList;
 public class GuiPacMan extends GuiArcade {
 	// 1 dot = 10 pt (240 total)
 	// 1 energizer = 50 pt (4 total)
-	// Captured Ghost: 1 = 200; 2 = 400; 3 = 800; 4 = 1200;
-	// All ghosts are captured with one energizer, additional 12000 pts
+	// Captured Ghost: 1 = 200; 2 = 400; 3 = 800; 4 = 1600
 	// Blue time decreases as level goes up
 	// Level 19, Ghosts can no longer be eaten
     /* Audio Info
@@ -72,6 +72,7 @@ public class GuiPacMan extends GuiArcade {
 	private EnumBonus bonus;
 	private int bonusTick, bonusTime;
 	private boolean showBonus;
+	private int backTick;
 	
 	// Character Variables
 	private Player pacman;
@@ -99,7 +100,14 @@ public class GuiPacMan extends GuiArcade {
 	public void updateScreen () {
 		super.updateScreen();
 		
-		if (!inMenu) {
+		if (inMenu) {
+			if (menu == 3) {
+				if ((tickCounter - backTick) == 60) {
+					tickCounter = score = ENERGIZER_STATE = mazeBlinks = mazeBlinkTick = deathTick = gameOverTick = energizerTick = scatterTick = scaredTime = scaredFlash = level = 0;
+					checkMenuAfterGameOver();
+				}
+			}
+		} else {
 			if (playing) {
 				// Pac-Man Logic
 				for (int i = 0; i < 3; i++) pacman.move().updatePosition(boardX, boardY);
@@ -214,6 +222,8 @@ public class GuiPacMan extends GuiArcade {
 					this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), boardX + 2, boardY + (GUI_Y) - 30, Color.white.getRGB());
 					break;
 				case 3: // Game Over
+					this.fontRendererObj.drawString(I18n.format("text.arcademod:gameover.locale"), boardX + (GUI_X / 2) - (this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:gameover.locale")) / 2), boardY + (GUI_Y / 2) - 20, Color.WHITE.getRGB());
+					this.fontRendererObj.drawString(I18n.format("text.arcademod:score.locale") + ": " + score, boardX + (GUI_X / 2) - (this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:score.locale=Score") + ": " + score)), boardY + (GUI_Y / 2), Color.WHITE.getRGB());
 					break;
 			}
 		} else {
@@ -237,8 +247,7 @@ public class GuiPacMan extends GuiArcade {
 			drawBonus();
 			
 			// Text
-			if (!playing)
-				this.fontRendererObj.drawString("Ready!", boardX + (MAZE_X / 2) - (this.fontRendererObj.getStringWidth("Ready") / 2), boardY + (MAZE_Y / 2) + 13, Color.yellow.getRGB());
+			if (!playing) this.fontRendererObj.drawString(I18n.format("text.arcademod:ready.pacman.locale"), boardX + (MAZE_X / 2) - (this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:ready.pacman.locale")) / 2), boardY + (MAZE_Y / 2) + 13, Color.yellow.getRGB());
 			
 			this.fontRendererObj.drawString(String.format("%d", score), boardX + 30, boardY - 8, Color.white.getRGB());
 		}
@@ -318,6 +327,7 @@ public class GuiPacMan extends GuiArcade {
 		level = 0;
 		inMenu = false;
 		pacman = new Player();
+		canGetCoinBack = false;
 		
 		setupTiles();
 		setupGame();
@@ -325,8 +335,6 @@ public class GuiPacMan extends GuiArcade {
 	
 	@Override
 	protected void keyTyped (char typedChar, int keyCode) throws IOException {
-		super.keyTyped(typedChar, keyCode);
-		
 		if (inMenu) {
 			if (menu == 0) {
 				if (keyCode == KeyHandler.down.getKeyCode()) {
@@ -349,7 +357,10 @@ public class GuiPacMan extends GuiArcade {
 			else if (keyCode == KeyHandler.right.getKeyCode()) pacman.desired = Direction.RIGHT;
 			else if (keyCode == KeyHandler.down.getKeyCode()) pacman.desired = Direction.DOWN;
 			else if (keyCode == KeyHandler.up.getKeyCode()) pacman.desired = Direction.UP;
+			
+			if (keyCode == 1) giveReward(ArcadeItems.ticket, (score / 80)); // Esc
 		}
+		super.keyTyped(typedChar, keyCode);
 	}
 	
 	private enum Direction {
@@ -671,9 +682,11 @@ public class GuiPacMan extends GuiArcade {
 				}
 				if ((tickCounter - gameOverTick) == 20) {
 					if (lives == 0) { // Go back to main menu logic
+						giveReward(ArcadeItems.ticket, (score / 80));
 						inMenu = true;
+						menu = 3;
 						playDeathAnimation = false;
-						tickCounter = score = ENERGIZER_STATE = mazeBlinks = mazeBlinkTick = deathTick = gameOverTick = energizerTick = scatterTick = scaredTime = scaredFlash = level = 0;
+						backTick = tickCounter;
 						houseQueue.clear();
 						gameOver = mazeBlink = nextLevel = updatePos = false;
 					} else {
@@ -1061,7 +1074,20 @@ public class GuiPacMan extends GuiArcade {
 						pauseTick = 0;
 						scaredTick = tickCounter + scaredDuration;
 						scared = false;
-						score += 200 + (200 * pacman.ghostsEaten);
+						switch (pacman.ghostsEaten) {
+							case 0:
+								score += 200;
+								break;
+							case 1:
+								score += 400;
+								break;
+							case 2:
+								score += 800;
+								break;
+							case 3:
+								score += 1600;
+								break;
+						}
 						pacman.ghostsEaten++;
 					}
 				}

@@ -1,6 +1,7 @@
 ## Based on GitHub's Eclipse .gitignore
 
 run/
+out/
 .gradle/
 build/
 gradle-app.setting
