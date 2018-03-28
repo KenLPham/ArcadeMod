@@ -10,6 +10,8 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -20,7 +22,11 @@ import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import superhb.arcademod.client.ArcadeBlocks;
+import superhb.arcademod.client.tileentity.TileEntityArcade;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 // Used for MultiBlock purposes only
@@ -62,10 +68,34 @@ public class BlockInvisible extends Block {
     public boolean isReplaceable (IBlockAccess world, BlockPos pos) {
         return false;
     }
-
+    
+    /**
+     * Get item to drop when harvested
+     */
     @Override
     public Item getItemDropped (IBlockState state, Random rand, int fortune) {
-        return Item.getItemFromBlock(ArcadeBlocks.arcadeMachine);
+        return null;
+    }
+    
+    @Override
+    public List<ItemStack> getDrops (IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+    	List<ItemStack> drops = new ArrayList<ItemStack>();
+    	drops.add(new ItemStack(Blocks.AIR));
+    	
+        return drops;//world.getBlockState(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ())).getBlock().getDrops(world, new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()), state, fortune);
+    }
+    
+    @Override
+    public boolean removedByPlayer (IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+        if (willHarvest) return true; //If it will harvest, delay deletion of the block until after getDrops
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+    
+    @Override
+    public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack tool) {
+        super.harvestBlock(world, player, pos, state, te, tool);
+        world.setBlockToAir(pos);
+        world.getBlockState(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ())).getBlock().harvestBlock(world, player, new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()), state, te, tool);
     }
 
     @Override
@@ -130,12 +160,14 @@ public class BlockInvisible extends Block {
 
     @Override
     public void onBlockDestroyedByExplosion (World world, BlockPos pos, Explosion explosion) {
-        world.setBlockToAir(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()));
+		world.setBlockToAir(pos);
+		world.getBlockState(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ())).getBlock().onBlockDestroyedByExplosion(world, new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()), explosion);
     }
 
     @Override
     public void onBlockDestroyedByPlayer (World world, BlockPos pos, IBlockState state) {
-        world.setBlockToAir(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()));
+        world.setBlockToAir(pos);
+        world.getBlockState(new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ())).getBlock().onBlockDestroyedByPlayer(world, new BlockPos(pos.getX(), pos.getY() - 1, pos.getZ()), state);
     }
 
     @Override

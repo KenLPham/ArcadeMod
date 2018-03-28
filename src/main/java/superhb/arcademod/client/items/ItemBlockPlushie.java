@@ -78,9 +78,7 @@ public class ItemBlockPlushie extends ItemBlock implements IItemMeshDefinition {
         return new ItemMeshDefinition() {
             @Override
             public ModelResourceLocation getModelLocation(ItemStack stack) {
-                if (stack.hasTagCompound()) {
-                    return new ModelResourceLocation(Reference.MODID + ":plushie", "facing=north,mob=" + EnumMob.values()[stack.getTagCompound().getInteger("Mob")].getName());
-                }
+                if (stack.hasTagCompound()) return new ModelResourceLocation(Reference.MODID + ":plushie", "facing=north,mob=" + EnumMob.values()[stack.getTagCompound().getInteger("Mob")].getName());
                 else return new ModelResourceLocation(Reference.MODID + ":plushie", "facing=north,mob=creeper");
             }
         };

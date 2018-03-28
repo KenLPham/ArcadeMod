@@ -2,6 +2,7 @@ package superhb.arcademod.client.tileentity;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.MovingSound;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.NetworkManager;
@@ -25,91 +26,101 @@ import javax.annotation.Nullable;
 // TODO: Make use of Forge Energy API (RF)
 //https://github.com/CJMinecraft01/BitOfEverything/blob/master/src/main/java/cjminecraft/bitofeverything/tileentity/TileEntityBlockBreaker.java
 public class TileEntityArcade extends TileEntity implements ITickable {
-    private int game = 0;
-
-    // Sound Variables
-    private SoundEvent soundEvent;
-    private boolean isPlaying, shouldStart, shouldStop;
-    private float volume = 1f;
-
-    // Leaderboard TODO: Leaderboard
-    //private NBTTagList leaderboard;
-    private ArcadeLeaderboard[] leaderboard;
-
-    // Energy (Default 10 RF/tick)
-    private EnergyStorage storage;
-
-    public TileEntityArcade () {
-        game = 0;
-        storage = new EnergyStorage(5000, 1000, 0);
-        leaderboard = new ArcadeLeaderboard[10];
-    }
-
-    public TileEntityArcade (int game) {
-        this.game = game;
-        storage = new EnergyStorage(5000, 1000, 0);
-        leaderboard = new ArcadeLeaderboard[10];
-    }
-
-    public int getGameID () {
-        return game;
-    }
-
-    public void setGameID (int id) {
-        game = id;
-    }
-
-    public void saveLeaderboard (ArcadeLeaderboard[] newLeaderboard) {
-        leaderboard = newLeaderboard;
-    }
-
-    public ArcadeLeaderboard[] getLeaderboard () {
-        return leaderboard;
-    }
-
-    @Override
-    public void update () {
-        // Sound System
-        // https://github.com/rykar/TheRealMcrafters-Siren-Mod/blob/master/main/java/mcrafter/SirenMod/sirens/nuclear/NuclearSirenTileEntity.java
-        if (!isPlaying && shouldStart) {
-            shouldStart = false;
-            shouldStop = false;
-            isPlaying = true;
-            LoopingSound sound = new LoopingSound((TileEntityArcade)world.getTileEntity(pos), soundEvent, SoundCategory.BLOCKS, volume);
-            Minecraft.getMinecraft().getSoundHandler().playSound(sound);
-        }
-
-        // Power System
-        if (world != null && !world.isRemote) {
-            if (!world.isBlockPowered(pos)) { // Not Powered
-                // Do not emit light
-            } else {
-                // Emit light
-            }
-        }
-    }
-
-    public void playSound (SoundEvent soundEvent) {
-        shouldStart = true;
-        this.soundEvent = soundEvent;
-    }
-
-    public boolean shouldStop () {
-        return shouldStart;
-    }
-
-    public void stop () {
-        shouldStop = false;
-    }
-
-    public void setVolume (float volume) {
-        this.volume = volume;
-    }
-
-    @Override
-    public NBTTagCompound writeToNBT (NBTTagCompound compound) {
-        super.writeToNBT(compound);
-        compound.setInteger("Game", game);
+	private int game = 0;
+	
+	// Sound Variables
+	private SoundEvent soundEvent;
+	private boolean isPlaying, shouldStart, shouldStop, loop;
+	private float volume = 1f;
+	
+	// Leaderboard TODO: Leaderboard
+	//private NBTTagList leaderboard;
+	private ArcadeLeaderboard[] leaderboard;
+	
+	// Energy (Default 10 RF/tick)
+	private EnergyStorage storage;
+	
+	public TileEntityArcade () {
+		game = 0;
+		storage = new EnergyStorage(5000, 1000, 0);
+		leaderboard = new ArcadeLeaderboard[10];
+	}
+	
+	public TileEntityArcade (int game) {
+		this.game = game;
+		storage = new EnergyStorage(5000, 1000, 0);
+		leaderboard = new ArcadeLeaderboard[10];
+	}
+	
+	public int getGameID () {
+		return game;
+	}
+	
+	public void setGameID (int id) {
+		game = id;
+	}
+	
+	public void saveLeaderboard (ArcadeLeaderboard[] newLeaderboard) {
+		leaderboard = newLeaderboard;
+	}
+	
+	public ArcadeLeaderboard[] getLeaderboard () {
+		return leaderboard;
+	}
+	
+	@Override
+	public void update () {
+		// Sound System
+		// https://github.com/rykar/TheRealMcrafters-Siren-Mod/blob/master/main/java/mcrafter/SirenMod/sirens/nuclear/NuclearSirenTileEntity.java
+		if (loop) {
+//			if (!isPlaying && shouldStart) {
+//				shouldStart = false;
+//				shouldStop = false;
+//				isPlaying = true;
+//				LoopingSound sound = new LoopingSound((TileEntityArcade)world.getTileEntity(pos), soundEvent, SoundCategory.BLOCKS, volume);
+//
+//				Minecraft.getMinecraft().getSoundHandler().playSound(sound);
+//			}
+//			if (shouldStart) {
+//				LoopingSound sound = new LoopingSound((TileEntityArcade)world.getTileEntity(pos), soundEvent, SoundCategory.BLOCKS, volume);
+//				Minecraft.getMinecraft().getSoundHandler().playSound(sound);
+//			}
+		} else {
+			// Play non looping sound
+		}
+		
+		// Power System
+		if (world != null && !world.isRemote) {
+			if (!world.isBlockPowered(pos)) { // Not Powered
+				// Do not emit light
+			} else {
+				// Emit light
+			}
+		}
+	}
+	
+	public void playSound (SoundEvent soundEvent, boolean looping) {
+		loop = looping;
+		shouldStart = true;
+		this.soundEvent = soundEvent;
+	}
+	
+	public boolean shouldStop () {
+		return shouldStart;
+	}
+	
+	public void stop () {
+		shouldStop = false;
+	}
+	
+	public void setVolume (float volume) {
+		this.volume = volume;
+	}
+	
+	@Override
+	public NBTTagCompound writeToNBT (NBTTagCompound compound) {
+		super.writeToNBT(compound);
+		compound.setInteger("Game", game);
         /*
         leaderboard = new NBTTagList();
         for (int i = 0; i < player.length; i++) {
@@ -120,15 +131,15 @@ public class TileEntityArcade extends TileEntity implements ITickable {
             leaderboard.appendTag(com);
         }
         */
-        compound.setInteger("Energy", storage.getEnergyStored());
-        //compound.setTag("Leaderboard", leaderboard);
-        return compound;
-    }
-
-    @Override
-    public void readFromNBT (NBTTagCompound compound) {
-        super.readFromNBT(compound);
-        game = compound.getInteger("Game");
+		compound.setInteger("Energy", storage.getEnergyStored());
+		//compound.setTag("Leaderboard", leaderboard);
+		return compound;
+	}
+	
+	@Override
+	public void readFromNBT (NBTTagCompound compound) {
+		super.readFromNBT(compound);
+		game = compound.getInteger("Game");
         /*
         leaderboard = compound.getTagList("Leaderboard", Constants.NBT.TAG_COMPOUND);
         for (int i = 0; i < leaderboard.tagCount(); i++) {
@@ -137,52 +148,52 @@ public class TileEntityArcade extends TileEntity implements ITickable {
             difficulty[i] = leaderboard.getCompoundTagAt(i).getString("Difficulty");
         }
         */
-        storage.receiveEnergy(compound.getInteger("Energy"), false);
-    }
-
-    @Override
-    public NBTTagCompound getUpdateTag () {
-        NBTTagCompound tag = new NBTTagCompound();
-        writeToNBT(tag);
-        return tag;
-    }
-
-    @Override
-    public void handleUpdateTag (NBTTagCompound tag) {
-        readFromNBT(tag);
-    }
-
-    @Override
-    public void onDataPacket (NetworkManager net, SPacketUpdateTileEntity packet) {
-        NBTTagCompound tag = packet.getNbtCompound();
-        handleUpdateTag(tag);
-    }
-
-    @Override
-    @Nullable
-    public SPacketUpdateTileEntity getUpdatePacket () {
-        NBTTagCompound tag = getUpdateTag();
-        final int meta = 0;
-
-        return new SPacketUpdateTileEntity(pos, meta, tag);
-    }
-
-    @Override
-    public boolean shouldRefresh (World world, BlockPos pos, IBlockState old, IBlockState newState) {
-        if (world.isAirBlock(pos)) return true;
-        return false;
-    }
-
-    // Capability System
-    @Override
-    public <T> T getCapability (Capability<T> capability, EnumFacing facing) {
-        if (capability == CapabilityEnergy.ENERGY) return (T)storage;
-        return super.getCapability(capability, facing);
-    }
-
-    @Override
-    public boolean hasCapability (Capability<?> capability, EnumFacing facing) {
-        if (capability == CapabilityEnergy.ENERGY) return true;
-        return super.hasCapability(capability, facing);
-    }
+		storage.receiveEnergy(compound.getInteger("Energy"), false);
+	}
+	
+	@Override
+	public NBTTagCompound getUpdateTag () {
+		NBTTagCompound tag = new NBTTagCompound();
+		writeToNBT(tag);
+		return tag;
+	}
+	
+	@Override
+	public void handleUpdateTag (NBTTagCompound tag) {
+		readFromNBT(tag);
+	}
+	
+	@Override
+	public void onDataPacket (NetworkManager net, SPacketUpdateTileEntity packet) {
+		NBTTagCompound tag = packet.getNbtCompound();
+		handleUpdateTag(tag);
+	}
+	
+	@Override
+	@Nullable
+	public SPacketUpdateTileEntity getUpdatePacket () {
+		NBTTagCompound tag = getUpdateTag();
+		final int meta = 0;
+		
+		return new SPacketUpdateTileEntity(pos, meta, tag);
+	}
+	
+	@Override
+	public boolean shouldRefresh (World world, BlockPos pos, IBlockState old, IBlockState newState) {
+		if (world.isAirBlock(pos)) return true;
+		return false;
+	}
+	
+	// Capability System
+	@Override
+	public <T> T getCapability (Capability<T> capability, EnumFacing facing) {
+		if (capability == CapabilityEnergy.ENERGY) return (T)storage;
+		return super.getCapability(capability, facing);
+	}
+	
+	@Override
+	public boolean hasCapability (Capability<?> capability, EnumFacing facing) {
+		if (capability == CapabilityEnergy.ENERGY) return true;
+		return super.hasCapability(capability, facing);
+	}
 }

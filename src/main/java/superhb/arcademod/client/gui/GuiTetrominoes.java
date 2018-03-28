@@ -45,6 +45,7 @@ public class GuiTetrominoes extends GuiArcade {
     private static final int ARROW_HORIZONTAL_X = 7;
     private static final int ARROW_HORIZONTAL_Y = 11;
 
+	// TODO: Sound
     // Music Variables
     private boolean playMusic = true;
 
@@ -106,16 +107,16 @@ public class GuiTetrominoes extends GuiArcade {
                     { new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(1, 2) }
             }
     };
-
-    private final float[][] colors = {
-            { 0.0F, 1.0F, 1.0F }, // Cyan
-            { 0.0F, 0.0F, 1.0F }, // Blue
-            { 1.0F, 0.549F, 0.0F }, // Orange
-            { 0.0F, 1.0F, 0.0F }, // Green
-            { 1.0F, 0.0F, 0.0F }, // Red
-            { 1.0F, 1.0F, 0.0F }, // Yellow
-            { 1.0F, 0.078F, 0.576F }, // Pink
-    };
+    
+    private final Color[] colors = {
+    		Color.cyan,
+			Color.blue,
+			new Color(1.0F, 0.549F, 0.0F), // Orange
+			Color.GREEN,
+			Color.RED,
+			Color.yellow,
+			new Color(1.0F, 0.078F, 0.576F) // Pink
+	};
 
     public GuiTetrominoes (World world, TileEntityArcade tileEntity, EntityPlayer player) {
         super(world, tileEntity, null, player);
@@ -135,6 +136,66 @@ public class GuiTetrominoes extends GuiArcade {
             }
         }
     }
+    
+    @Override
+    public void updateScreen () {
+    	super.updateScreen();
+    	
+    	if (inMenu) {
+			// Game Over Timer
+			if (menu == 3) {
+				if (tickCounter >= 60) {
+					tickCounter = 0;
+					checkMenuAfterGameOver();
+					nextShape = getWorld().rand.nextInt(7);
+					score = 0;
+					row = 0;
+					level = 1;
+					rotation = 0;
+					for (int x = 0; x < 10; x++) {
+						for (int y = 0; y < 18; y++) {
+							board[x][y] = -1;
+						}
+					}
+				}
+			}
+		} else {
+			if (gameOver) {
+				menu = 3;
+				giveNextPiece = false;
+				inMenu = true;
+				gameOver = false;
+				giveReward(ArcadeItems.ticket, row);
+				// TODO: Send Score to NBT
+			}
+		
+			if (giveNextPiece) {
+				rotation = 0;
+				curShape = nextShape;
+				nextShape = getWorld().rand.nextInt(7);
+				piecePoint = new Point(3, 0);
+				giveNextPiece = false;
+			}
+		
+			// Move Current Piece down or place
+			if ((tickCounter - prevGameTick) >= (isKeyDown(KeyHandler.down.getKeyCode()) ? speed[0] : speed[level])) {
+				prevGameTick = tickCounter;
+			
+				if (canMoveDown()) piecePoint.y++;
+				else place();
+			}
+		
+			// Controls
+			if ((tickCounter - prevControlTick) >= controlSpeed) {
+				prevControlTick = tickCounter;
+				if (isKeyDown(KeyHandler.left.getKeyCode())) {
+					if (canMoveLeft()) piecePoint.x--;
+				} else if (isKeyDown(KeyHandler.right.getKeyCode())) {
+					if (canMoveRight()) piecePoint.x++;
+				}
+			}
+		}
+	}
 
     // TODO: Make leaderboard menu
     // TODO: Save high score to nbt
@@ -149,14 +210,14 @@ public class GuiTetrominoes extends GuiArcade {
 
         super.drawScreen(mouseX, mouseY, partialTicks);
 
-        int controlWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:control.locale"));
-
         // TODO: Make it so that song plays on loop
         // TODO: Make it so you can change the volume through GUI
-        if (playMusic && !inMenu) {
-            playMusic = false;
-            //mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(new SoundEvent(new ResourceLocation(Reference.MODID, "theme.tetris")), 1.0F));
-        }
+//        if (playMusic && !inMenu) {
+//            playMusic = false;
+//            //mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(new SoundEvent(new ResourceLocation(Reference.MODID, "theme.tetris")), 1.0F));
+//        }
+    
+        int controlWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:control.locale"));
 
         if (inMenu) {
             // TODO: Volume Menu
@@ -168,27 +229,19 @@ public class GuiTetrominoes extends GuiArcade {
                     this.fontRendererObj.drawString(I18n.format("game.arcademod:tetrominoes.name"), playX + (130 / 2) - (titleWidth / 2), playY + 2, Color.white.getRGB());
                     this.fontRendererObj.drawString(I18n.format("option.arcademod:start.locale"), playX + (130 / 2) - (startWidth / 2), (height / 2), Color.white.getRGB());
                     this.fontRendererObj.drawString(I18n.format("option.arcademod:control.locale"), playX + (130 / 2) - (controlWidth / 2), (height / 2) + 10, Color.white.getRGB());
-
-                    this.mc.getTextureManager().bindTexture(texture);
-                    switch (menuOption) {
-                        case 0: // Start
-                            this.drawTexturedModalRect(playX + (130 / 2) - 40, (height / 2) - 2, GUI_X, PLAY_BLOCK, ARROW_HORIZONTAL_X, ARROW_HORIZONTAL_Y);
-                            break;
-                        case 1: // Controls
-                            this.drawTexturedModalRect(playX + (130 / 2) - 40, (height / 2) + 8, GUI_X, PLAY_BLOCK, ARROW_HORIZONTAL_X, ARROW_HORIZONTAL_Y);
-                            break;
-                    }
-
-                    // TODO: Leaderboard
+	
+                    // Arrows
+                    if (menuOption == 0) drawRightArrow(playX + (130 / 2) - 40, (height / 2) - 2, true); // Start
+                    else if (menuOption == 1) drawRightArrow(playX + (130 / 2) - 40, (height / 2) + 8, true); // Controls
                     break;
                 case 1: // Level Select
                     int levelWidth = this.fontRendererObj.getStringWidth(String.format("[%d]", level));
                     this.fontRendererObj.drawString(I18n.format("text.arcademod:level_select.tetrominoes.locale"), playX + (130 / 2) - 40, yScaled, Color.white.getRGB());
                     this.fontRendererObj.drawString(String.format("[%d]", level), playX + (130 / 2) + 35 - (levelWidth / 2), yScaled, Color.white.getRGB());
-
-                    this.mc.getTextureManager().bindTexture(texture);
-                    this.drawTexturedModalRect(playX + (130 / 2) + 29, yScaled - 10, GUI_X + PLAY_BLOCK + PREVIEW_BLOCK + ARROW_VERTICAL_X, 0, ARROW_VERTICAL_X, ARROW_VERTICAL_Y); // Up Arrow
-                    this.drawTexturedModalRect(playX + (130 / 2) + 29, yScaled + 10, GUI_X + PLAY_BLOCK + PREVIEW_BLOCK, 0, ARROW_VERTICAL_X, ARROW_VERTICAL_Y); // Down Arrow
+                    
+                    // Arrows
+					drawUpArrow(playX + (130 / 2) + 29, yScaled - 10, true);
+					drawDownArrow(playX + (130 / 2) + 29, yScaled + 10);
 
                     // Back
                     this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), playX + 2, yScaled + (GUI_Y / 2) - 20, Color.white.getRGB());
@@ -198,10 +251,10 @@ public class GuiTetrominoes extends GuiArcade {
 
                     // Controls
                     this.fontRendererObj.drawString("[" + KeyHandler.up.getDisplayName() + "] " + I18n.format("control.arcademod:up.tetrominoes.name"), playX + (130 / 2) - 40, yScaled - 10, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.down.getDisplayName() + "] " + I18n.format("control.arcademod:down.tetrominoes.name"), playX + (130 / 2) - 40, yScaled, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("control.arcademod:left.tetrominoes.name"), playX + (130 / 2) - 40, yScaled + 10, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.right.getDisplayName() + "] " + I18n.format("control.arcademod:right.tetrominoes.name"), playX + (130 / 2) - 40, yScaled + 20, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.select.getDisplayName() + "] " + I18n.format("control.arcademod:select.tetrominoes.name"), playX + (130 / 2) - 40, yScaled + 30, Color.white.getRGB());
+                    this.fontRendererObj.drawString("[" + KeyHandler.down.getDisplayName() + "] " + I18n.format("control.arcademod:down.name"), playX + (130 / 2) - 40, yScaled, Color.white.getRGB());
+                    this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("control.arcademod:left.name"), playX + (130 / 2) - 40, yScaled + 10, Color.white.getRGB());
+                    this.fontRendererObj.drawString("[" + KeyHandler.right.getDisplayName() + "] " + I18n.format("control.arcademod:right.name"), playX + (130 / 2) - 40, yScaled + 20, Color.white.getRGB());
+                    this.fontRendererObj.drawString("[" + KeyHandler.select.getDisplayName() + "] " + I18n.format("control.arcademod:select.name"), playX + (130 / 2) - 40, yScaled + 30, Color.white.getRGB());
 
                     // Back
                     this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), playX + 2, yScaled + (GUI_Y / 2) - 20, Color.white.getRGB());
@@ -214,60 +267,7 @@ public class GuiTetrominoes extends GuiArcade {
                     // TODO: Highscore
                     break;
             }
-
-            // Game Over Timer
-            if (menu == 3) {
-                if (tickCounter >= 60) {
-                    tickCounter = 0;
-                    checkMenuAfterGameOver();
-                    nextShape = getWorld().rand.nextInt(7);
-                    score = 0;
-                    row = 0;
-                    level = 1;
-                    rotation = 0;
-                    for (int x = 0; x < 10; x++) {
-                        for (int y = 0; y < 18; y++) {
-                            board[x][y] = -1;
-                        }
-                    }
-                }
-            }
         } else {
-            if (gameOver) {
-                menu = 3;
-                giveNextPiece = false;
-                inMenu = true;
-                gameOver = false;
-                giveReward(ArcadeItems.ticket, row);
-                // TODO: Send Score to NBT
-            }
-
-            if (giveNextPiece) {
-                rotation = 0;
-                curShape = nextShape;
-                nextShape = getWorld().rand.nextInt(7);
-                piecePoint = new Point(3, 0);
-                giveNextPiece = false;
-            }
-
-            // Move Current Piece down or place
-            if ((tickCounter - prevGameTick) >= (isKeyDown(KeyHandler.down.getKeyCode()) ? speed[0] : speed[level])) {
-                prevGameTick = tickCounter;
-
-                if (canMoveDown()) piecePoint.y++;
-                else place();
-            }
-
-            // Controls
-            if ((tickCounter - prevControlTick) >= controlSpeed) {
-                prevControlTick = tickCounter;
-                if (isKeyDown(KeyHandler.left.getKeyCode())) {
-                    if (canMoveLeft()) piecePoint.x--;
-                } else if (isKeyDown(KeyHandler.right.getKeyCode())) {
-                    if (canMoveRight()) piecePoint.x++;
-                }
-            }
-
             // Draw Tetrominos
             drawTetromino(curShape, rotation, piecePoint.x, piecePoint.y); // Max 17
             for (int x = 0; x < 10; x++) {
@@ -373,16 +373,14 @@ public class GuiTetrominoes extends GuiArcade {
     }
 
     private void drawTetromino (int shape, int rotation, int x, int y) {
-        GlStateManager.color(colors[shape][0], colors[shape][1], colors[shape][2]);
+        glColor(colors[shape]);
         this.mc.getTextureManager().bindTexture(texture);
-
         for (int i = 0; i < 4; i++) this.drawTexturedModalRect(playX + (x * PLAY_BLOCK) + (pieces[shape][rotation][i].x * PLAY_BLOCK), playY + (y * PLAY_BLOCK) + (pieces[shape][rotation][i].y * PLAY_BLOCK) - PLAY_BLOCK, GUI_X, 0, PLAY_BLOCK, PLAY_BLOCK);
     }
 
     private void drawBlock (int shape, int x, int y) {
-        GlStateManager.color(colors[shape][0], colors[shape][1], colors[shape][2]);
+    	glColor(colors[shape]);
         this.mc.getTextureManager().bindTexture(texture);
-
         this.drawTexturedModalRect(playX + (x * PLAY_BLOCK), playY + (y * PLAY_BLOCK), GUI_X, 0, PLAY_BLOCK, PLAY_BLOCK);
     }
 
@@ -397,7 +395,7 @@ public class GuiTetrominoes extends GuiArcade {
                 { 8, -8 } // T
         };
 
-        GlStateManager.color(colors[shape][0], colors[shape][1], colors[shape][2]);
+        glColor(colors[shape]);
         this.mc.getTextureManager().bindTexture(texture);
         for (int i = 0; i < 4; i++) this.drawTexturedModalRect(nextX + pos[shape][0] + (pieces[shape][0][i].x * PREVIEW_BLOCK), nextY + pos[shape][1] + (pieces[shape][0][i].y * PREVIEW_BLOCK), (GUI_X + PLAY_BLOCK), 0, PREVIEW_BLOCK, PREVIEW_BLOCK);
     }

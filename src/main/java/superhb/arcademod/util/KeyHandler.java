@@ -1,22 +1,28 @@
 package superhb.arcademod.util;
 
+import com.google.common.collect.ImmutableList;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import org.lwjgl.input.Keyboard;
+import java.util.List;
 
 public class KeyHandler {
-    public static KeyBinding up, down, left, right, select;
-
-    public static void preInit () {
-        up = new KeyBinding("Up", Keyboard.KEY_UP, "Arcade Mod");
-        down = new KeyBinding("Down", Keyboard.KEY_DOWN, "Arcade Mod");
-        left = new KeyBinding("Left", Keyboard.KEY_LEFT, "Arcade Mod");
-        right = new KeyBinding("Right", Keyboard.KEY_RIGHT, "Arcade Mod");
-        select = new KeyBinding("Select", Keyboard.KEY_RETURN, "Arcade Mod");
-        registerKeyBinding(up, down, left, right, select);
-    }
-
-    private static void registerKeyBinding (KeyBinding... keys) {
-        for (KeyBinding key : keys) ClientRegistry.registerKeyBinding(key);
-    }
+	public static KeyBinding up, down, left, right, select;
+	
+	public static final List<KeyBinding> bindings;
+	
+	static {
+		bindings = ImmutableList.of(
+				up = new KeyBinding(I18n.format("control.arcademod:up.name"), Keyboard.KEY_UP, I18n.format("mod.arcademod:name.locale")),
+				down = new KeyBinding(I18n.format("control.arcademod:down.name"), Keyboard.KEY_DOWN, I18n.format("mod.arcademod:name.locale")),
+				left = new KeyBinding(I18n.format("control.arcademod:left.name"), Keyboard.KEY_LEFT, I18n.format("mod.arcademod:name.locale")),
+				right = new KeyBinding(I18n.format("control.arcademod:right.name"), Keyboard.KEY_RIGHT, I18n.format("mod.arcademod:name.locale")),
+				select = new KeyBinding(I18n.format("control.arcademod:select.name"), Keyboard.KEY_RETURN, I18n.format("mod.arcademod:name.locale"))
+		);
+	}
+	
+	public static void registerKeyBinding () {
+		for (KeyBinding key : bindings) ClientRegistry.registerKeyBinding(key);
+	}
 }

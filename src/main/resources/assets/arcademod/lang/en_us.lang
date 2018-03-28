@@ -26,9 +26,12 @@ text.arcademod:level.tetrominoes.locale=Level
 text.arcademod:row.tetrominoes.locale=Rows
 text.arcademod:level_select.tetrominoes.locale=Level Select
 
+text.arcademod:ready.pacman.locale=Ready!
+
 option.arcademod:start.locale=Start
 option.arcademod:difficulty.locale=Difficulty
 option.arcademod:control.locale=Controls
+option.arcademod:setting.locale=Settings
 option.arcademod:back.name=Back
 
 option.arcademod:difficulty.easy.locale=Easy
@@ -38,15 +41,12 @@ option.arcademod:difficulty.extreme.locale=Extreme
 
 game.arcademod:snake.name=Snake
 game.arcademod:tetrominoes.name=Tetris
+game.arcademod:pacman.name=Pac-Man
 
-control.arcademod:up.snake.name=Up
-control.arcademod:down.snake.name=Down
-control.arcademod:left.snake.name=Left/Back
-control.arcademod:right.snake.name=Right
-control.arcademod:select.snake.name=Select
+control.arcademod:up.name=Up
+control.arcademod:down.name=Down
+control.arcademod:left.name=Left/Back
+control.arcademod:right.name=Right
+control.arcademod:select.name=Select
 
 control.arcademod:up.tetrominoes.name=Up/Rotate
-control.arcademod:down.tetrominoes.name=Down
-control.arcademod:left.tetrominoes.name=Left/Back
-control.arcademod:right.tetrominoes.name=Right
-control.arcademod:select.tetrominoes.name=Select

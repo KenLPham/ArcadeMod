@@ -1,7 +1,6 @@
 package superhb.arcademod.client.blocks;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
+import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.*;
 import net.minecraft.block.state.*;
@@ -13,31 +12,26 @@ import net.minecraft.item.*;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import superhb.arcademod.client.tileentity.TileEntityArcade;
+import net.minecraft.util.math.*;
+import net.minecraft.world.*;
+import net.minecraftforge.fml.relauncher.*;
 import superhb.arcademod.client.tileentity.TileEntityPlushie;
-import superhb.arcademod.util.EnumMob;
-import superhb.arcademod.util.EnumRotation;
-
-import java.util.Random;
+import superhb.arcademod.util.*;
+import javax.annotation.Nullable;
+import java.util.*;
 
 // TODO: Redo Creeper Texture
+// TODO: Change break particles depending on plushies
 @SuppressWarnings("deprecation")
 public class BlockPlushie extends Block implements IBlockVariant {
     // TODO: Diagonal rotation
     /** {@link net.minecraft.block.BlockBanner.BlockBannerStanding#withRotation(IBlockState, Rotation)} */
-    public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
-    public static final PropertyEnum ROTATION = PropertyEnum.create("rotation", EnumRotation.class);
-    public static final PropertyEnum MOB = PropertyEnum.create("mob", EnumMob.class);
+    private static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
+    private static final PropertyEnum ROTATION = PropertyEnum.create("rotation", EnumRotation.class);
+    private static final PropertyEnum MOB = PropertyEnum.create("mob", EnumMob.class);
 
     // TODO: Rotations
-    public static final AxisAlignedBB[][] boundingBox = { // [Mob][Rotation]
+    private static final AxisAlignedBB[][] boundingBox = { // [Mob][Rotation]
             { // Creeper TODO: Fix Bounding Box (Rotation Update)
                     new AxisAlignedBB((5.0D / 16.0D), 0.0D, (5.0D / 16.0D), (11.0D / 16.0D), (13.0D / 16.0D), (11.0D / 16.0D))
             },
@@ -46,7 +40,7 @@ public class BlockPlushie extends Block implements IBlockVariant {
             }
     };
 
-    public static final SoundEvent[] mobSounds = {
+    private static final SoundEvent[] mobSounds = {
             SoundEvents.ENTITY_CREEPER_HURT,
             SoundEvents.ENTITY_PIG_AMBIENT
     };
@@ -87,14 +81,40 @@ public class BlockPlushie extends Block implements IBlockVariant {
     public boolean canSpawnInBlock () {
         return false;
     }
-
+    
     /**
      * Get item to drop when harvested
      */
     @Override
     public Item getItemDropped (IBlockState state, Random rand, int fortune) {
-        return Item.getItemFromBlock(this);
+		return null;
     }
+    
+    @Override
+	public List<ItemStack> getDrops (IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+		List<ItemStack> drops = super.getDrops(world, pos, state, fortune);
+		TileEntityPlushie tile = world.getTileEntity(pos) instanceof TileEntityPlushie ? (TileEntityPlushie)world.getTileEntity(pos) : null;
+		NBTTagCompound compound = new NBTTagCompound();
+		ItemStack stack = new ItemStack(this);
+		
+		compound.setInteger("Mob", tile.getMobID());
+		stack.setTagCompound(compound);
+		
+    	if (tile != null) drops.add(stack);
+    	return drops;
+	}
+	
+	@Override
+	public boolean removedByPlayer (IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+		if (willHarvest) return true; //If it will harvest, delay deletion of the block until after getDrops
+		return super.removedByPlayer(state, world, pos, player, willHarvest);
+	}
+	
+	@Override
+	public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack tool) {
+		super.harvestBlock(world, player, pos, state, te, tool);
+		world.setBlockToAir(pos);
+	}
 
     @Override
     public boolean isReplaceable (IBlockAccess world, BlockPos pos) {
@@ -132,7 +152,7 @@ public class BlockPlushie extends Block implements IBlockVariant {
         compound.setInteger("Mob", 0);
         stack.setTagCompound(compound);
 
-        if (tile instanceof TileEntityArcade) {
+        if (tile instanceof TileEntityPlushie) {
             TileEntityPlushie plushie = (TileEntityPlushie)tile;
             compound.setInteger("Mob", plushie.getMobID());
             stack.setTagCompound(compound);
@@ -166,15 +186,15 @@ public class BlockPlushie extends Block implements IBlockVariant {
     protected BlockStateContainer createBlockState () {
         return new BlockStateContainer(this, new IProperty[] { FACING, MOB });
     }
-
+    
+    /**
+     * Gets the metadata of the item this Block can drop.
+     */
     @Override
     public int damageDropped (IBlockState state) {
         return 0;
     }
-
-    /**
-     * Gets the metadata of the item this Block can drop.
-     */
+    
     @Override
     public void breakBlock (World world, BlockPos pos, IBlockState state) {
         super.breakBlock(world, pos, state);

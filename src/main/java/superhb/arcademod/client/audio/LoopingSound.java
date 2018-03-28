@@ -23,6 +23,6 @@ public class LoopingSound extends MovingSound {
 
     @Override
     public void update () {
-        if (!(Minecraft.getMinecraft().currentScreen instanceof GuiArcade) || tile.shouldStop()) donePlaying = true;
+        if (!(Minecraft.getMinecraft().currentScreen instanceof GuiArcade)) donePlaying = true;
     }
 }

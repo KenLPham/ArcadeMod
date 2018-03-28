@@ -60,6 +60,10 @@ public enum EnumMob implements IStringSerializable {
         return name;
     }
 
+    public int getId () {
+    	return id;
+    }
+    
     public static EnumMob getValue (int id) {
         return values()[id];
     }

@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 
 public class TileEntityPlushie extends TileEntity {
     private int mob = 0;
+    private NBTTagCompound tagCompound;
 
     public TileEntityPlushie () {
         mob = 0;
@@ -28,8 +29,12 @@ public class TileEntityPlushie extends TileEntity {
     public void setMobID (int id) {
         mob = id;
     }
-
-    @Override
+	
+	public NBTTagCompound getTagCompound () {
+		return tagCompound;
+	}
+	
+	@Override
     public NBTTagCompound writeToNBT (NBTTagCompound compound) {
         super.writeToNBT(compound);
         compound.setInteger("Mob", mob);
@@ -39,6 +44,7 @@ public class TileEntityPlushie extends TileEntity {
     @Override
     public void readFromNBT (NBTTagCompound compound) {
         super.readFromNBT(compound);
+        tagCompound = compound;
         mob = compound.getInteger("Mob");
     }
 

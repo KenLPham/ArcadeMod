@@ -5,7 +5,8 @@ import net.minecraft.util.IStringSerializable;
 public enum EnumGame implements IStringSerializable {
     SNAKE(0, "snake"),
     TETROMINOES(1, "tetrominoes"),
-    PACMAN(2, "pacman");
+    PACMAN(2, "pacman"),
+    DDR(3, "ddr");
 
     private int id;
     private String registryName;
@@ -19,6 +20,10 @@ public enum EnumGame implements IStringSerializable {
     public String getName () {
         return registryName;
     }
+    
+    public int getId () {
+    	return id;
+	}
 
     public static EnumGame getValue (int id) {
         return values()[id];

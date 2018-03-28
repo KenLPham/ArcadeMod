@@ -1,5 +1,6 @@
 package superhb.arcademod.client.gui;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import superhb.arcademod.Reference;
@@ -40,6 +41,101 @@ public class GuiSnake extends GuiArcade {
         setTexture(texture);
         setStartMenu(0);
     }
+    
+    @Override
+	public void updateScreen () {
+    	super.updateScreen();
+    	
+    	if (inMenu) {
+			if (menu == 3) {
+				if ((tickCounter - prevTick) >= 60) {
+					prevTick = tickCounter;
+					checkMenuAfterGameOver();
+					direction = 0;
+					start = true;
+					tail = 0;
+				}
+			}
+		} else {
+			if ((tickCounter - prevTick) >= tick) {
+				prevTick = tickCounter;
+			
+				int preX = tailX[0];
+				int preY = tailY[0];
+				int pre2X, pre2Y;
+			
+				if (start) {
+					pointPosX = getWorld().rand.nextInt(25);
+					pointPosY = getWorld().rand.nextInt(36);
+					start = false;
+				}
+			
+				// Movement
+				if (direction == 0) {
+					snakePosX = (130 / 5) / 2;
+					snakePosY = (185 / 5) / 2;
+				} else if (direction == 1) { // Up
+					tailX[0] = snakePosX;
+					tailY[0] = snakePosY;
+					snakePosY -= 1;
+				} else if (direction == 2) { // Down
+					tailX[0] = snakePosX;
+					tailY[0] = snakePosY;
+					snakePosY += 1;
+				} else if (direction == 3) { // Left
+					tailX[0] = snakePosX;
+					tailY[0] = snakePosY;
+					snakePosX -= 1;
+				} else if (direction == 4) { // Right
+					tailX[0] = snakePosX;
+					tailY[0] = snakePosY;
+					snakePosX += 1;
+				}
+			
+				// Game Over
+				if (snakePosX < 0 || snakePosX > 25 || snakePosY < 0 || snakePosY > 36) {
+					direction = -1;
+					gameOver = true;
+				}
+			
+				for (int i = 0; i < tail; i++) {
+					if (i < tailX.length) {
+						if (tailX[i] == snakePosX && tailY[i] == snakePosY) {
+							direction = -1;
+							gameOver = true;
+						}
+					}
+				}
+			
+				// Add Point
+				if (snakePosX == pointPosX && snakePosY == pointPosY) {
+					tail++;
+					pointPosX = getWorld().rand.nextInt(25);
+					pointPosY = getWorld().rand.nextInt(36);
+					for (int i = 0; i < tail; i++) {
+						if (i < tailX.length) {
+							if ((pointPosX == tailX[i] && pointPosY == tailY[i]) || (pointPosX == snakePosX && pointPosY == snakePosY)) {
+								pointPosX = getWorld().rand.nextInt(25);
+								pointPosY = getWorld().rand.nextInt(36);
+							}
+						}
+					}
+				}
+			
+				// Tail
+				for (int i = 1; i < tail; i++) {
+					if (i < tailX.length) {
+						pre2X = tailX[i];
+						pre2Y = tailY[i];
+						tailX[i] = preX;
+						tailY[i] = preY;
+						preX = pre2X;
+						preY = pre2Y;
+					}
+				}
+			}
+		}
+	}
 
     @Override
     public void drawScreen (int mouseX, int mouseY, float partialTicks) {
@@ -48,19 +144,20 @@ public class GuiSnake extends GuiArcade {
 
         super.drawScreen(mouseX, mouseY, partialTicks);
 
-        int startWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:start.locale"));
-        int difficultyWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.locale"));
-        int controlWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:control.locale"));
-
-        int easyWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.easy.locale"));
-        int mediumWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.medium.locale"));
-        int hardWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.hard.locale"));
-        int extremeWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.extreme.locale"));
-
         // TODO: Make leaderboard menu
         // TODO: Save high score to nbt
         // TODO: Save leaderboard (Top 10) to nbt
+		// TODO: Warn player when FPS is too low? (Minecraft.getDebugFPS())
         if (inMenu) {
+			int startWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:start.locale"));
+			int difficultyWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.locale"));
+			int controlWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:control.locale"));
+	
+			int easyWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.easy.locale"));
+			int mediumWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.medium.locale"));
+			int hardWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.hard.locale"));
+			int extremeWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.extreme.locale"));
+			
             switch (menu) {
                 case 0: //Start Menu
                     int titleWidth = this.fontRendererObj.getStringWidth(I18n.format("game.arcademod:snake.name"));
@@ -109,11 +206,11 @@ public class GuiSnake extends GuiArcade {
                 case 2: // Controls Menu
                     this.fontRendererObj.drawString(I18n.format("option.arcademod:control.locale"), (width / 2) - (controlWidth / 2), (height / 2) - (GUI_Y / 2) + 11, Color.white.getRGB());
 
-                    this.fontRendererObj.drawString("[" + KeyHandler.up.getDisplayName() + "] " + I18n.format("control.arcademod:up.snake.name"), (width / 2) - 40, (height / 2) - 10, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.down.getDisplayName() + "] " + I18n.format("control.arcademod:down.snake.name"), (width / 2) - 40, height / 2, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("control.arcademod:left.snake.name"), (width / 2) - 40, (height / 2) + 10, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.right.getDisplayName() + "] " + I18n.format("control.arcademod:right.snake.name"), (width / 2) - 40, (height / 2) + 20, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.select.getDisplayName() + "] " + I18n.format("control.arcademod:select.snake.name"), (width / 2) - 40, (height / 2) + 30, Color.white.getRGB());
+                    this.fontRendererObj.drawString("[" + KeyHandler.up.getDisplayName() + "] " + I18n.format("control.arcademod:up.name"), (width / 2) - 40, (height / 2) - 10, Color.white.getRGB());
+                    this.fontRendererObj.drawString("[" + KeyHandler.down.getDisplayName() + "] " + I18n.format("control.arcademod:down.name"), (width / 2) - 40, height / 2, Color.white.getRGB());
+                    this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("control.arcademod:left.name"), (width / 2) - 40, (height / 2) + 10, Color.white.getRGB());
+                    this.fontRendererObj.drawString("[" + KeyHandler.right.getDisplayName() + "] " + I18n.format("control.arcademod:right.name"), (width / 2) - 40, (height / 2) + 20, Color.white.getRGB());
+                    this.fontRendererObj.drawString("[" + KeyHandler.select.getDisplayName() + "] " + I18n.format("control.arcademod:select.name"), (width / 2) - 40, (height / 2) + 30, Color.white.getRGB());
 
                     this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), (width / 2) - (GUI_X / 2) + 12, (height / 2) + (GUI_Y / 2) - 20, Color.white.getRGB());
                     break;
@@ -127,16 +224,6 @@ public class GuiSnake extends GuiArcade {
                 case 4: // ArcadeLeaderboard Menu
                     break;
             }
-
-            if (menu == 3) {
-                if ((tickCounter - prevTick) >= 60) {
-                    prevTick = tickCounter;
-                    checkMenuAfterGameOver();
-                    direction = 0;
-                    start = true;
-                    tail = 0;
-                }
-            }
         } else {
             if (gameOver) {
                 menu = 3;
@@ -147,98 +234,15 @@ public class GuiSnake extends GuiArcade {
                 // TODO: Send Score to NBT
             }
 
-            if ((tickCounter - prevTick) >= tick) {
-                prevTick = tickCounter;
-
-                int preX = tailX[0];
-                int preY = tailY[0];
-                int pre2X, pre2Y;
-
-                if (start) {
-                    pointPosX = getWorld().rand.nextInt(25);
-                    pointPosY = getWorld().rand.nextInt(36);
-                    start = false;
-                }
-
-                // Movement
-                if (direction == 0) {
-                    snakePosX = (130 / 5) / 2;
-                    snakePosY = (185 / 5) / 2;
-                } else if (direction == 1) { // Up
-                    tailX[0] = snakePosX;
-                    tailY[0] = snakePosY;
-                    snakePosY -= 1;
-                } else if (direction == 2) { // Down
-                    tailX[0] = snakePosX;
-                    tailY[0] = snakePosY;
-                    snakePosY += 1;
-                } else if (direction == 3) { // Left
-                    tailX[0] = snakePosX;
-                    tailY[0] = snakePosY;
-                    snakePosX -= 1;
-                } else if (direction == 4) { // Right
-                    tailX[0] = snakePosX;
-                    tailY[0] = snakePosY;
-                    snakePosX += 1;
-                }
-
-                // Game Over
-                if (snakePosX < 0 || snakePosX > 25 || snakePosY < 0 || snakePosY > 36) {
-                    direction = -1;
-                    gameOver = true;
-                }
-
-                for (int i = 0; i < tail; i++) {
-                    if (i < tailX.length) {
-                        if (tailX[i] == snakePosX && tailY[i] == snakePosY) {
-                            direction = -1;
-                            gameOver = true;
-                        }
-                    }
-                }
-
-                // Add Point
-                if (snakePosX == pointPosX && snakePosY == pointPosY) {
-                    tail++;
-                    pointPosX = getWorld().rand.nextInt(25);
-                    pointPosY = getWorld().rand.nextInt(36);
-                    for (int i = 0; i < tail; i++) {
-                        if (i < tailX.length) {
-                            if ((pointPosX == tailX[i] && pointPosY == tailY[i]) || (pointPosX == snakePosX && pointPosY == snakePosY)) {
-                                pointPosX = getWorld().rand.nextInt(25);
-                                pointPosY = getWorld().rand.nextInt(36);
-                            }
-                        }
-                    }
-                }
-
-                // Tail
-                for (int i = 1; i < tail; i++) {
-                    if (i < tailX.length) {
-                        pre2X = tailX[i];
-                        pre2Y = tailY[i];
-                        tailX[i] = preX;
-                        tailY[i] = preY;
-                        preX = pre2X;
-                        preY = pre2Y;
-                    }
-                }
-            }
-
             // Snake
-            this.mc.getTextureManager().bindTexture(texture);
             this.drawTexturedModalRect(minX + (snakePosX * 5), minY + (snakePosY * 5), ARROW_X, GUI_Y, SNAKE, SNAKE);
 
             // Point
-            this.mc.getTextureManager().bindTexture(texture);
             this.drawTexturedModalRect(minX + 1 + (pointPosX * 5), minY + 1 + (pointPosY * 5), ARROW_X + SNAKE, GUI_Y, POINT, POINT);
 
             // Tail
             for (int i = 1; i <= tail; i++) {
-                if (i < tailX.length) {
-                    this.mc.getTextureManager().bindTexture(texture);
-                    this.drawTexturedModalRect(minX + (tailX[i - 1] * 5), minY + (tailY[i - 1] * 5), ARROW_X, GUI_Y, SNAKE, SNAKE);
-                }
+                if (i < tailX.length) this.drawTexturedModalRect(minX + (tailX[i - 1] * 5), minY + (tailY[i - 1] * 5), ARROW_X, GUI_Y, SNAKE, SNAKE);
             }
 
             // Score

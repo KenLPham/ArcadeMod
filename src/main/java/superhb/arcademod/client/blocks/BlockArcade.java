@@ -76,10 +76,39 @@ public class BlockArcade extends Block implements IBlockVariant {
     public boolean canSpawnInBlock () {
         return false;
     }
-
+    
+    /**
+     * Get item to drop when harvested
+     */
     @Override
     public Item getItemDropped (IBlockState state, Random rand, int fortune) {
-        return Item.getItemFromBlock(this);
+        return null;
+    }
+    
+    @Override
+    public List<ItemStack> getDrops (IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+        List<ItemStack> drops = super.getDrops(world, pos, state, fortune);
+        TileEntityArcade tile = world.getTileEntity(pos) instanceof TileEntityArcade ? (TileEntityArcade)world.getTileEntity(pos) : null;
+        NBTTagCompound compound = new NBTTagCompound();
+        ItemStack stack = new ItemStack(this);
+        
+        compound.setInteger("Game", tile.getGameID());
+        stack.setTagCompound(compound);
+        
+        if (tile != null) drops.add(stack);
+        return drops;
+    }
+    
+    @Override
+    public boolean removedByPlayer (IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+        if (willHarvest) return true; //If it will harvest, delay deletion of the block until after getDrops
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
+    }
+    
+    @Override
+    public void harvestBlock(World world, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, ItemStack tool) {
+        super.harvestBlock(world, player, pos, state, te, tool);
+        world.setBlockToAir(pos);
     }
 
     @Override
@@ -266,13 +295,13 @@ public class BlockArcade extends Block implements IBlockVariant {
     @SideOnly(Side.CLIENT)
     public void getSubBlocks (Item item, CreativeTabs tab, NonNullList<ItemStack> list) {
         for (int i = 0; i < EnumGame.values().length; i++) {
-            if (i != 2) {
-                NBTTagCompound compound = new NBTTagCompound();
-                ItemStack stack = new ItemStack(item);
-                compound.setInteger("Game", i);
-                stack.setTagCompound(compound);
-                list.add(stack);
-            }
+            if (i != 3) {
+				NBTTagCompound compound = new NBTTagCompound();
+				ItemStack stack = new ItemStack(item);
+				compound.setInteger("Game", i);
+				stack.setTagCompound(compound);
+				list.add(stack);
+			}
         }
     }
 
