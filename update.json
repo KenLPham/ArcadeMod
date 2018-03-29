@@ -1,7 +1,7 @@
 {
   "homepage": "https://minecraft.curseforge.com/projects/arcade-mod",
-  "1.12": {
-    "1.0.0": ""
+  "1.12.2": {
+    "2.0.0": "Updated to 1.12.2"
   },
   "1.11.2": {
     "0.1.0": "Initial Creation",
@@ -47,8 +47,8 @@
     "2.0.0": "Added Pac-Man"
   },
   "promos": {
-    "1.12-latest": "1.0.0",
-    "1.12-recommended": "1.0.0",
+    "1.12.2-latest": "2.0.0",
+    "1.12.2-recommended": "2.0.0",
     "1.11.2-latest": "2.0.0",
     "1.11.2-recommended": "2.0.0"
   }
