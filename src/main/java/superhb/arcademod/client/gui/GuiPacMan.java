@@ -19,7 +19,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
-// http://www.gamasutra.com/view/feature/3938/the_pacman_dossier.php?print=1
 public class GuiPacMan extends GuiArcade {
 	// 1 dot = 10 pt (240 total)
 	// 1 energizer = 50 pt (4 total)
