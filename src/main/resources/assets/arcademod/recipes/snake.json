@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "bgb",
+    "wbw",
+    "brb"
+  ],
+  "key": {
+    "g": {
+      "item": "minecraft:glass_pane"
+    },
+    "b": {
+      "item": "minecraft:wool",
+      "data": 15
+    },
+    "w": {
+      "item": "minecraft:wool",
+      "data": 0
+    },
+    "r": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "type": "minecraft:item_nbt",
+    "item": "arcademod:arcade_machine",
+    "data": 0,
+    "nbt": {
+      "Game": 0
+    }
+  }
+}
