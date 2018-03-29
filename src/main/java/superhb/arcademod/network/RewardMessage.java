@@ -53,15 +53,12 @@ public class RewardMessage implements IMessage {
     public static class Handler implements IMessageHandler<RewardMessage, IMessage> {
         @Override
         public IMessage onMessage (final RewardMessage message, final MessageContext context) {
-            IThreadListener thread = (WorldServer)context.getServerHandler().playerEntity.world;
+            IThreadListener thread = (WorldServer)context.getServerHandler().player.world;
 
-            thread.addScheduledTask(new Runnable() {
-                @Override
-                public void run() {
-                    EntityPlayerMP player = context.getServerHandler().playerEntity;
-                    player.inventory.addItemStackToInventory(message.getReward());
-                }
-            });
+            thread.addScheduledTask(()->{
+				EntityPlayerMP player = context.getServerHandler().player;
+				player.inventory.addItemStackToInventory(message.getReward());
+			});
             return null;
         }
     }

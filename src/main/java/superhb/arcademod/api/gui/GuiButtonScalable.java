@@ -19,21 +19,21 @@ public class GuiButtonScalable extends GuiButton {
     }
 
     @Override
-    public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+    public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         int scaledX = Math.round(mouseX / scale);
         int scaledY = Math.round(mouseY / scale);
 
         if (this.visible) {
-            FontRenderer fontrenderer = mc.fontRendererObj;
+            FontRenderer fontrenderer = mc.fontRenderer;
             mc.getTextureManager().bindTexture(BUTTON_TEXTURES);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            this.hovered = scaledX >= this.xPosition && scaledY >= this.yPosition && scaledX < this.xPosition + this.width && scaledY < this.yPosition + this.height;
+            this.hovered = scaledX >= this.x && scaledY >= this.y && scaledX < this.x + this.width && scaledY < this.y + this.height;
             int i = this.getHoverState(this.hovered);
             GlStateManager.enableBlend();
             GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
             GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            this.drawTexturedModalRect(this.xPosition, this.yPosition, 0, 46 + i * 20, this.width / 2, this.height);
-            this.drawTexturedModalRect(this.xPosition + this.width / 2, this.yPosition, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
+            this.drawTexturedModalRect(this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
+            this.drawTexturedModalRect(this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
             this.mouseDragged(mc, scaledX, scaledY);
 
             int j = 14737632;
@@ -42,7 +42,7 @@ public class GuiButtonScalable extends GuiButton {
             else if (!this.enabled) j = 10526880;
             else if (this.hovered) j = 16777120;
 
-            this.drawCenteredString(fontrenderer, this.displayString, this.xPosition + this.width / 2, this.yPosition + (this.height - 8) / 2, j);
+            this.drawCenteredString(fontrenderer, this.displayString, this.x + this.width / 2, this.y + (this.height - 8) / 2, j);
         }
     }
 
@@ -51,6 +51,6 @@ public class GuiButtonScalable extends GuiButton {
         int scaledX = Math.round(mouseX / scale);
         int scaledY = Math.round(mouseY / scale);
 
-        return this.enabled && this.visible && scaledX >= this.xPosition && scaledY >= this.yPosition && scaledX < this.xPosition + this.width && scaledY < this.yPosition + this.height;
+        return this.enabled && this.visible && scaledX >= this.x && scaledY >= this.y && scaledX < this.x + this.width && scaledY < this.y + this.height;
     }
 }

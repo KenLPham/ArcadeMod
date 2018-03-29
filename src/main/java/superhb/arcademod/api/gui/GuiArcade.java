@@ -70,8 +70,8 @@ public class GuiArcade extends GuiScreen {
 			if (!mc.getMinecraft().player.isCreative()) menu = -1;
 			else menu = startMenu;
 		} else menu = startMenu;
-		this.fontRendererObj = mc.getMinecraft().fontRendererObj;
-		buttonWidth = this.fontRendererObj.getStringWidth(I18n.format("button.arcademod:insert.locale")) + 6;
+		this.fontRenderer = mc.getMinecraft().fontRenderer;
+		buttonWidth = this.fontRenderer.getStringWidth(I18n.format("button.arcademod:insert.locale")) + 6;
 	}
 	
 	/**
@@ -280,21 +280,21 @@ public class GuiArcade extends GuiScreen {
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		
 		if (useInternalMenu) {
-			int coinWidth = this.fontRendererObj.getStringWidth(I18n.format("button.arcademod:insert.locale") + "...");
-			int neededSingWidth = this.fontRendererObj.getStringWidth(cost + " " + I18n.format("text.arcademod:needed.locale"));
-			int neededPluralWidth = this.fontRendererObj.getStringWidth(cost + " " + I18n.format("text.arcademod:needed_plural.locale"));
+			int coinWidth = this.fontRenderer.getStringWidth(I18n.format("button.arcademod:insert.locale") + "...");
+			int neededSingWidth = this.fontRenderer.getStringWidth(cost + " " + I18n.format("text.arcademod:needed.locale"));
+			int neededPluralWidth = this.fontRenderer.getStringWidth(cost + " " + I18n.format("text.arcademod:needed_plural.locale"));
 			
 			if (inMenu) {
 				switch (menu) {
 					case -1: // Insert Coin Menu
 						buttonList.get(0).enabled = true;
 						buttonList.get(0).visible = true;
-						this.fontRendererObj.drawString(I18n.format("button.arcademod:insert.locale") + "...", xScaled - (coinWidth / 2) + offset[0], yScaled + offset[1], 16777215);
+						this.fontRenderer.drawString(I18n.format("button.arcademod:insert.locale") + "...", xScaled - (coinWidth / 2) + offset[0], yScaled + offset[1], 16777215);
 						if (!enoughCoins) {
 							if (cost == 1)
-								this.fontRendererObj.drawString(cost + " " + I18n.format("text.arcademod:needed.locale"), xScaled - (neededSingWidth / 2) + offset[0], yScaled + 10 + offset[1], 16711680);
+								this.fontRenderer.drawString(cost + " " + I18n.format("text.arcademod:needed.locale"), xScaled - (neededSingWidth / 2) + offset[0], yScaled + 10 + offset[1], 16711680);
 							else
-								this.fontRendererObj.drawString(cost + " " + I18n.format("text.arcademod:needed_plural.locale"), xScaled - (neededPluralWidth / 2) + offset[0], yScaled + 10 + offset[1], 16711680);
+								this.fontRenderer.drawString(cost + " " + I18n.format("text.arcademod:needed_plural.locale"), xScaled - (neededPluralWidth / 2) + offset[0], yScaled + 10 + offset[1], 16711680);
 						}
 						break;
 				}

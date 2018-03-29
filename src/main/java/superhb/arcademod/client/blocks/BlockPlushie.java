@@ -224,10 +224,10 @@ public class BlockPlushie extends Block implements IBlockVariant {
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubBlocks (Item item, CreativeTabs tab, NonNullList<ItemStack> list) {
+    public void getSubBlocks (CreativeTabs tab, NonNullList<ItemStack> list) {
         for (int i = 0; i < EnumMob.values().length; i++) {
             NBTTagCompound compound = new NBTTagCompound();
-            ItemStack stack = new ItemStack(item);
+            ItemStack stack = new ItemStack(this);
             compound.setInteger("Mob", i);
             stack.setTagCompound(compound);
             list.add(stack);

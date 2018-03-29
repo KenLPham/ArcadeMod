@@ -217,53 +217,53 @@ public class GuiTetrominoes extends GuiArcade {
 //            //mc.getSoundHandler().playSound(PositionedSoundRecord.getMasterRecord(new SoundEvent(new ResourceLocation(Reference.MODID, "theme.tetris")), 1.0F));
 //        }
     
-        int controlWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:control.locale"));
+        int controlWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:control.locale"));
 
         if (inMenu) {
             // TODO: Volume Menu
             switch (menu) {
                 case 0: // Main Menu
-                    int titleWidth = this.fontRendererObj.getStringWidth(I18n.format("game.arcademod:tetrominoes.name"));
-                    int startWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:start.locale"));
+                    int titleWidth = this.fontRenderer.getStringWidth(I18n.format("game.arcademod:tetrominoes.name"));
+                    int startWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:start.locale"));
 
-                    this.fontRendererObj.drawString(I18n.format("game.arcademod:tetrominoes.name"), playX + (130 / 2) - (titleWidth / 2), playY + 2, Color.white.getRGB());
-                    this.fontRendererObj.drawString(I18n.format("option.arcademod:start.locale"), playX + (130 / 2) - (startWidth / 2), (height / 2), Color.white.getRGB());
-                    this.fontRendererObj.drawString(I18n.format("option.arcademod:control.locale"), playX + (130 / 2) - (controlWidth / 2), (height / 2) + 10, Color.white.getRGB());
+                    this.fontRenderer.drawString(I18n.format("game.arcademod:tetrominoes.name"), playX + (130 / 2) - (titleWidth / 2), playY + 2, Color.white.getRGB());
+                    this.fontRenderer.drawString(I18n.format("option.arcademod:start.locale"), playX + (130 / 2) - (startWidth / 2), (height / 2), Color.white.getRGB());
+                    this.fontRenderer.drawString(I18n.format("option.arcademod:control.locale"), playX + (130 / 2) - (controlWidth / 2), (height / 2) + 10, Color.white.getRGB());
 	
                     // Arrows
                     if (menuOption == 0) drawRightArrow(playX + (130 / 2) - 40, (height / 2) - 2, true); // Start
                     else if (menuOption == 1) drawRightArrow(playX + (130 / 2) - 40, (height / 2) + 8, true); // Controls
                     break;
                 case 1: // Level Select
-                    int levelWidth = this.fontRendererObj.getStringWidth(String.format("[%d]", level));
-                    this.fontRendererObj.drawString(I18n.format("text.arcademod:level_select.tetrominoes.locale"), playX + (130 / 2) - 40, yScaled, Color.white.getRGB());
-                    this.fontRendererObj.drawString(String.format("[%d]", level), playX + (130 / 2) + 35 - (levelWidth / 2), yScaled, Color.white.getRGB());
+                    int levelWidth = this.fontRenderer.getStringWidth(String.format("[%d]", level));
+                    this.fontRenderer.drawString(I18n.format("text.arcademod:level_select.tetrominoes.locale"), playX + (130 / 2) - 40, yScaled, Color.white.getRGB());
+                    this.fontRenderer.drawString(String.format("[%d]", level), playX + (130 / 2) + 35 - (levelWidth / 2), yScaled, Color.white.getRGB());
                     
                     // Arrows
 					drawUpArrow(playX + (130 / 2) + 29, yScaled - 10, true);
 					drawDownArrow(playX + (130 / 2) + 29, yScaled + 10);
 
                     // Back
-                    this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), playX + 2, yScaled + (GUI_Y / 2) - 20, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), playX + 2, yScaled + (GUI_Y / 2) - 20, Color.white.getRGB());
                     break;
                 case 2: // Controls
-                    this.fontRendererObj.drawString(I18n.format("option.arcademod:control.locale"), playX + (130 / 2) - (controlWidth / 2), playY + 2, Color.white.getRGB());
+                    this.fontRenderer.drawString(I18n.format("option.arcademod:control.locale"), playX + (130 / 2) - (controlWidth / 2), playY + 2, Color.white.getRGB());
 
                     // Controls
-                    this.fontRendererObj.drawString("[" + KeyHandler.up.getDisplayName() + "] " + I18n.format("control.arcademod:up.tetrominoes.name"), playX + (130 / 2) - 40, yScaled - 10, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.down.getDisplayName() + "] " + I18n.format("control.arcademod:down.name"), playX + (130 / 2) - 40, yScaled, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("control.arcademod:left.name"), playX + (130 / 2) - 40, yScaled + 10, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.right.getDisplayName() + "] " + I18n.format("control.arcademod:right.name"), playX + (130 / 2) - 40, yScaled + 20, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.select.getDisplayName() + "] " + I18n.format("control.arcademod:select.name"), playX + (130 / 2) - 40, yScaled + 30, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.up.getDisplayName() + "] " + I18n.format("control.arcademod:up.tetrominoes.name"), playX + (130 / 2) - 40, yScaled - 10, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.down.getDisplayName() + "] " + I18n.format("control.arcademod:down.name"), playX + (130 / 2) - 40, yScaled, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("control.arcademod:left.name"), playX + (130 / 2) - 40, yScaled + 10, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.right.getDisplayName() + "] " + I18n.format("control.arcademod:right.name"), playX + (130 / 2) - 40, yScaled + 20, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.select.getDisplayName() + "] " + I18n.format("control.arcademod:select.name"), playX + (130 / 2) - 40, yScaled + 30, Color.white.getRGB());
 
                     // Back
-                    this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), playX + 2, yScaled + (GUI_Y / 2) - 20, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), playX + 2, yScaled + (GUI_Y / 2) - 20, Color.white.getRGB());
                     break;
                 case 3: // Game Over
-                    int overWidth = this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:gameover.locale"));
-                    this.fontRendererObj.drawString(I18n.format("text.arcademod:gameover.locale"), playX + (130 / 2) - (overWidth / 2), yScaled - 20, Color.white.getRGB());
-                    int scoreWidth = this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:score.locale") + ": " + score);
-                    this.fontRendererObj.drawString(I18n.format("text.arcademod:score.locale") + ": " + score, playX + (130 / 2) - (scoreWidth / 2), yScaled - 10, Color.white.getRGB());
+                    int overWidth = this.fontRenderer.getStringWidth(I18n.format("text.arcademod:gameover.locale"));
+                    this.fontRenderer.drawString(I18n.format("text.arcademod:gameover.locale"), playX + (130 / 2) - (overWidth / 2), yScaled - 20, Color.white.getRGB());
+                    int scoreWidth = this.fontRenderer.getStringWidth(I18n.format("text.arcademod:score.locale") + ": " + score);
+                    this.fontRenderer.drawString(I18n.format("text.arcademod:score.locale") + ": " + score, playX + (130 / 2) - (scoreWidth / 2), yScaled - 10, Color.white.getRGB());
                     // TODO: Highscore
                     break;
             }
@@ -278,16 +278,16 @@ public class GuiTetrominoes extends GuiArcade {
             drawPreview(nextShape);
 
             // Next
-            fontRendererObj.drawString(I18n.format("text.arcademod:next.tetrominoes.locale") + ":", xScaled + (GUI_X / 2) - 60, playY, 4210752);
+            fontRenderer.drawString(I18n.format("text.arcademod:next.tetrominoes.locale") + ":", xScaled + (GUI_X / 2) - 60, playY, 4210752);
 
             // Level (1-10)
-            fontRendererObj.drawSplitString(I18n.format("text.arcademod:level.tetrominoes.locale") + ": " + level, xScaled + (GUI_X / 2) - 60, nextY + 38, 50, 4210752);
+            fontRenderer.drawSplitString(I18n.format("text.arcademod:level.tetrominoes.locale") + ": " + level, xScaled + (GUI_X / 2) - 60, nextY + 38, 50, 4210752);
 
             // Row
-            fontRendererObj.drawSplitString(I18n.format("text.arcademod:row.tetrominoes.locale") + ": " + row, xScaled + (GUI_X / 2) - 60, nextY + 63, 50, 4210752);
+            fontRenderer.drawSplitString(I18n.format("text.arcademod:row.tetrominoes.locale") + ": " + row, xScaled + (GUI_X / 2) - 60, nextY + 63, 50, 4210752);
 
             // Score
-            fontRendererObj.drawSplitString(I18n.format("text.arcademod:score.locale") + ": " + score, xScaled + (GUI_X / 2) - 60, nextY + 88, 50, 4210752);
+            fontRenderer.drawSplitString(I18n.format("text.arcademod:score.locale") + ": " + score, xScaled + (GUI_X / 2) - 60, nextY + 88, 50, 4210752);
         }
     }
 

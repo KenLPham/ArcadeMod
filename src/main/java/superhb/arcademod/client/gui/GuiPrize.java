@@ -51,14 +51,14 @@ public class GuiPrize extends GuiScreen {
         super.drawScreen(mouseX, mouseY, partialTicks);
 
         String name = tile.getDisplayName().getUnformattedText();
-        int nameWidth = fontRendererObj.getStringWidth(name);
-        fontRendererObj.drawString(name, (width / 2) - (nameWidth / 2), guiTop + 4, Color.darkGray.getRGB());
+        int nameWidth = fontRenderer.getStringWidth(name);
+        fontRenderer.drawString(name, (width / 2) - (nameWidth / 2), guiTop + 4, Color.darkGray.getRGB());
 
         // Amount
-        fontRendererObj.drawString(String.format("%d", amount), (guiLeft + 91) - (fontRendererObj.getStringWidth(String.format("%d", amount)) / 2), (guiTop + 34), Color.white.getRGB());
+        fontRenderer.drawString(String.format("%d", amount), (guiLeft + 91) - (fontRenderer.getStringWidth(String.format("%d", amount)) / 2), (guiTop + 34), Color.white.getRGB());
 
         // Cost
-        fontRendererObj.drawString("Cost: " + (Arcade.prizeList[curPrize].getPrice() * amount), (guiLeft + 70), (guiTop + 63), isEnough ? Color.darkGray.getRGB() : Color.red.getRGB());
+        fontRenderer.drawString("Cost: " + (Arcade.prizeList[curPrize].getPrice() * amount), (guiLeft + 70), (guiTop + 63), isEnough ? Color.darkGray.getRGB() : Color.red.getRGB());
 
         // TODO: Item colors are fine, blocks are darker
         // Draw Prizes
@@ -68,7 +68,7 @@ public class GuiPrize extends GuiScreen {
         GlStateManager.enableDepth();
         itemRender.renderItemAndEffectIntoGUI(Arcade.prizeList[curPrize].getStack(), (guiLeft + 31), (guiTop + 29));
         // TODO: Hover Overlay                                                                                                                          What the actual fuck
-        //itemRender.renderItemOverlayIntoGUI(fontRendererObj, new ItemStack(Arcade.prizeList[curPrize].getItem()), (guiLeft + 31), (guiTop + 29), Arcade.prizeList[curPrize].getItem().getItemStackDisplayName(new ItemStack(Arcade.prizeList[curPrize].getItem())));
+        //itemRender.renderItemOverlayIntoGUI(fontRenderer, new ItemStack(Arcade.prizeList[curPrize].getItem()), (guiLeft + 31), (guiTop + 29), Arcade.prizeList[curPrize].getItem().getItemStackDisplayName(new ItemStack(Arcade.prizeList[curPrize].getItem())));
     }
 
     @Override

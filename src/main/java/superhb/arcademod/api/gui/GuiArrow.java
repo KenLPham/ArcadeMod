@@ -38,11 +38,11 @@ public class GuiArrow extends GuiButton {
     }
 
     @Override
-    public void drawButton (Minecraft mc, int mouseX, int mouseY) {
+    public void drawButton (Minecraft mc, int mouseX, int mouseY, float partialTicks) {
         if (visible) {
             mc.getTextureManager().bindTexture(texture);
             GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
-            hovered = mouseX >= this.xPosition && mouseY >= this.yPosition && mouseX < this.xPosition + this.width && mouseY < this.yPosition + this.height;
+            hovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
             int i = getHoverState(hovered); //Returns 0 if the button is disabled, 1 if the mouse is NOT hovering over this button and 2 if it IS hovering over
             GlStateManager.enableBlend();
             GlStateManager.tryBlendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
@@ -50,28 +50,28 @@ public class GuiArrow extends GuiButton {
 
             switch (type) {
                 case 0: // Large Right
-                    if (i == 1) drawTexturedModalRect(xPosition, yPosition, 0, 0, LARGE_X, LARGE_Y); // Not Hovering
-                    else if (i == 2) drawTexturedModalRect(xPosition, yPosition, 0, LARGE_Y, LARGE_X, LARGE_Y); // Hovering
+                    if (i == 1) drawTexturedModalRect(x, y, 0, 0, LARGE_X, LARGE_Y); // Not Hovering
+                    else if (i == 2) drawTexturedModalRect(x, y, 0, LARGE_Y, LARGE_X, LARGE_Y); // Hovering
                     break;
                 case 1: // Large Left
-                    if (i == 1) drawTexturedModalRect(xPosition, yPosition, LARGE_X, 0, LARGE_X, LARGE_Y); // Not Hovering
-                    else if (i == 2) drawTexturedModalRect(xPosition, yPosition, LARGE_X, LARGE_Y, LARGE_X, LARGE_Y); // Hovering
+                    if (i == 1) drawTexturedModalRect(x, y, LARGE_X, 0, LARGE_X, LARGE_Y); // Not Hovering
+                    else if (i == 2) drawTexturedModalRect(x, y, LARGE_X, LARGE_Y, LARGE_X, LARGE_Y); // Hovering
                     break;
                 case 2: // Small Right
-                    if (i == 1) drawTexturedModalRect(xPosition, yPosition, (LARGE_X * 2), 0, SMALL_HORIZONTAL_X, SMALL_HORIZONTAL_Y); // Not Hovering
-                    else if (i == 2) drawTexturedModalRect(xPosition, yPosition, (LARGE_X * 2), SMALL_HORIZONTAL_Y, SMALL_HORIZONTAL_X, SMALL_HORIZONTAL_Y); // Hovering
+                    if (i == 1) drawTexturedModalRect(x, y, (LARGE_X * 2), 0, SMALL_HORIZONTAL_X, SMALL_HORIZONTAL_Y); // Not Hovering
+                    else if (i == 2) drawTexturedModalRect(x, y, (LARGE_X * 2), SMALL_HORIZONTAL_Y, SMALL_HORIZONTAL_X, SMALL_HORIZONTAL_Y); // Hovering
                     break;
                 case 3: // Small Left
-                    if (i == 1) drawTexturedModalRect(xPosition, yPosition, (LARGE_X * 2) + SMALL_HORIZONTAL_X, 0, SMALL_HORIZONTAL_X, SMALL_HORIZONTAL_Y); // Not Hovering
-                    else if (i == 2) drawTexturedModalRect(xPosition, yPosition, (LARGE_X * 2) + SMALL_HORIZONTAL_X, SMALL_HORIZONTAL_Y, SMALL_HORIZONTAL_X, SMALL_HORIZONTAL_Y); // Hovering
+                    if (i == 1) drawTexturedModalRect(x, y, (LARGE_X * 2) + SMALL_HORIZONTAL_X, 0, SMALL_HORIZONTAL_X, SMALL_HORIZONTAL_Y); // Not Hovering
+                    else if (i == 2) drawTexturedModalRect(x, y, (LARGE_X * 2) + SMALL_HORIZONTAL_X, SMALL_HORIZONTAL_Y, SMALL_HORIZONTAL_X, SMALL_HORIZONTAL_Y); // Hovering
                     break;
                 case 4: // Small Down
-                    if (i == 1) drawTexturedModalRect(xPosition, yPosition, (LARGE_X * 2) + (SMALL_HORIZONTAL_X * 2), 0, SMALL_VERTICAL_X, SMALL_VERTICAL_Y); // Not Hovering
-                    else if (i == 2) drawTexturedModalRect(xPosition, yPosition, (LARGE_X * 2) + (SMALL_HORIZONTAL_X * 2), SMALL_VERTICAL_Y, SMALL_VERTICAL_X, SMALL_VERTICAL_Y); // Hovering
+                    if (i == 1) drawTexturedModalRect(x, y, (LARGE_X * 2) + (SMALL_HORIZONTAL_X * 2), 0, SMALL_VERTICAL_X, SMALL_VERTICAL_Y); // Not Hovering
+                    else if (i == 2) drawTexturedModalRect(x, y, (LARGE_X * 2) + (SMALL_HORIZONTAL_X * 2), SMALL_VERTICAL_Y, SMALL_VERTICAL_X, SMALL_VERTICAL_Y); // Hovering
                     break;
                 case 5: // Small Up
-                    if (i == 1) drawTexturedModalRect(xPosition, yPosition, (LARGE_X * 2) + (SMALL_HORIZONTAL_X * 2) + SMALL_VERTICAL_X, 0, SMALL_VERTICAL_X, SMALL_VERTICAL_Y); // Not Hovering
-                    else if (i == 2) drawTexturedModalRect(xPosition, yPosition, (LARGE_X * 2) + (SMALL_HORIZONTAL_X * 2) + SMALL_VERTICAL_X, SMALL_VERTICAL_Y, SMALL_VERTICAL_X, SMALL_VERTICAL_Y); // Hovering
+                    if (i == 1) drawTexturedModalRect(x, y, (LARGE_X * 2) + (SMALL_HORIZONTAL_X * 2) + SMALL_VERTICAL_X, 0, SMALL_VERTICAL_X, SMALL_VERTICAL_Y); // Not Hovering
+                    else if (i == 2) drawTexturedModalRect(x, y, (LARGE_X * 2) + (SMALL_HORIZONTAL_X * 2) + SMALL_VERTICAL_X, SMALL_VERTICAL_Y, SMALL_VERTICAL_X, SMALL_VERTICAL_Y); // Hovering
                     break;
             }
             this.mouseDragged(mc, mouseX, mouseY);

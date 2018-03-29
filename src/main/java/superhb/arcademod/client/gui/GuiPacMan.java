@@ -183,19 +183,19 @@ public class GuiPacMan extends GuiArcade {
 		boardY = yScaled - (GUI_Y / 2) + 14;
 		super.drawScreen(mouseX, mouseY, partialTick);
 		
-		int controlWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:control.locale"));
-		int settingWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:setting.locale"));
+		int controlWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:control.locale"));
+		int settingWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:setting.locale"));
 		
 		if (inMenu) {
 			switch (menu) {
 				case 0: // Main Menu
-					int titleWidth = this.fontRendererObj.getStringWidth(I18n.format("game.arcademod:pacman.name"));
-					int startWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:start.locale"));
+					int titleWidth = this.fontRenderer.getStringWidth(I18n.format("game.arcademod:pacman.name"));
+					int startWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:start.locale"));
 					
-					this.fontRendererObj.drawString(I18n.format("game.arcademod:pacman.name"), boardX + (GUI_X / 2) - (titleWidth / 2), boardY + 2, Color.WHITE.getRGB());
-					this.fontRendererObj.drawString(I18n.format("option.arcademod:start.locale"), boardX + (GUI_X / 2) - (startWidth / 2), boardY + (GUI_Y / 2) - 30, Color.WHITE.getRGB());
-					this.fontRendererObj.drawString(I18n.format("option.arcademod:control.locale"), boardX + (GUI_X / 2) - (controlWidth / 2), boardY + (GUI_Y / 2) - 20, Color.WHITE.getRGB());
-					this.fontRendererObj.drawString(I18n.format("option.arcademod:setting.locale"), boardX + (GUI_X / 2) - (settingWidth / 2), boardY + (GUI_Y / 2) - 10, Color.WHITE.getRGB());
+					this.fontRenderer.drawString(I18n.format("game.arcademod:pacman.name"), boardX + (GUI_X / 2) - (titleWidth / 2), boardY + 2, Color.WHITE.getRGB());
+					this.fontRenderer.drawString(I18n.format("option.arcademod:start.locale"), boardX + (GUI_X / 2) - (startWidth / 2), boardY + (GUI_Y / 2) - 30, Color.WHITE.getRGB());
+					this.fontRenderer.drawString(I18n.format("option.arcademod:control.locale"), boardX + (GUI_X / 2) - (controlWidth / 2), boardY + (GUI_Y / 2) - 20, Color.WHITE.getRGB());
+					this.fontRenderer.drawString(I18n.format("option.arcademod:setting.locale"), boardX + (GUI_X / 2) - (settingWidth / 2), boardY + (GUI_Y / 2) - 10, Color.WHITE.getRGB());
 					
 					if (menuOption == 0)
 						drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 32, true); // Start
@@ -205,24 +205,24 @@ public class GuiPacMan extends GuiArcade {
 						drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 12, true); // Settings
 					break;
 				case 1: // Controls
-					this.fontRendererObj.drawString(I18n.format("option.arcademod:control.locale"), boardX + (GUI_X / 2) - (controlWidth / 2), boardY + 2, Color.WHITE.getRGB());
+					this.fontRenderer.drawString(I18n.format("option.arcademod:control.locale"), boardX + (GUI_X / 2) - (controlWidth / 2), boardY + 2, Color.WHITE.getRGB());
 					
 					// Controls
-					this.fontRendererObj.drawString("[" + KeyHandler.up.getDisplayName() + "] " + I18n.format("control.arcademod:up.name"), boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 20, Color.WHITE.getRGB());
-					this.fontRendererObj.drawString("[" + KeyHandler.down.getDisplayName() + "] " + I18n.format("control.arcademod:down.name"), boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 10, Color.WHITE.getRGB());
-					this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("control.arcademod:left.name"), boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2), Color.WHITE.getRGB());
-					this.fontRendererObj.drawString("[" + KeyHandler.right.getDisplayName() + "] " + I18n.format("control.arcademod:right.name"), boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) + 10, Color.WHITE.getRGB());
+					this.fontRenderer.drawString("[" + KeyHandler.up.getDisplayName() + "] " + I18n.format("control.arcademod:up.name"), boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 20, Color.WHITE.getRGB());
+					this.fontRenderer.drawString("[" + KeyHandler.down.getDisplayName() + "] " + I18n.format("control.arcademod:down.name"), boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 10, Color.WHITE.getRGB());
+					this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("control.arcademod:left.name"), boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2), Color.WHITE.getRGB());
+					this.fontRenderer.drawString("[" + KeyHandler.right.getDisplayName() + "] " + I18n.format("control.arcademod:right.name"), boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) + 10, Color.WHITE.getRGB());
 					
 					// Back
-					this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), boardX + 2, boardY + (GUI_Y) - 30, Color.white.getRGB());
+					this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), boardX + 2, boardY + (GUI_Y) - 30, Color.white.getRGB());
 					break;
 				case 2: // Settings
 					// Back
-					this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), boardX + 2, boardY + (GUI_Y) - 30, Color.white.getRGB());
+					this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), boardX + 2, boardY + (GUI_Y) - 30, Color.white.getRGB());
 					break;
 				case 3: // Game Over
-					this.fontRendererObj.drawString(I18n.format("text.arcademod:gameover.locale"), boardX + (GUI_X / 2) - (this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:gameover.locale")) / 2), boardY + (GUI_Y / 2) - 20, Color.WHITE.getRGB());
-					this.fontRendererObj.drawString(I18n.format("text.arcademod:score.locale") + ": " + score, boardX + (GUI_X / 2) - (this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:score.locale=Score") + ": " + score)), boardY + (GUI_Y / 2), Color.WHITE.getRGB());
+					this.fontRenderer.drawString(I18n.format("text.arcademod:gameover.locale"), boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:gameover.locale")) / 2), boardY + (GUI_Y / 2) - 20, Color.WHITE.getRGB());
+					this.fontRenderer.drawString(I18n.format("text.arcademod:score.locale") + ": " + score, boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:score.locale=Score") + ": " + score)), boardY + (GUI_Y / 2), Color.WHITE.getRGB());
 					break;
 			}
 		} else {
@@ -246,9 +246,9 @@ public class GuiPacMan extends GuiArcade {
 			drawBonus();
 			
 			// Text
-			if (!playing) this.fontRendererObj.drawString(I18n.format("text.arcademod:ready.pacman.locale"), boardX + (MAZE_X / 2) - (this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:ready.pacman.locale")) / 2), boardY + (MAZE_Y / 2) + 13, Color.yellow.getRGB());
+			if (!playing) this.fontRenderer.drawString(I18n.format("text.arcademod:ready.pacman.locale"), boardX + (MAZE_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:ready.pacman.locale")) / 2), boardY + (MAZE_Y / 2) + 13, Color.yellow.getRGB());
 			
-			this.fontRendererObj.drawString(String.format("%d", score), boardX + 30, boardY - 8, Color.white.getRGB());
+			this.fontRenderer.drawString(String.format("%d", score), boardX + 30, boardY - 8, Color.white.getRGB());
 		}
 	}
 	
@@ -295,7 +295,7 @@ public class GuiPacMan extends GuiArcade {
 			getTileEntity().playSound(ArcadeSoundRegistry.PACMAN_DEATH, false);
 			pacman.kill();
 		}
-		this.fontRendererObj.drawString(I18n.format("text.arcademod:gameover.locale"), boardX + (MAZE_X / 2) - (this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:gameover.locale")) / 2), boardY + (MAZE_Y / 2) + 13, Color.red.getRGB());
+		this.fontRenderer.drawString(I18n.format("text.arcademod:gameover.locale"), boardX + (MAZE_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:gameover.locale")) / 2), boardY + (MAZE_Y / 2) + 13, Color.red.getRGB());
 	}
 	
 	private void setupGame () {

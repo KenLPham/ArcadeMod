@@ -51,27 +51,24 @@ public class ServerCoinMessage implements IMessage {
     public static class Handler implements IMessageHandler<ServerCoinMessage, IMessage> {
         @Override
         public IMessage onMessage (final ServerCoinMessage message, final MessageContext context) {
-            IThreadListener thread = (WorldServer)context.getServerHandler().playerEntity.world;
+            IThreadListener thread = (WorldServer)context.getServerHandler().player.world;
 
-            thread.addScheduledTask(new Runnable() {
-                @Override
-                public void run() {
-                    EntityPlayerMP serverPlayer = context.getServerHandler().playerEntity;
+            thread.addScheduledTask(()->{
+				EntityPlayerMP serverPlayer = context.getServerHandler().player;
 
-                    // TODO: Do check for costs above 64
-                    if (serverPlayer.inventory.hasItemStack(message.getStack())) {
-                        ItemStack coin = serverPlayer.inventory.getStackInSlot(serverPlayer.inventory.getSlotFor(message.getStack()));
-                        int slot = serverPlayer.inventory.getSlotFor(message.getStack());
-                        if (coin.getCount() > message.getCost()){
-                            serverPlayer.inventory.decrStackSize(slot, message.getCost());
-                            ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(true, 0), serverPlayer);
-                        } else if (coin.getCount() == message.getCost()) {
-                            serverPlayer.inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
-                            ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(true, 0), serverPlayer);
-                        } else ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(false, -1), serverPlayer);
-                    } else ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(false, -1), serverPlayer);
-                }
-            });
+				// TODO: Do check for costs above 64
+				if (serverPlayer.inventory.hasItemStack(message.getStack())) {
+					ItemStack coin = serverPlayer.inventory.getStackInSlot(serverPlayer.inventory.getSlotFor(message.getStack()));
+					int slot = serverPlayer.inventory.getSlotFor(message.getStack());
+					if (coin.getCount() > message.getCost()){
+						serverPlayer.inventory.decrStackSize(slot, message.getCost());
+						ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(true, 0), serverPlayer);
+					} else if (coin.getCount() == message.getCost()) {
+						serverPlayer.inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
+						ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(true, 0), serverPlayer);
+					} else ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(false, -1), serverPlayer);
+				} else ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(false, -1), serverPlayer);
+			});
             return null;
         }
     }

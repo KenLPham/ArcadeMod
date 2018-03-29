@@ -149,22 +149,22 @@ public class GuiSnake extends GuiArcade {
         // TODO: Save leaderboard (Top 10) to nbt
 		// TODO: Warn player when FPS is too low? (Minecraft.getDebugFPS())
         if (inMenu) {
-			int startWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:start.locale"));
-			int difficultyWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.locale"));
-			int controlWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:control.locale"));
+			int startWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:start.locale"));
+			int difficultyWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:difficulty.locale"));
+			int controlWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:control.locale"));
 	
-			int easyWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.easy.locale"));
-			int mediumWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.medium.locale"));
-			int hardWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.hard.locale"));
-			int extremeWidth = this.fontRendererObj.getStringWidth(I18n.format("option.arcademod:difficulty.extreme.locale"));
+			int easyWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:difficulty.easy.locale"));
+			int mediumWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:difficulty.medium.locale"));
+			int hardWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:difficulty.hard.locale"));
+			int extremeWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:difficulty.extreme.locale"));
 			
             switch (menu) {
                 case 0: //Start Menu
-                    int titleWidth = this.fontRendererObj.getStringWidth(I18n.format("game.arcademod:snake.name"));
-                    this.fontRendererObj.drawString(I18n.format("game.arcademod:snake.name"), (width / 2) - (titleWidth / 2), (height / 2) - (GUI_Y / 2) + 11, 16777215);
-                    this.fontRendererObj.drawString(I18n.format("option.arcademod:start.locale"), (width / 2) - (startWidth / 2), height / 2, 16777215);
-                    this.fontRendererObj.drawString(I18n.format("option.arcademod:difficulty.locale"), (width / 2) - (difficultyWidth / 2), height / 2 + 10, 16777215);
-                    this.fontRendererObj.drawString(I18n.format("option.arcademod:control.locale"), (width / 2) - (controlWidth / 2), height / 2 + 20, 16777215);
+                    int titleWidth = this.fontRenderer.getStringWidth(I18n.format("game.arcademod:snake.name"));
+                    this.fontRenderer.drawString(I18n.format("game.arcademod:snake.name"), (width / 2) - (titleWidth / 2), (height / 2) - (GUI_Y / 2) + 11, 16777215);
+                    this.fontRenderer.drawString(I18n.format("option.arcademod:start.locale"), (width / 2) - (startWidth / 2), height / 2, 16777215);
+                    this.fontRenderer.drawString(I18n.format("option.arcademod:difficulty.locale"), (width / 2) - (difficultyWidth / 2), height / 2 + 10, 16777215);
+                    this.fontRenderer.drawString(I18n.format("option.arcademod:control.locale"), (width / 2) - (controlWidth / 2), height / 2 + 20, 16777215);
 
                     switch (menuOption) {
                         case 0: // Start
@@ -181,11 +181,11 @@ public class GuiSnake extends GuiArcade {
                     }
                     break;
                 case 1: // Options Menu
-                    this.fontRendererObj.drawString(I18n.format("option.arcademod:difficulty.locale"), (width / 2) - (difficultyWidth / 2), (height / 2) - (GUI_Y / 2) + 11, 16777215);
-                    this.fontRendererObj.drawString(I18n.format("option.arcademod:difficulty.easy.locale"), (width / 2) - (easyWidth / 2), height / 2, 16777215);
-                    this.fontRendererObj.drawString(I18n.format("option.arcademod:difficulty.medium.locale"), (width / 2) - (mediumWidth / 2), height / 2 + 10, 16777215);
-                    this.fontRendererObj.drawString(I18n.format("option.arcademod:difficulty.hard.locale"), (width / 2) - (hardWidth / 2), height / 2 + 20, 16777215);
-                    this.fontRendererObj.drawString(I18n.format("option.arcademod:difficulty.extreme.locale"), (width / 2) - (extremeWidth / 2), height / 2 + 30, 16777215);
+                    this.fontRenderer.drawString(I18n.format("option.arcademod:difficulty.locale"), (width / 2) - (difficultyWidth / 2), (height / 2) - (GUI_Y / 2) + 11, 16777215);
+                    this.fontRenderer.drawString(I18n.format("option.arcademod:difficulty.easy.locale"), (width / 2) - (easyWidth / 2), height / 2, 16777215);
+                    this.fontRenderer.drawString(I18n.format("option.arcademod:difficulty.medium.locale"), (width / 2) - (mediumWidth / 2), height / 2 + 10, 16777215);
+                    this.fontRenderer.drawString(I18n.format("option.arcademod:difficulty.hard.locale"), (width / 2) - (hardWidth / 2), height / 2 + 20, 16777215);
+                    this.fontRenderer.drawString(I18n.format("option.arcademod:difficulty.extreme.locale"), (width / 2) - (extremeWidth / 2), height / 2 + 30, 16777215);
 
                     this.mc.getTextureManager().bindTexture(texture);
                     switch (difficulty) {
@@ -204,21 +204,21 @@ public class GuiSnake extends GuiArcade {
                     }
                     break;
                 case 2: // Controls Menu
-                    this.fontRendererObj.drawString(I18n.format("option.arcademod:control.locale"), (width / 2) - (controlWidth / 2), (height / 2) - (GUI_Y / 2) + 11, Color.white.getRGB());
+                    this.fontRenderer.drawString(I18n.format("option.arcademod:control.locale"), (width / 2) - (controlWidth / 2), (height / 2) - (GUI_Y / 2) + 11, Color.white.getRGB());
 
-                    this.fontRendererObj.drawString("[" + KeyHandler.up.getDisplayName() + "] " + I18n.format("control.arcademod:up.name"), (width / 2) - 40, (height / 2) - 10, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.down.getDisplayName() + "] " + I18n.format("control.arcademod:down.name"), (width / 2) - 40, height / 2, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("control.arcademod:left.name"), (width / 2) - 40, (height / 2) + 10, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.right.getDisplayName() + "] " + I18n.format("control.arcademod:right.name"), (width / 2) - 40, (height / 2) + 20, Color.white.getRGB());
-                    this.fontRendererObj.drawString("[" + KeyHandler.select.getDisplayName() + "] " + I18n.format("control.arcademod:select.name"), (width / 2) - 40, (height / 2) + 30, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.up.getDisplayName() + "] " + I18n.format("control.arcademod:up.name"), (width / 2) - 40, (height / 2) - 10, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.down.getDisplayName() + "] " + I18n.format("control.arcademod:down.name"), (width / 2) - 40, height / 2, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("control.arcademod:left.name"), (width / 2) - 40, (height / 2) + 10, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.right.getDisplayName() + "] " + I18n.format("control.arcademod:right.name"), (width / 2) - 40, (height / 2) + 20, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.select.getDisplayName() + "] " + I18n.format("control.arcademod:select.name"), (width / 2) - 40, (height / 2) + 30, Color.white.getRGB());
 
-                    this.fontRendererObj.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), (width / 2) - (GUI_X / 2) + 12, (height / 2) + (GUI_Y / 2) - 20, Color.white.getRGB());
+                    this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), (width / 2) - (GUI_X / 2) + 12, (height / 2) + (GUI_Y / 2) - 20, Color.white.getRGB());
                     break;
                 case 3: // Game Over Menu
-                    int overWidth = this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:gameover.locale"));
-                    this.fontRendererObj.drawString(I18n.format("text.arcademod:gameover.locale"), (width / 2) - (overWidth / 2), (height / 2) - 20, Color.white.getRGB());
-                    int scoreWidth = this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:score.locale") + ": " + tail);
-                    this.fontRendererObj.drawString(I18n.format("text.arcademod:score.locale") + ": " + tail, (width / 2) - (scoreWidth / 2), (height / 2) - 10, Color.white.getRGB());
+                    int overWidth = this.fontRenderer.getStringWidth(I18n.format("text.arcademod:gameover.locale"));
+                    this.fontRenderer.drawString(I18n.format("text.arcademod:gameover.locale"), (width / 2) - (overWidth / 2), (height / 2) - 20, Color.white.getRGB());
+                    int scoreWidth = this.fontRenderer.getStringWidth(I18n.format("text.arcademod:score.locale") + ": " + tail);
+                    this.fontRenderer.drawString(I18n.format("text.arcademod:score.locale") + ": " + tail, (width / 2) - (scoreWidth / 2), (height / 2) - 10, Color.white.getRGB());
                     // TODO: Show Highscore
                     break;
                 case 4: // ArcadeLeaderboard Menu
@@ -246,8 +246,8 @@ public class GuiSnake extends GuiArcade {
             }
 
             // Score
-            int scoreWidth = this.fontRendererObj.getStringWidth(I18n.format("text.arcademod:score.locale") + ": " + tail);
-            this.fontRendererObj.drawString(I18n.format("text.arcademod:score.locale") + ": " + tail, (width / 2) - (scoreWidth / 2), (height / 2) + 93, 4210752);
+            int scoreWidth = this.fontRenderer.getStringWidth(I18n.format("text.arcademod:score.locale") + ": " + tail);
+            this.fontRenderer.drawString(I18n.format("text.arcademod:score.locale") + ": " + tail, (width / 2) - (scoreWidth / 2), (height / 2) + 93, 4210752);
         }
     }
 
