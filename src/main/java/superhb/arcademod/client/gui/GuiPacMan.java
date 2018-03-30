@@ -10,8 +10,8 @@ import net.minecraft.world.World;
 import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArcade;
 import superhb.arcademod.client.ArcadeItems;
+import superhb.arcademod.client.audio.ArcadeSounds;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
-import superhb.arcademod.util.ArcadeSoundRegistry;
 import superhb.arcademod.util.KeyHandler;
 
 import javax.annotation.Nullable;
@@ -226,7 +226,7 @@ public class GuiPacMan extends GuiArcade {
 					break;
 			}
 		} else {
-			getTileEntity().playSound(ArcadeSoundRegistry.PACMAN_SIREN, true);
+			//getTileEntity().playSound(ArcadeSounds.PACMAN_SIREN, true);
 			
 			drawMaze();
 			
@@ -292,7 +292,7 @@ public class GuiPacMan extends GuiArcade {
 			gameOver = true;
 			pacman.canMove = false;
 			for (int i = 0; i < ghosts.length; i++) ghosts[i].canMove = false;
-			getTileEntity().playSound(ArcadeSoundRegistry.PACMAN_DEATH, false);
+			//getTileEntity().playSound(ArcadeSounds.PACMAN_DEATH, false);
 			pacman.kill();
 		}
 		this.fontRenderer.drawString(I18n.format("text.arcademod:gameover.locale"), boardX + (MAZE_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:gameover.locale")) / 2), boardY + (MAZE_Y / 2) + 13, Color.red.getRGB());
@@ -300,7 +300,7 @@ public class GuiPacMan extends GuiArcade {
 	
 	private void setupGame () {
 		// TODO: Sound
-		//getTileEntity().playSound(ArcadeSoundRegistry.PACMAN_SIREN, true);
+		//getTileEntity().playSound(ArcadeSounds.PACMAN_SIREN, true);
 		getLevelData();
 		resetGame();
 		
@@ -357,7 +357,7 @@ public class GuiPacMan extends GuiArcade {
 			else if (keyCode == KeyHandler.down.getKeyCode()) pacman.desired = Direction.DOWN;
 			else if (keyCode == KeyHandler.up.getKeyCode()) pacman.desired = Direction.UP;
 			
-			if (keyCode == 1) giveReward(ArcadeItems.ticket, (score / 80)); // Esc
+			if (keyCode == 1) giveReward(ArcadeItems.TICKET, (score / 80)); // Esc
 		}
 		super.keyTyped(typedChar, keyCode);
 	}
@@ -681,7 +681,7 @@ public class GuiPacMan extends GuiArcade {
 				}
 				if ((tickCounter - gameOverTick) == 20) {
 					if (lives == 0) { // Go back to main menu logic
-						giveReward(ArcadeItems.ticket, (score / 80));
+						giveReward(ArcadeItems.TICKET, (score / 80));
 						inMenu = true;
 						menu = 3;
 						playDeathAnimation = false;
@@ -730,32 +730,32 @@ public class GuiPacMan extends GuiArcade {
 		// TODO: Play through tileEntity?
 		private void playWaka () {
 			if (waka == 0) {
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_1, SoundCategory.BLOCKS, volume, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_1, SoundCategory.BLOCKS, volume, 1.0f);
 				waka++;
 				return;
 			}
 			if (waka == 1) {
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_2, SoundCategory.BLOCKS, volume, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_2, SoundCategory.BLOCKS, volume, 1.0f);
 				waka++;
 				return;
 			}
 			if (waka == 2) {
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_3, SoundCategory.BLOCKS, volume, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_3, SoundCategory.BLOCKS, volume, 1.0f);
 				waka++;
 				return;
 			}
 			if (waka == 3) {
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_4, SoundCategory.BLOCKS, volume, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_4, SoundCategory.BLOCKS, volume, 1.0f);
 				waka++;
 				return;
 			}
 			if (waka == 4) {
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_5, SoundCategory.BLOCKS, volume, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_5, SoundCategory.BLOCKS, volume, 1.0f);
 				waka++;
 				return;
 			}
 			if (waka == 5) {
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSoundRegistry.PACMAN_WAKA_6, SoundCategory.BLOCKS, volume, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_6, SoundCategory.BLOCKS, volume, 1.0f);
 				waka = 0;
 				return;
 			}

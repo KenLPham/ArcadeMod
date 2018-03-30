@@ -42,6 +42,9 @@ import java.util.*;
  */
 
 /* ChangeLog
+Update Registry System
+- Update to use 1.12.2 Registry System for sounds, blocks, and items
+- Removed RegistryUtil, ArcadeSoundRegistry
  */
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, updateJSON = Reference.UPDATE_URL)
 public class Arcade {
@@ -59,7 +62,7 @@ public class Arcade {
 	public static final CreativeTabs tab = new CreativeTabs(Reference.MODID) {
 		@Override
 		public ItemStack getTabIconItem () {
-			return new ItemStack(ArcadeItems.coin);
+			return new ItemStack(ArcadeItems.COIN);
 		}
 		
 		@Override

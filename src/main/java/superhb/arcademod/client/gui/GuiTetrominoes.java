@@ -165,7 +165,7 @@ public class GuiTetrominoes extends GuiArcade {
 				giveNextPiece = false;
 				inMenu = true;
 				gameOver = false;
-				giveReward(ArcadeItems.ticket, row);
+				giveReward(ArcadeItems.TICKET, row);
 				// TODO: Send Score to NBT
 			}
 		
@@ -351,7 +351,7 @@ public class GuiTetrominoes extends GuiArcade {
             }
         }
         if (keyCode == 1) { // Esc
-            if (!inMenu) giveReward(ArcadeItems.ticket, row);
+            if (!inMenu) giveReward(ArcadeItems.TICKET, row);
             // TODO: Only Stop Arcade Machine Sounds
             //mc.getSoundHandler().stopSound(PositionedSoundRecord.getMasterRecord(new SoundEvent(new ResourceLocation(Reference.MODID, "theme.tetris")), 1));
             //mc.getSoundHandler().stopSounds();

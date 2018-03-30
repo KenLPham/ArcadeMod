@@ -96,7 +96,7 @@ public class GuiPrize extends GuiScreen {
         } else if (button == amountDown) {
             if (amount != 1) amount--;
         } else if (button == buy) {
-            ArcadePacketHandler.INSTANCE.sendToServer(new ServerBuyMessage(Arcade.prizeList[curPrize].getStack(), new ItemStack(ArcadeItems.ticket), amount, Arcade.prizeList[curPrize].getPrice() * amount));
+            ArcadePacketHandler.INSTANCE.sendToServer(new ServerBuyMessage(Arcade.prizeList[curPrize].getStack(), new ItemStack(ArcadeItems.TICKET), amount, Arcade.prizeList[curPrize].getPrice() * amount));
         }
     }
 

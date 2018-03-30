@@ -230,7 +230,7 @@ public class GuiSnake extends GuiArcade {
                 score = tail;
                 inMenu = true;
                 gameOver = false;
-                giveReward(ArcadeItems.ticket, (score / 10));
+                giveReward(ArcadeItems.TICKET, (score / 10));
                 // TODO: Send Score to NBT
             }
 
@@ -347,7 +347,7 @@ public class GuiSnake extends GuiArcade {
             }
         }
         if (keyCode == 1) { // Esc
-            if (!inMenu) giveReward(ArcadeItems.ticket, (score / 10));
+            if (!inMenu) giveReward(ArcadeItems.TICKET, (score / 10));
         }
         super.keyTyped(typedChar, keyCode);
     }

@@ -14,6 +14,7 @@ import org.lwjgl.input.Keyboard;
 import superhb.arcademod.Arcade;
 import superhb.arcademod.Reference;
 import superhb.arcademod.client.ArcadeItems;
+import superhb.arcademod.client.audio.ArcadeSounds;
 import superhb.arcademod.client.tileentity.ArcadeLeaderboard;
 import superhb.arcademod.network.RewardMessage;
 import superhb.arcademod.network.ServerCoinMessage;
@@ -387,8 +388,7 @@ public class GuiArcade extends GuiScreen {
 		this.guiLeft = Math.round((width / 2) / scale) - (xSize / 2); //(this.width - this.xSize) / 2;
 		this.guiTop = Math.round((height / 2) / scale) - (ySize / 2); //(this.height - this.ySize) / 2;
 		
-		if (useCoins())
-			this.buttonList.add(insertCoin = new GuiSoundButton(0, (guiLeft + buttonX), (guiTop + buttonY), buttonWidth, buttonHeight, scale, I18n.format("button.arcademod:insert.locale"), ArcadeSoundRegistry.INSERT_COIN));
+		if (useCoins()) this.buttonList.add(insertCoin = new GuiSoundButton(0, (guiLeft + buttonX), (guiTop + buttonY), buttonWidth, buttonHeight, scale, I18n.format("button.arcademod:insert.locale"), ArcadeSounds.INSERT_COIN));
 	}
 	
 	// TODO: Use it stop all sounds
@@ -509,7 +509,7 @@ public class GuiArcade extends GuiScreen {
 	protected void actionPerformed (GuiButton button) throws IOException {
 		if (button == insertCoin) {
 			if (menu == -1)
-				ArcadePacketHandler.INSTANCE.sendToServer(new ServerCoinMessage(new ItemStack(ArcadeItems.coin), cost));
+				ArcadePacketHandler.INSTANCE.sendToServer(new ServerCoinMessage(new ItemStack(ArcadeItems.COIN), cost));
 		}
 	}
 	
@@ -524,7 +524,7 @@ public class GuiArcade extends GuiScreen {
 	@Override
 	protected void keyTyped (char typedChar, int keyCode) throws IOException {
 		if (keyCode == 1) { // Esc
-			if (canGetCoinBack && !mc.player.isCreative() && menu != -1) giveReward(ArcadeItems.coin, cost);
+			if (canGetCoinBack && !mc.player.isCreative() && menu != -1) giveReward(ArcadeItems.COIN, cost);
 		}
 		super.keyTyped(typedChar, keyCode);
 	}
