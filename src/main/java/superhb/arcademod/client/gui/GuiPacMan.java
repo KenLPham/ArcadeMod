@@ -357,7 +357,7 @@ public class GuiPacMan extends GuiArcade {
 			else if (keyCode == KeyHandler.down.getKeyCode()) pacman.desired = Direction.DOWN;
 			else if (keyCode == KeyHandler.up.getKeyCode()) pacman.desired = Direction.UP;
 			
-			if (keyCode == 1) giveReward(ArcadeItems.TICKET, (score / 80)); // Esc
+			if (keyCode == 1) giveReward(ArcadeItems.TICKET, (score / 200)); // Esc
 		}
 		super.keyTyped(typedChar, keyCode);
 	}
@@ -681,7 +681,7 @@ public class GuiPacMan extends GuiArcade {
 				}
 				if ((tickCounter - gameOverTick) == 20) {
 					if (lives == 0) { // Go back to main menu logic
-						giveReward(ArcadeItems.TICKET, (score / 80));
+						giveReward(ArcadeItems.TICKET, (score / 200));
 						inMenu = true;
 						menu = 3;
 						playDeathAnimation = false;
@@ -703,7 +703,7 @@ public class GuiPacMan extends GuiArcade {
 			
 			// Bonus Logic
 			if (showBonus) {
-				if (extendedX == offsetX + (13 * 8) && extendedY == offsetY + (17 * 8)) {
+				if ((extendedX >= offsetX + (13 * 8) - 2 && (extendedX <= offsetX + (13 * 8) + 2)) && extendedY == offsetY + (17 * 8)) {
 					showBonus = false;
 					bonusTick = 0;
 					score += bonus.getPoints();
@@ -721,7 +721,7 @@ public class GuiPacMan extends GuiArcade {
 			
 			prevX = 14;
 			prevY = 23;
-			moveX = moveY = foodEaten = 0;
+			moveX = moveY = 0;
 			teleport = false; // TODO: Remove?
 			useGlobalCounter = false;
 			current = desired = Direction.LEFT;

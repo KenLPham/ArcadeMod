@@ -42,9 +42,6 @@ import java.util.*;
  */
 
 /* ChangeLog
-Update Registry System
-- Update to use 1.12.2 Registry System for sounds, blocks, and items
-- Removed RegistryUtil, ArcadeSoundRegistry
  */
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, updateJSON = Reference.UPDATE_URL)
 public class Arcade {

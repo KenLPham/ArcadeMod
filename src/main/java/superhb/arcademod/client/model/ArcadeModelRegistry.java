@@ -26,7 +26,7 @@ import superhb.arcademod.util.EnumMob;
 import java.util.HashSet;
 import java.util.Set;
 
-@EventBusSubscriber
+@EventBusSubscriber(value = Side.CLIENT, modid = Reference.MODID)
 public class ArcadeModelRegistry {
 	public static final ArcadeModelRegistry INSTANCE = new ArcadeModelRegistry();
 	
