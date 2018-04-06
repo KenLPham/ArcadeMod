@@ -296,13 +296,11 @@ public class BlockArcade extends Block implements IBlockVariant {
 	@SideOnly(Side.CLIENT)
 	public void getSubBlocks (CreativeTabs tab, NonNullList<ItemStack> list) {
 		for (int i = 0; i < EnumGame.values().length; i++) {
-			if (i != 3) {
-				NBTTagCompound compound = new NBTTagCompound();
-				ItemStack stack = new ItemStack(this);
-				compound.setInteger("Game", i);
-				stack.setTagCompound(compound);
-				list.add(stack);
-			}
+			NBTTagCompound compound = new NBTTagCompound();
+			ItemStack stack = new ItemStack(this);
+			compound.setInteger("Game", i);
+			stack.setTagCompound(compound);
+			list.add(stack);
 		}
 	}
 	

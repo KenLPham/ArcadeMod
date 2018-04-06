@@ -1,0 +1,31 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "wgw",
+    "yby",
+    "wrw"
+  ],
+  "key": {
+    "g": {
+      "item": "minecraft:glass_pane"
+    },
+    "y": {
+      "item": "minecraft:wool",
+      "data": 4
+    },
+    "w": {
+      "item": "minecraft:planks"
+    },
+    "r": {
+      "item": "minecraft:redstone"
+    }
+  },
+  "result": {
+    "type": "minecraft:item_nbt",
+    "item": "arcademod:arcade_machine",
+    "data": 0,
+    "nbt": {
+      "Game": 3
+    }
+  }
+}

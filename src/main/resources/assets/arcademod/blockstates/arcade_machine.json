@@ -26,6 +26,9 @@
             },
             "pacman": {
             	"model": "arcademod:pacman.obj"
+            },
+            "pong": {
+            	"model": "arcademod:pong.obj"
             }
 		},
 		"facing": {

@@ -30,7 +30,6 @@ import java.util.*;
     - Asteroids (WilchHabos) [CF]
     - Galaga (TheFroggyFrog) [CF]
     - DDR (GamerGuy941Ytube) [MCF]
-    - Pong
     - Pinball
  */
 

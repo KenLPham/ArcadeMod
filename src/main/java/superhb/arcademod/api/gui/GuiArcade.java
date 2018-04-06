@@ -508,8 +508,7 @@ public class GuiArcade extends GuiScreen {
 	@Override
 	protected void actionPerformed (GuiButton button) throws IOException {
 		if (button == insertCoin) {
-			if (menu == -1)
-				ArcadePacketHandler.INSTANCE.sendToServer(new ServerCoinMessage(new ItemStack(ArcadeItems.COIN), cost));
+			if (menu == -1) ArcadePacketHandler.INSTANCE.sendToServer(new ServerCoinMessage(new ItemStack(ArcadeItems.COIN), cost));
 		}
 	}
 	
