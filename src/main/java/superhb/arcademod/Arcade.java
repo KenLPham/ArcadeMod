@@ -22,27 +22,6 @@ import superhb.arcademod.util.PrizeList;
 import java.io.File;
 import java.util.*;
 
-/* Game List
-    - Mrs. Pac-Man
-    - Space Invaders
-    - Donkey Kong (ReddyRedStoneOre) [CF]
-    - Super Mario Bros (thatguyEnder) [CF]
-    - Asteroids (WilchHabos) [CF]
-    - Galaga (TheFroggyFrog) [CF]
-    - DDR (GamerGuy941Ytube) [MCF]
-    - Pong
-    - Pinball
- */
-
-/* Special Machines
-    - Skeeball
-    - Claw Machine
-    - Coin Pusher
-    - Stacker (The game with the square that has to line up)
- */
-
-/* ChangeLog
- */
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, updateJSON = Reference.UPDATE_URL)
 public class Arcade {
 	@SidedProxy(clientSide = Reference.CLIENT_PROXY, serverSide = Reference.SERVER_PROXY)
@@ -83,7 +62,15 @@ public class Arcade {
 	private String[] s_prizeList;
 	
 	// TODO: default add all plushies
-	private final String[] defaultList = { "arcademod:plushie:5:Mob=0", "arcademod:plushie:3:Mob=1", "minecraft:diamond:128", "minecraft:iron_ingot:64", "minecraft:gold_ingot:96", "minecraft:ender_pearl:16", "minecraft:ender_eye:32" };
+	private final String[] defaultList = {
+			"arcademod:plushie:5:Mob=0",
+			"arcademod:plushie:3:Mob=1",
+			"minecraft:diamond:128",
+			"minecraft:iron_ingot:64",
+			"minecraft:gold_ingot:96",
+			"minecraft:ender_pearl:16",
+			"minecraft:ender_eye:32"
+	};
 	
 	// Game Addons
 	private static File gameDir;

@@ -6,6 +6,7 @@ item.arcademod:ticket.name=Ticket
 tile.arcademod:arcade_machine.snake.name=Arcade Machine (Snake)
 tile.arcademod:arcade_machine.tetrominoes.name=Arcade Machine (Tetris)
 tile.arcademod:arcade_machine.pacman.name=Arcade Machine (Pac-Man)
+tile.arcademod:arcade_machine.pong.name=Arcade Machine (Pong)
 
 tile.arcademod:plushie.creeper.name=Creeper Plushie
 tile.arcademod:plushie.pig.name=Pig Plushie
@@ -20,6 +21,7 @@ text.arcademod:needed.locale=coin needed
 text.arcademod:needed_plural.locale=coins needed
 text.arcademod:gameover.locale=Game Over
 text.arcademod:score.locale=Score
+text.arcademod:return_menu.name=Return to Menu
 
 text.arcademod:next.tetrominoes.locale=Next
 text.arcademod:level.tetrominoes.locale=Level
@@ -28,11 +30,16 @@ text.arcademod:level_select.tetrominoes.locale=Level Select
 
 text.arcademod:ready.pacman.locale=Ready!
 
+text.arcademod:left_paddle.pong.name=Left Paddle
+text.arcademod:right_paddle.pong.name=Right Paddle
+
 option.arcademod:start.locale=Start
 option.arcademod:difficulty.locale=Difficulty
 option.arcademod:control.locale=Controls
 option.arcademod:setting.locale=Settings
 option.arcademod:back.name=Back
+option.arcademod:singleplayer.name=Singleplayer
+option.arcademod:multiplayer.name=Multiplayer
 
 option.arcademod:difficulty.easy.locale=Easy
 option.arcademod:difficulty.medium.locale=Medium
@@ -42,6 +49,7 @@ option.arcademod:difficulty.extreme.locale=Extreme
 game.arcademod:snake.name=Snake
 game.arcademod:tetrominoes.name=Tetris
 game.arcademod:pacman.name=Pac-Man
+game.arcademod:pong.name=Pong
 
 control.arcademod:up.name=Up
 control.arcademod:down.name=Down
@@ -50,3 +58,5 @@ control.arcademod:right.name=Right
 control.arcademod:select.name=Select
 
 control.arcademod:up.tetrominoes.name=Up/Rotate
+
+control.arcademod:mouse.pong.name=Use mouse to move paddle up and down
