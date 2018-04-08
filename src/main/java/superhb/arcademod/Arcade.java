@@ -31,6 +31,8 @@ import java.util.*;
     - Galaga (TheFroggyFrog) [CF]
     - DDR (GamerGuy941Ytube) [MCF]
     - Pinball
+    - Centipede (Kaylagoodie) [PMC]
+    - Bubble Bobble (pumpkin0022) [CF]
  */
 
 /* Special Machines
@@ -82,7 +84,15 @@ public class Arcade {
 	private String[] s_prizeList;
 	
 	// TODO: default add all plushies
-	private final String[] defaultList = { "arcademod:plushie:5:Mob=0", "arcademod:plushie:3:Mob=1", "minecraft:diamond:128", "minecraft:iron_ingot:64", "minecraft:gold_ingot:96", "minecraft:ender_pearl:16", "minecraft:ender_eye:32" };
+	private final String[] defaultList = {
+			"arcademod:plushie:5:Mob=0",
+			"arcademod:plushie:3:Mob=1",
+			"minecraft:diamond:128",
+			"minecraft:iron_ingot:64",
+			"minecraft:gold_ingot:96",
+			"minecraft:ender_pearl:16",
+			"minecraft:ender_eye:32"
+	};
 	
 	// Game Addons
 	private static File gameDir;
