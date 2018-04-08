@@ -19,6 +19,7 @@ public class UpdateAnnouncer {
 	public void onPlayerJoin (TickEvent.PlayerTickEvent event) {
 		ClickEvent openUrl = new ClickEvent(ClickEvent.Action.OPEN_URL, Reference.URL);
 		TextComponentString download = new TextComponentString("[Download Latest]");
+		
 		if (event.side == Side.CLIENT) {
 			if (Arcade.status == ForgeVersion.Status.OUTDATED || Arcade.status == ForgeVersion.Status.BETA_OUTDATED) {
 				event.player.sendMessage(new TextComponentString(ChatFormatting.DARK_RED + "[" + Reference.NAME + "] Has an update available."));
