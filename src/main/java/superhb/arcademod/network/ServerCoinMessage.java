@@ -55,12 +55,14 @@ public class ServerCoinMessage implements IMessage {
 
             thread.addScheduledTask(()->{
 				EntityPlayerMP serverPlayer = context.getServerHandler().player;
-
+				
+				//System.out.println("handler");
+				
 				// TODO: Do check for costs above 64
 				if (serverPlayer.inventory.hasItemStack(message.getStack())) {
 					ItemStack coin = serverPlayer.inventory.getStackInSlot(serverPlayer.inventory.getSlotFor(message.getStack()));
 					int slot = serverPlayer.inventory.getSlotFor(message.getStack());
-					if (coin.getCount() > message.getCost()){
+					if (coin.getCount() > message.getCost()) {
 						serverPlayer.inventory.decrStackSize(slot, message.getCost());
 						ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(true, 0), serverPlayer);
 					} else if (coin.getCount() == message.getCost()) {

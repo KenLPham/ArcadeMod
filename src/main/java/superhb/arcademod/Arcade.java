@@ -1,5 +1,7 @@
 package superhb.arcademod;
 
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
@@ -20,6 +22,8 @@ import superhb.arcademod.client.tileentity.*;
 import superhb.arcademod.util.PrizeList;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.*;
 
 /* Game List
@@ -95,7 +99,7 @@ public class Arcade {
 	};
 	
 	// Game Addons
-	private static File gameDir;
+	private static File gameDir, prizeDir;
 	
 	@EventHandler
 	public void preInit (FMLPreInitializationEvent event) {
@@ -123,8 +127,25 @@ public class Arcade {
 			s_prizeList[i] = config.getString(String.format("%d", i), "prize_list", defaultList[i], "Format: name:cost");
 		config.save();
 		
+		// Prize List
+		/*prizeDir = new File(event.getModConfigurationDirectory().getParent(), "/" + Reference.MODID + "/");
+		if (prizeDir.exists()) {
+			Gson g = new Gson();
+			Object json;
+			try {
+				json = new JsonReader(new FileReader(event.getModConfigurationDirectory().getParent() + "/" + Reference.MODID + "/prizelist.json"));
+			} catch (FileNotFoundException e) {
+				json = "";
+			}
+			//Prizelist list = g.fromJson(json, Prizelist.class);
+		} else {
+			logger.info("Directory doesn't exist. Creating empty folder...");
+			prizeDir.mkdir();
+			prizeDir.mkdirs();
+		}*/
+		
 		// Game Addons
-		gameDir = new File(event.getModConfigurationDirectory().getParent(), "/Arcade_Games/");
+		gameDir = new File(event.getModConfigurationDirectory().getParent(), "/" + Reference.MODID + "/games");
 		if (!gameDir.exists()) {
 			logger.info("Games Addon directory doesn't exist. Creating empty folder...");
 			gameDir.mkdir();
@@ -196,6 +217,40 @@ public class Arcade {
 		for (File game : games) {
 			if (game.isDirectory()) {
 			}
+		}
+	}
+	
+	private class Prizelist {
+		PrizelistData[] data;
+		
+		public PrizelistData[] getData () {
+			return data;
+		}
+	}
+	
+	private class PrizelistData {
+		String item;
+		int cost;
+		PrizelistNBT[] nbt;
+		
+		public String getItem () {
+			return item;
+		}
+		
+		public int getCost () {
+			return cost;
+		}
+		
+		public PrizelistNBT[] getNBT () {
+			return nbt;
+		}
+	}
+	
+	private class PrizelistNBT {
+		Map<String, Object> data;
+		
+		public Map<String, Object> getNBTData () {
+			return data;
 		}
 	}
 }

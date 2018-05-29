@@ -33,7 +33,7 @@ public class GuiArcade extends GuiScreen {
 	// Menu Variables
 	public boolean inMenu = true;
 	public int menuOption = 0;
-	public int menu = -1, startMenu = 0;
+	public int menu = 0, startMenu = 0;
 	public boolean useInternalMenu = true;
 	
 	// GUI Variables
@@ -301,7 +301,7 @@ public class GuiArcade extends GuiScreen {
 				}
 			}
 			
-			if (menu != -1) {
+			if (menu != -1 && useCoins()) {
 				buttonList.get(0).enabled = false;
 				buttonList.get(0).visible = false;
 			}
@@ -505,10 +505,11 @@ public class GuiArcade extends GuiScreen {
 	}
 	// UNUSED
 	
+	// Seems to only be an issue with Pong
 	@Override
 	protected void actionPerformed (GuiButton button) throws IOException {
-		if (button == insertCoin) {
-			if (menu == -1) ArcadePacketHandler.INSTANCE.sendToServer(new ServerCoinMessage(new ItemStack(ArcadeItems.COIN), cost));
+		if (button.enabled) {
+			if (button == insertCoin) ArcadePacketHandler.INSTANCE.sendToServer(new ServerCoinMessage(new ItemStack(ArcadeItems.COIN), cost));
 		}
 	}
 	
@@ -517,7 +518,7 @@ public class GuiArcade extends GuiScreen {
 	 * Use isKeyDown(keyCode), if you want to check if key is held down
 	 *
 	 * @param typedChar Key Character
-	 * @param keyCode   Key Code
+	 * @param keyCode Key Code
 	 * @throws IOException
 	 */
 	@Override

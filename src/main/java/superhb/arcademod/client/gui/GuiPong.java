@@ -72,7 +72,7 @@ public class GuiPong extends GuiArcade {
 	
 	public GuiPong (World world, TileEntityArcade tileEntity, @Nullable BlockPos pos, EntityPlayer player) {
 		super(world, tileEntity, pos, player);
-		setGuiSize(GUI_X, GUI_Y, 1);
+		setGuiSize(GUI_X, GUI_Y);
 		setTexture(texture, 512, 512);
 		setCost(1);
 		setOffset(0, 0);
@@ -86,8 +86,7 @@ public class GuiPong extends GuiArcade {
 	@Override
 	public void updateScreen () {
 		super.updateScreen();
-		if (inMenu) {
-		} else {
+		if (!inMenu) {
 			if (endGame == 0) {
 				for (int i = 0; i < 3; i++) {
 					outlineBoundingBox[0].setLocation(boardX, boardY);
@@ -181,7 +180,6 @@ public class GuiPong extends GuiArcade {
 		}
 	}
 	
-	// TODO: Redo to support double digit numbers
 	private void drawScore () {
 		glColor(Color.GRAY);
 		if (paddles[0].score / 3 < 10) this.drawModalRectWithCustomSizedTexture(boardX + (BOARD_X / 2) - 30, boardY + 7, (12 * (paddles[0].score / 3)), GUI_Y + PADDLE_Y, NUMBER_X, NUMBER_Y, 512, 512);
