@@ -50,11 +50,12 @@
     "2.0.0": "Added Pac-Man",
     "2.0.1": "- Made Pac-Man give you 1 ticket per 200 points\n- Fixed Pac-Man not eating bonus\n- Fixed next level not starting when everything is eaten",
     "2.1.0": "Added Pong",
-    "2.1.1": "Fixed UpdateAnnouncer running on server, causing it to crash"
+    "2.1.1": "Fixed UpdateAnnouncer running on server, causing it to crash",
+    "2.1.2": "Fix crash when disableCoins in config is true"
   },
   "promos": {
-    "1.12.2-latest": "2.1.1",
-    "1.12.2-recommended": "2.1.1",
+    "1.12.2-latest": "2.1.2",
+    "1.12.2-recommended": "2.1.2",
     "1.11.2-latest": "2.1.1",
     "1.11.2-recommended": "2.1.1"
   }
