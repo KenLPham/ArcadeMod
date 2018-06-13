@@ -1,14 +1,13 @@
 package superhb.arcademod;
 
-import com.google.gson.Gson;
-import com.google.gson.stream.JsonReader;
+import com.google.gson.*;
 import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.item.Item;
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.JsonUtils;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.common.*;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.versioning.ComparableVersion;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.*;
 import superhb.arcademod.client.ArcadeItems;
 import superhb.arcademod.proxy.CommonProxy;
@@ -20,10 +19,13 @@ import net.minecraftforge.fml.common.Mod.*;
 import net.minecraftforge.fml.common.event.*;
 import superhb.arcademod.client.tileentity.*;
 import superhb.arcademod.util.PrizeList;
+import superhb.arcademod.util.prizebox.PrizeHelper;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /* Game List
@@ -37,6 +39,7 @@ import java.util.*;
     - Pinball
     - Centipede (Kaylagoodie) [PMC]
     - Bubble Bobble (pumpkin0022) [CF]
+    - Raiden STG (sz0999312) [CF]
  */
 
 /* Special Machines
@@ -83,23 +86,11 @@ public class Arcade {
 	public static boolean disableUpdateNotification;
 	
 	// Prize List Variables
-	private static int prizeTotal = 0;
 	public static PrizeList[] prizeList;
-	private String[] s_prizeList;
-	
-	// TODO: default add all plushies
-	private final String[] defaultList = {
-			"arcademod:plushie:5:Mob=0",
-			"arcademod:plushie:3:Mob=1",
-			"minecraft:diamond:128",
-			"minecraft:iron_ingot:64",
-			"minecraft:gold_ingot:96",
-			"minecraft:ender_pearl:16",
-			"minecraft:ender_eye:32"
-	};
+	private static JsonObject json;
 	
 	// Game Addons
-	private static File gameDir, prizeDir;
+	private static File gameDir;
 	
 	@EventHandler
 	public void preInit (FMLPreInitializationEvent event) {
@@ -118,31 +109,10 @@ public class Arcade {
 		disableCoins = config.getBoolean("disableCoins", Configuration.CATEGORY_GENERAL, false, "Disable the need to use coins to play the arcade machines");
 		requireRedstone = config.getBoolean("requireRedstone", Configuration.CATEGORY_GENERAL, false, "Require the machines to be powered by redstone to play");
 		disableUpdateNotification = config.getBoolean("disableUpdateNotification", Configuration.CATEGORY_GENERAL, false, "Disable message in chat when update is available");
-		// Prize List
-		// TODO: Get prizeTotal some other way
-		prizeTotal = config.getInt("total", "prize_list", defaultList.length, 0, 100, "Amount of prizes in list. This has to be changed manually.");
-		prizeList = new PrizeList[prizeTotal];
-		s_prizeList = new String[prizeTotal];
-		for (int i = 0; i < prizeTotal; i++)
-			s_prizeList[i] = config.getString(String.format("%d", i), "prize_list", defaultList[i], "Format: name:cost");
 		config.save();
 		
 		// Prize List
-		/*prizeDir = new File(event.getModConfigurationDirectory().getParent(), "/" + Reference.MODID + "/");
-		if (prizeDir.exists()) {
-			Gson g = new Gson();
-			Object json;
-			try {
-				json = new JsonReader(new FileReader(event.getModConfigurationDirectory().getParent() + "/" + Reference.MODID + "/prizelist.json"));
-			} catch (FileNotFoundException e) {
-				json = "";
-			}
-			//Prizelist list = g.fromJson(json, Prizelist.class);
-		} else {
-			logger.info("Directory doesn't exist. Creating empty folder...");
-			prizeDir.mkdir();
-			prizeDir.mkdirs();
-		}*/
+		loadPrizeList(event);
 		
 		// Game Addons
 		gameDir = new File(event.getModConfigurationDirectory().getParent(), "/" + Reference.MODID + "/games");
@@ -180,77 +150,71 @@ public class Arcade {
 		// Check for other mods here
 		
 		// Prize List
-		loadPrizeList();
+		initPrizeList();
 		
 		proxy.postInit(event);
 	}
 	
-	private void loadPrizeList () {
-		for (int i = 0; i < s_prizeList.length; i++) {
-			String[] s = s_prizeList[i].split(":");
-			if (s.length == 3) {
-				Item item = Item.getByNameOrId(s[0] + ":" + s[1]);
-				int cost = new Integer(s[2]);
-				prizeList[i] = new PrizeList(new ItemStack(item), cost);
-			} else if (s.length == 4) {
-				int cost = new Integer(s[2]);
-				Item item = Item.getByNameOrId(s[0] + ":" + s[1]);
-				String[] nbt = s[3].split("=");
+	private void loadPrizeList (FMLPreInitializationEvent event) {
+		String dir = event.getModConfigurationDirectory().getParent() + "/" + Reference.MODID + "/prizelist.json";
+		
+		try {
+			JsonParser parser = new JsonParser();
+			JsonElement element = parser.parse(new FileReader(dir));
+			json = element.getAsJsonObject();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			
+			File list = new File(dir);
+			try {
+				list.createNewFile();
+				exportResource("prizelist.json", dir);
 				
-				NBTTagCompound compound = new NBTTagCompound();
-				// TODO: phraser for other types
-				try {
-					compound.setInteger(nbt[0], new Integer(nbt[1]));
-				} catch (NumberFormatException e) {
-					compound.setString(nbt[0], nbt[1]);
-				}
-				ItemStack stack = new ItemStack(item, 1);
-				stack.setTagCompound(compound);
-				prizeList[i] = new PrizeList(stack, cost);
+				JsonParser parser = new JsonParser();
+				JsonElement element = parser.parse(new FileReader(dir));
+				json = element.getAsJsonObject();
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			}
 		}
 	}
 	
+	private void initPrizeList () {
+		JsonArray prizes = json.getAsJsonArray("prizes");
+		
+		prizeList = new PrizeList[prizes.size()];
+		for (int i = 0; i < prizes.size(); i++) {
+			try {
+				prizeList[i] = new PrizeList(PrizeHelper.getItemStack(prizes.get(i).getAsJsonObject()), JsonUtils.getInt(prizes.get(i).getAsJsonObject(), "cost"));
+			} catch (JsonSyntaxException e) {
+				throw new JsonSyntaxException("Item is missing 'cost' member. Item will not be added to Prize Counter");
+			}
+		}
+	}
+	
+	private void exportResource (String name, String dir) throws Exception {
+		InputStream in;
+		OutputStream out;
+		
+		in = getClass().getClassLoader().getResourceAsStream(name);
+		if (in == null) throw new Exception(String.format("Cannot get resource '%s' from JAR file", name));
+
+		int readBytes;
+		byte[] buffer = new byte[4096];
+		out = new FileOutputStream(dir);
+
+		while ((readBytes = in.read(buffer)) > 0) out.write(buffer, 0, readBytes);
+
+		in.close();
+		out.close();
+	}
+	
 	// TODO: Game Addons
-	// Gets files from /Arcade_Games/ directory
+	// Gets files from /arcademod/games/ directory
 	private void getAddons (List<File> games) {
 		for (File game : games) {
 			if (game.isDirectory()) {
 			}
-		}
-	}
-	
-	private class Prizelist {
-		PrizelistData[] data;
-		
-		public PrizelistData[] getData () {
-			return data;
-		}
-	}
-	
-	private class PrizelistData {
-		String item;
-		int cost;
-		PrizelistNBT[] nbt;
-		
-		public String getItem () {
-			return item;
-		}
-		
-		public int getCost () {
-			return cost;
-		}
-		
-		public PrizelistNBT[] getNBT () {
-			return nbt;
-		}
-	}
-	
-	private class PrizelistNBT {
-		Map<String, Object> data;
-		
-		public Map<String, Object> getNBTData () {
-			return data;
 		}
 	}
 }

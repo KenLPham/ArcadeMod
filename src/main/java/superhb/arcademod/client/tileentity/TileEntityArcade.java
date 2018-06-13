@@ -22,6 +22,7 @@ import net.minecraftforge.energy.EnergyStorage;
 import superhb.arcademod.client.audio.LoopingSound;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 
 // TODO: Make use of Forge Energy API (RF)
 //https://github.com/CJMinecraft01/BitOfEverything/blob/master/src/main/java/cjminecraft/bitofeverything/tileentity/TileEntityBlockBreaker.java
@@ -40,16 +41,21 @@ public class TileEntityArcade extends TileEntity implements ITickable {
 	// Energy (Default 10 RF/tick)
 	private EnergyStorage storage;
 	
+	// Multiplayer
+	private ArrayList<String> playerList;
+	
 	public TileEntityArcade () {
 		game = 0;
 		storage = new EnergyStorage(5000, 1000, 0);
 		leaderboard = new ArcadeLeaderboard[10];
+		playerList = new ArrayList<>();
 	}
 	
 	public TileEntityArcade (int game) {
 		this.game = game;
 		storage = new EnergyStorage(5000, 1000, 0);
 		leaderboard = new ArcadeLeaderboard[10];
+		playerList = new ArrayList<>();
 	}
 	
 	public int getGameID () {
@@ -116,6 +122,20 @@ public class TileEntityArcade extends TileEntity implements ITickable {
 	public void setVolume (float volume) {
 		this.volume = volume;
 	}
+	
+	// Multiplayer
+	public void addPlayer (String name) {
+		playerList.add(name);
+	}
+	
+	public void removePlayer (String name) {
+		playerList.remove(name);
+	}
+	
+	public void onPlayerJoin () {}
+	public void onPlayerLeave () {}
+	public void onGameStart () {}
+	public void onGameEnd () {}
 	
 	@Override
 	public NBTTagCompound writeToNBT (NBTTagCompound compound) {

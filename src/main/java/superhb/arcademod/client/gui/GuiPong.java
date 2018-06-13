@@ -79,6 +79,8 @@ public class GuiPong extends GuiArcade {
 		setButtonPos((GUI_X / 2) - (buttonWidth / 2), GUI_Y - 30);
 		setStartMenu(0);
 		
+		addPlayer(player.getName());
+		
 		// TODO: Multiplayer
 		//if (!mc.getMinecraft().isSingleplayer() || mc.getMinecraft().getConnection().getPlayerInfoMap().size() > 1) canMultiplayer = true;
 	}
@@ -264,7 +266,18 @@ public class GuiPong extends GuiArcade {
 				}
 			}
 		}
+		if (keyCode == 1) { // Esc
+			removePlayer(getPlayer().getName());
+		}
 		super.keyTyped(typedChar, keyCode);
+	}
+	
+	public void addPlayer (String name) {
+		getTileEntity().addPlayer(name);
+	}
+	
+	public void removePlayer (String name) {
+		getTileEntity().removePlayer(name);
 	}
 	
 	public void joinGame () {
