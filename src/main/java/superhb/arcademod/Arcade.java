@@ -7,7 +7,6 @@ import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.common.*;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.common.versioning.ComparableVersion;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.*;
 import superhb.arcademod.client.ArcadeItems;
 import superhb.arcademod.proxy.CommonProxy;
@@ -22,10 +21,6 @@ import superhb.arcademod.util.PrizeList;
 import superhb.arcademod.util.prizebox.PrizeHelper;
 
 import java.io.*;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 /* Game List
@@ -111,9 +106,6 @@ public class Arcade {
 		disableUpdateNotification = config.getBoolean("disableUpdateNotification", Configuration.CATEGORY_GENERAL, false, "Disable message in chat when update is available");
 		config.save();
 		
-		// Prize List
-		loadPrizeList(event);
-		
 		// Game Addons
 		gameDir = new File(event.getModConfigurationDirectory().getParent(), "/" + Reference.MODID + "/games");
 		if (!gameDir.exists()) {
@@ -121,6 +113,9 @@ public class Arcade {
 			gameDir.mkdir();
 			gameDir.mkdirs();
 		}
+		
+		// Prize List
+		loadPrizeList(event);
 		
 		// Register TileEntity
 		GameRegistry.registerTileEntity(TileEntityArcade.class, Reference.MODID + ":tile_arcade");
