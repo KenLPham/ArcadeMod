@@ -29,6 +29,9 @@
             },
             "pong": {
             	"model": "arcademod:pong.obj"
+			},
+			"spaceinvaders": {
+            	"model": "arcademod:spaceinvaders.obj"
             }
 		},
 		"facing": {

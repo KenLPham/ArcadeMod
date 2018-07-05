@@ -55,6 +55,18 @@ public class ArcadeSounds {
 	@ObjectHolder("effect.pacman_life")
 	public static final SoundEvent PACMAN_LIFE = null;
 	
+	@ObjectHolder("theme.spaceinvaders")
+	public static final SoundEvent SPACEINVADERS = null;
+	
+	@ObjectHolder("effect.spaceinvaders_shoot")
+	public static final SoundEvent SPACEINVADERS_SHOOT = null;
+	
+	@ObjectHolder("effect.spaceinvaders_explode")
+	public static final SoundEvent SPACEINVADERS_EXPLODE = null;
+	
+	@ObjectHolder("effect.spaceinvaders_destroyed")
+	public static final SoundEvent SPACEINVADERS_DESTROYED = null;
+	
 	@EventBusSubscriber
 	public static class RegistrationHandler {
 		@SubscribeEvent
@@ -74,7 +86,11 @@ public class ArcadeSounds {
 					createSound("effect.pacman_ghost"),
 					createSound("theme.pacman_siren"),
 					createSound("theme.pacman_fright"),
-					createSound("effect.pacman_life")
+					createSound("effect.pacman_life"),
+					createSound("theme.spaceinvaders"),
+					createSound("effect.spaceinvaders_shoot"),
+					createSound("effect.spaceinvaders_explode"),
+					createSound("effect.spaceinvaders_destroyed")
 			};
 			
 			event.getRegistry().registerAll(sounds);
