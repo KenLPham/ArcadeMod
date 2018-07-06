@@ -15,6 +15,11 @@ public class ArcadeSoundRegistry {
             PACMAN_INTRO, PACMAN_GHOST,
             PACMAN_SIREN, PACMAN_FRIGHT, PACMAN_LIFE,
             PACMAN_ENERGIZER_1, PACMAN_ENERGIZER_2, PACMAN_ENERGIZER_3, PACMAN_ENERGIZER_4, PACMAN_HOME; // TODO: Add Audio
+    
+    public static SoundEvent SPACEINVADERS;	
+    public static SoundEvent SPACEINVADERS_SHOOT;
+    public static SoundEvent SPACEINVADERS_EXPLODE;
+    public static SoundEvent SPACEINVADERS_DESTROYED;
 
     public static void registerSounds () {
         // General
@@ -37,6 +42,10 @@ public class ArcadeSoundRegistry {
         PACMAN_SIREN = registerSound("theme.pacman_siren");
         PACMAN_FRIGHT = registerSound("theme.pacman_fright");
         PACMAN_LIFE = registerSound("effect.pacman_life");
+        SPACEINVADERS = registerSound("theme.spaceinvaders");
+        SPACEINVADERS_SHOOT = registerSound("effect.spaceinvaders_shoot");
+        SPACEINVADERS_EXPLODE = registerSound("effect.spaceinvaders_explode");
+        SPACEINVADERS_DESTROYED = registerSound("effect.spaceinvaders_destroyed");
     }
 
     private static SoundEvent registerSound (String name) {
