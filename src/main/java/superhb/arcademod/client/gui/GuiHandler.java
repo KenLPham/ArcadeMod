@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.network.IGuiHandler;
 import superhb.arcademod.client.tileentity.*;
 
 public class GuiHandler implements IGuiHandler {
-	private int SNAKE = 0, TETROMINOES = 1, PACMAN = 2, PONG = 3, KONG = 4;
+	private int SNAKE = 0, TETROMINOES = 1, PACMAN = 2, PONG = 3, SPACEINVADERS = 4, KONG = 5;
 	private int PRIZE = -1, PUSHER = -2;
 	
 	@Override
@@ -23,6 +23,7 @@ public class GuiHandler implements IGuiHandler {
 		else if (id == PRIZE) return new GuiPrize((TileEntityPrize)world.getTileEntity(new BlockPos(x, y, z)));
 		else if (id == PUSHER) return new GuiPusher(world, x, y, z, player);
 		else if (id == PONG) return new GuiPong(world, (TileEntityArcade)world.getTileEntity(new BlockPos(x, y, z)), new BlockPos(x, y, z), player);
+		else if (id == SPACEINVADERS) return new GuiSpaceInvaders(world, (TileEntityArcade)world.getTileEntity(new BlockPos(x, y, z)), new BlockPos(x, y, z), player);
 		else if (id == KONG) return new GuiKong(world, (TileEntityArcade)world.getTileEntity(new BlockPos(x, y, z)), player);
 		return null;
 	}
