@@ -6,8 +6,8 @@ public enum EnumGame implements IStringSerializable {
 	SNAKE(0, "snake"),
 	TETROMINOES(1, "tetrominoes"),
 	PACMAN(2, "pacman"),
-	PONG(3, "pong");
-	//DDR(4, "ddr");
+	PONG(3, "pong"),
+	KONG(4, "kong");
 	
 	private int id;
 	private String registryName;
