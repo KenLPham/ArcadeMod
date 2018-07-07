@@ -111,5 +111,37 @@
 				"stream": true
 			}
 		]
-	}
+	},
+	"theme.spaceinvaders": {
+		"sounds": [
+			{
+				"name": "arcademod:spaceinvaders/theme",
+				"stream": true
+			}
+		]
+	},
+	"effect.spaceinvaders_shoot": {
+		"sounds": [
+			{
+				"name": "arcademod:spaceinvaders/shoot",
+				"stream": true
+			}
+		]
+	},
+	"effect.spaceinvaders_explode": {
+		"sounds": [
+			{
+				"name": "arcademod:spaceinvaders/explode",
+				"stream": true
+			}
+		]
+	},
+	"effect.spaceinvaders_destroyed": {
+		"sounds": [
+			{
+				"name": "arcademod:spaceinvaders/destroyed",
+				"stream": true
+			}
+		]
+ 	}
 }

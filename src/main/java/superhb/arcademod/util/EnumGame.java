@@ -6,7 +6,8 @@ public enum EnumGame implements IStringSerializable {
 	SNAKE(0, "snake"),
 	TETROMINOES(1, "tetrominoes"),
 	PACMAN(2, "pacman"),
-	PONG(3, "pong");
+	PONG(3, "pong"),
+	SPACEINVADERS(4, "spaceinvaders");
 	//DDR(4, "ddr");
 	
 	private int id;
