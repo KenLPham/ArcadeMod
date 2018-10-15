@@ -45,6 +45,7 @@ import java.util.*;
  */
 
 /* ChangeLog
+	- Updated to Forge 2705
  */
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, updateJSON = Reference.UPDATE_URL)
 public class Arcade {

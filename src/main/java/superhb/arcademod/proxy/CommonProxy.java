@@ -13,9 +13,9 @@ import net.minecraftforge.fml.common.network.NetworkRegistry;
 public class CommonProxy {
 	public void preInit (FMLPreInitializationEvent event) {
 		// Register Server Network Packet
-		ArcadePacketHandler.INSTANCE.registerMessage(ServerCoinMessage.Handler.class, ServerCoinMessage.class, 2, Side.SERVER);
-		ArcadePacketHandler.INSTANCE.registerMessage(RewardMessage.Handler.class, RewardMessage.class, 3, Side.SERVER);
-		ArcadePacketHandler.INSTANCE.registerMessage(ServerBuyMessage.Handler.class, ServerBuyMessage.class, 4, Side.SERVER);
+		ArcadePacketHandler.INSTANCE.registerMessage(ServerCoinMessage.Handler.class, ServerCoinMessage.class, 3, Side.SERVER);
+		ArcadePacketHandler.INSTANCE.registerMessage(RewardMessage.Handler.class, RewardMessage.class, 4, Side.SERVER);
+		ArcadePacketHandler.INSTANCE.registerMessage(ServerBuyMessage.Handler.class, ServerBuyMessage.class, 5, Side.SERVER);
 		
 		// Register Event
 		if (!Arcade.disableUpdateNotification) MinecraftForge.EVENT_BUS.register(new UpdateAnnouncer());

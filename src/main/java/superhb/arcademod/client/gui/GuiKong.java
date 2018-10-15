@@ -3,9 +3,11 @@ package superhb.arcademod.client.gui;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import org.lwjgl.input.Keyboard;
 import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArcade;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
+import superhb.arcademod.util.KeyHandler;
 
 import java.awt.*;
 import java.io.IOException;
@@ -44,6 +46,7 @@ public class GuiKong extends GuiArcade {
 	private int boardX, boardY;
 	private int barrelTick, barrelAnim;
 	private ArrayList<Point> collisionBoxes = new ArrayList<>();
+	private ArrayList<Ladder> ladders = new ArrayList<>();
 	private Player player;
 	
 	public GuiKong (World world, TileEntityArcade tileEntity, EntityPlayer player) {
@@ -56,6 +59,9 @@ public class GuiKong extends GuiArcade {
 		setCost(2);
 		inMenu = false; // TODO: Remove
 		createCollisionBoxes();
+		createLadderCollisionBoxes();
+		
+		this.player = new Player();
 	}
 	
 	@Override
@@ -70,6 +76,8 @@ public class GuiKong extends GuiArcade {
 				else barrelAnim++;
 				barrelTick = 0;
 			}
+			
+			player.move();
 		}
 	}
 	
@@ -88,20 +96,33 @@ public class GuiKong extends GuiArcade {
 			
 			// Platform Collision
 			for (Point p : collisionBoxes) this.drawModalRectWithCustomSizedTexture(boardX + p.x, boardY + p.y, 496, 510, 16, 2, 512, 512);
+			for (Ladder l : ladders) {
+				this.drawModalRectWithCustomSizedTexture(boardX + l.x, boardY + l.y, 504, 506, LADDER_WIDTH, 2, 512, 512);
+				this.drawModalRectWithCustomSizedTexture(boardX + l.x, boardY + l.y + l.length - 2, 504, 508, LADDER_WIDTH, 2, 512, 512);
+			}
 			
 			// Donkey Kong
 			this.drawModalRectWithCustomSizedTexture(boardX + 24, boardY + 52, 0, GUI_HEIGHT, KONG_WIDTH, KONG_HEIGHT, 512, 512);
 			
 			// Girl
 			this.drawModalRectWithCustomSizedTexture(boardX + 88, boardY + 34, GUI_WIDTH + LADDER_WIDTH, BARREL_TOP_HIEGHT, GIRL_WIDTH, GIRL_HEIGHT, 512, 512);
+			
+			// Mario
+			player.draw();
 		}
 	}
 	
 	protected void keyTyped (char typedChar, int keyCode) throws IOException {
+		if (inMenu) {
+		
+		} else {
+			if (keyCode == KeyHandler.left.getKeyCode()) player.setDirection(Direction.LEFT);
+			if (keyCode == KeyHandler.right.getKeyCode()) player.setDirection(Direction.RIGHT);
+			if (keyCode == KeyHandler.jump.getKeyCode()) player.setDirection(Direction.JUMP);
+			if (keyCode == KeyHandler.up.getKeyCode()) player.setDirection(Direction.UP);
+		}
 		super.keyTyped(typedChar, keyCode);
 	}
-	
-	private void collisionDetection () {}
 	
 	private void drawPlatforms () {
 		for (int i = 0; i < 7; i++) { // Plat 0
@@ -186,41 +207,135 @@ public class GuiKong extends GuiArcade {
 		for (int i = 0; i < 3; i++) collisionBoxes.add(new Point(88 + i * PLATFORM_WIDTH, 56));
 	}
 	
+	private void createLadderCollisionBoxes () {
+		ladders.add(new Ladder(64, 32));
+		ladders.add(new Ladder(80, 32));
+		ladders.add(new Ladder(128, 64, 20));
+		ladders.add(new Ladder(88, 92, 4));
+		ladders.add(new Ladder(88, 104, 13));
+		ladders.add(new Ladder(184, 95, 16));
+		ladders.add(new Ladder(32, 128, 16));
+		ladders.add(new Ladder(72, 126, 20));
+		ladders.add(new Ladder(168, 120, 8));
+		ladders.add(new Ladder(168, 144, 8));
+		ladders.add(new Ladder(64, 154, 6));
+		ladders.add(new Ladder(64, 176, 8));
+		ladders.add(new Ladder(112, 157, 24));
+		ladders.add(new Ladder(184, 161, 16));
+		ladders.add(new Ladder(32, 194, 16));
+		ladders.add(new Ladder(96, 190, 24));
+		ladders.add(new Ladder(80, 221, 3));
+		ladders.add(new Ladder(80, 240, 8));
+		ladders.add(new Ladder(184, 227, 16));
+	}
+	
 	private class Player {
-		private int lives = 3, x, y;
-		private boolean canClimb, isClimbing;
+		private int lives = 3, x, y, jumpTick = 0;
+		private boolean canClimb, isClimbing, isJumping;
+		private Direction direction = Direction.STAND;
+		
+		private Player (){
+			this.x = 20;
+			this.y = 232;
+		}
 		
 		private Player (int x, int y) {
 			this.x = x;
 			this.y = y;
 		}
 		
-		public void move () {}
+		public void move () {
+			if (!isOnGround() && !isClimbing) y += 1;
+			if (isOnGround()) isClimbing = false;
+			
+			switch (direction) {
+				case RIGHT:
+					isClimbing = false;
+					if (canMoveRight() && Keyboard.isKeyDown(KeyHandler.right.getKeyCode())) {
+						x += 1;
+						for (Point p : collisionBoxes) {
+							if (x + 8 == p.x && y + 15 == p.y) y -= 1;
+						}
+					} else setDirection(Direction.STAND);
+					break;
+				case LEFT:
+					isClimbing = false;
+					if (canMoveLeft() && Keyboard.isKeyDown(KeyHandler.left.getKeyCode())) {
+						x -= 1;
+						for (Point p : collisionBoxes) {
+							if (x == p.x && y + 15 == p.y) y -= 1;
+						}
+					} else setDirection(Direction.STAND);
+					break;
+				case JUMP:
+					isClimbing = false;
+					if (!canJump() && !isJumping) break;
+					isJumping = true;
+					if (jumpTick == 0) jumpTick = tickCounter;
+					if (tickCounter - jumpTick <= 10) y -= 2;
+					else {
+						setDirection(Direction.STAND);
+						isJumping = false;
+						jumpTick = 0;
+					}
+					break;
+				case UP:
+					if (canClimbUp() && Keyboard.isKeyDown(KeyHandler.up.getKeyCode())) {
+						isClimbing = true;
+						y -= 1;
+					} else {
+						//isClimbing = false;
+						setDirection(Direction.STAND);
+					}
+					break;
+				case DOWN:
+					if (canClimbDown() && Keyboard.isKeyDown(KeyHandler.down.getKeyCode())) {
+						isClimbing = true;
+						y += 1;
+					} else {
+						//isClimbing = false;
+						setDirection(Direction.STAND);
+					}
+					break;
+				case STAND:
+					break;
+			}
+		}
+		
+		public void setDirection (Direction direction) {
+			this.direction = direction;
+		}
 		
 		public void draw () {
 			drawModalRectWithCustomSizedTexture(boardX + x, boardY + y, 0, GUI_HEIGHT + 3 * KONG_HEIGHT, 16, 16, 512, 512);
 		}
 		
 		public boolean canMoveLeft () {
-			return false;
+			return (boardX + x != boardX);
 		}
 		
 		public boolean canMoveRight () {
-			return (boardX + x != boardX + 208 || boardX + x != boardX);
+			return (boardX + x != boardX + 212);
 		}
 		
 		public boolean isOnGround () {
 			for (Point p : collisionBoxes) {
-				if (x == p.x && y + 16 == p.y) return true;
+				if (x + 8 >= p.x && y + 16 == p.y) return true;
 			}
 			return false;
 		}
 		
 		public boolean canClimbUp () {
+			for (Ladder l : ladders) {
+				if ((x + 4 >= l.x && x + 4 <= l.x + LADDER_WIDTH) && (y + 15 >= l.y && y + 15 <= l.y + l.length)) return true;
+			}
 			return false;
 		}
 		
 		public boolean canClimbDown () {
+			for (Ladder l : ladders) {
+				if ((x + 4 >= l.x && x + 4 <= l.x + LADDER_WIDTH) && (y + 15 >= l.y && y + 15 <= l.y + l.length)) return true;
+			}
 			return false;
 		}
 		
@@ -234,6 +349,91 @@ public class GuiKong extends GuiArcade {
 		
 		public int getY () {
 			return y;
+		}
+	}
+	
+	private class Barrel {
+		private boolean isFlaming;
+		private int x, y, rollState;
+		
+		private Barrel (int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+		
+		public void move () {
+		
+		}
+		
+		public void draw () {
+		
+		}
+		
+		public boolean canMoveLeft () {
+			return false;
+		}
+		
+		public boolean canMoveRight () {
+			return false;
+		}
+		
+		public boolean canFall () {
+			return false;
+		}
+		
+		public int getX () {
+			return x;
+		}
+		
+		public int getY () {
+			return y;
+		}
+	}
+	
+	private enum Direction {
+		STAND(0, 0, 0),
+		UP(1, 2, 1),
+		DOWN(2, 1, 1),
+		LEFT(3, 4, 2),
+		RIGHT(4, 3, 2),
+		JUMP(5, 0, 1);
+		
+		private int direction;
+		private int opposite;
+		private int axis;
+		
+		Direction (int direction, int opposite, int axis) {
+			this.direction = direction;
+			this.opposite = opposite;
+			this.axis = axis;
+		}
+		
+		public int getDirection () {
+			return direction;
+		}
+		
+		public Direction getOpposite () {
+			return values()[opposite];
+		}
+		
+		public int getAxis () {
+			return axis;
+		}
+	}
+	
+	private class Ladder {
+		int x, y, length;
+		
+		public Ladder (int x, int y) {
+			this.x = x;
+			this.y = y;
+			this.length = LADDER_HEIGHT;
+		}
+		
+		public Ladder (int x, int y, int length) {
+			this.x = x;
+			this.y = y;
+			this.length = length;
 		}
 	}
 }

@@ -45,7 +45,6 @@ public class GuiSpaceInvaders extends GuiArcade {
 	private int mazeBlinks = 0;
 	private boolean playing, updatePos, allDead;
 	private int startTick = 0;
-	private EnumBonus bonus;
 	private int bonusTick, bonusTime;
 	private boolean showBonus;
 	private int backTick;
@@ -80,9 +79,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 		super.updateScreen();
 		
 		if (inMenu) {
-			if (mc.getSoundHandler().isSoundPlaying(theme)) {
-				mc.getSoundHandler().stopSound(theme);
-			}
+			if (mc.getSoundHandler().isSoundPlaying(theme)) mc.getSoundHandler().stopSound(theme);
 			if (menu == 3) {
 				if ((tickCounter - backTick) == 60) {
 					tickCounter = score = mazeBlinks = mazeBlinkTick = deathTick = gameOverTick = level = 0;
@@ -116,9 +113,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 					}
 				} else {
 					for (int i = 0; i < aliens.length; i++) {
-						if (aliens[i].isVisible) {
-							aliens[i].ai().move().updatePosition(boardX, boardY);
-						}
+						if (aliens[i].isVisible) aliens[i].ai().move().updatePosition(boardX, boardY);
 					}
 				}
 				for (int i = 0; i < aliens.length; i++) {
@@ -129,10 +124,8 @@ public class GuiSpaceInvaders extends GuiArcade {
 				// Alien bombing logic
 				Random random = new Random();
 				activeBombs = 0;
-				for (int i=0;i<bombs.length;i++) {
-					if (bombs[i].isVisible == true) {
-						activeBombs++;
-					}
+				for (int i = 0; i < bombs.length; i++) {
+					if (bombs[i].isVisible) activeBombs++;
 				}
 					
 				for (int i=0;i<level;i++) {
@@ -152,9 +145,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 					}
 				}
 				
-				if (bullet != null) {
-					bullet.move().updatePosition(boardX, boardY);
-				}
+				if (bullet != null) bullet.move().updatePosition(boardX, boardY);
 				
 				for (int i=0;i<bombs.length;i++) {
 					if (bombs[i].isVisible) {
@@ -174,9 +165,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 				
 				if (ufo != null) {
 					ufo.move().updatePosition(boardX, boardY);
-					if (ufo != null) {
-						ufo.update();	
-					}
+					if (ufo != null) ufo.update();
 				}
 				
 				collisionDetection();
@@ -249,12 +238,9 @@ public class GuiSpaceInvaders extends GuiArcade {
 					this.fontRenderer.drawString(I18n.format("option.arcademod:control.locale"), boardX + (GUI_X / 2) - (controlWidth / 2), boardY + (GUI_Y / 2) - 20, Color.WHITE.getRGB());
 					this.fontRenderer.drawString(I18n.format("option.arcademod:setting.locale"), boardX + (GUI_X / 2) - (settingWidth / 2), boardY + (GUI_Y / 2) - 10, Color.WHITE.getRGB());
 					
-					if (menuOption == 0)
-						drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 32, true); // Start
-					else if (menuOption == 1)
-						drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 22, true); // Controls
-					else if (menuOption == 2)
-						drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 12, true); // Settings
+					if (menuOption == 0) drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 32, true); // Start
+					else if (menuOption == 1) drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 22, true); // Controls
+					else if (menuOption == 2) drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 12, true); // Settings
 					break;
 				case 1: // Controls
 					this.fontRenderer.drawString(I18n.format("option.arcademod:control.locale"), boardX + (GUI_X / 2) - (controlWidth / 2), boardY + 2, Color.WHITE.getRGB());
@@ -292,8 +278,6 @@ public class GuiSpaceInvaders extends GuiArcade {
 					break;
 			}
 		} else {
-			//getTileEntity().playSound(ArcadeSounds.PACMAN_SIREN, true);
-			
 			drawMaze();
 			
 			for (int y = 0; y < 31; y++) {
@@ -305,9 +289,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 			// Aliens
 			if (playing) {
 				for (int i = 0; i < aliens.length; i++) {
-					if (aliens[i].isVisible) {
-						aliens[i].drawAlien();	
-					}
+					if (aliens[i].isVisible) aliens[i].drawAlien();
 				}
 			}
 			
@@ -315,26 +297,18 @@ public class GuiSpaceInvaders extends GuiArcade {
 			tank.drawPlayer().drawLives();
 			
 			// Bullet
-			if (bullet != null) {
-				bullet.drawBullet();
-			}
+			if (bullet != null) bullet.drawBullet();
 			
 			// Bombs
 			for (int i=0;i<bombs.length;i++) {
-				if (bombs[i].isVisible) {
-					bombs[i].drawBomb();
-				}	
+				if (bombs[i].isVisible) bombs[i].drawBomb();
 			}
 			
 			// UFO
-			if (ufo != null) {
-				ufo.drawUFO();
-			}
+			if (ufo != null) ufo.drawUFO();
 			
 			// Text
-			if (!playing) {
-				this.fontRenderer.drawString(I18n.format("text.arcademod:ready.spaceinvaders.locale"), boardX + (MAZE_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:ready.spaceinvaders.locale")) / 2), boardY + (MAZE_Y / 2) + 13, Color.yellow.getRGB());
-			}
+			if (!playing) this.fontRenderer.drawString(I18n.format("text.arcademod:ready.spaceinvaders.locale"), boardX + (MAZE_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:ready.spaceinvaders.locale")) / 2), boardY + (MAZE_Y / 2) + 13, Color.yellow.getRGB());
 			
 			this.fontRenderer.drawString(String.format(I18n.format("text.arcademod:score.locale") + " %d", score), boardX + 10, boardY + 6, Color.white.getRGB());
 			//this.fontRenderer.drawString(String.format(I18n.format("text.arcademod:topscore.locale") + " %s %d", topName, topScore), boardX + 45, boardY - 8, Color.white.getRGB());
@@ -343,18 +317,14 @@ public class GuiSpaceInvaders extends GuiArcade {
 	}
 		
 	private void drawMaze () {
-		if (mazeBlink) {
-			glColor(Color.WHITE);
-		}
-		else {
-			glColor(new Color(33, 33, 222));
-		}
+		if (mazeBlink) glColor(Color.WHITE);
+		else glColor(new Color(33, 33, 222));
 		drawModalRectWithCustomSizedTexture(boardX, boardY, GUI_X, 0, MAZE_X, MAZE_Y, 512, 512);
 	}
 	
 	private void collisionDetection () {
-		for (int i=3; i >= 0; i--) {
-			for (int j=0; j < 8; j++) {
+		for (int i = 3; i >= 0; i--) {
+			for (int j = 0; j < 8; j++) {
 				int id = i * 8 + j;
 				if (bullet != null) {
 					if (bullet.extendedX >= (aliens[id].extendedX - 7) &&
@@ -370,7 +340,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 				}
 			}
 		}
-		for(int i=0;i<bombs.length;i++) {
+		for(int i = 0; i < bombs.length; i++) {
 			if (bombs[i].isVisible) {
 				if (bombs[i].extendedX >= (tank.extendedX - 7) &&
 					bombs[i].extendedX <= (tank.extendedX + 7) &&
@@ -440,28 +410,18 @@ public class GuiSpaceInvaders extends GuiArcade {
 	}
 	
 	private void resetGame () {
-		for (int i=0; i < 4; i++) {
-			for (int j=0; j < 8; j++) {
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 8; j++) {
 				int id = i * 8 + j;
-				if (i == 0) {
-					aliens[id] = new Alien(id, 7 + (j * 2), 5 + (i * 2), new Color(29, 226, 255), true);
-				}
-				if (i == 1) {
-					aliens[id] = new Alien(id, 7 + (j * 2), 5 + (i * 2), new Color(30, 180, 50), true);
-				}
-				if (i == 2) {
-					aliens[id] = new Alien(id, 7 + (j * 2), 5 + (i * 2), new Color(255, 180, 0), true);
-				}
-				if (i == 3) {
-					aliens[id] = new Alien(id, 7 + (j * 2), 5 + (i * 2), new Color(180, 30, 180), true);
-				}
+				if (i == 0) aliens[id] = new Alien(id, 7 + (j * 2), 5 + (i * 2), new Color(29, 226, 255), true);
+				if (i == 1) aliens[id] = new Alien(id, 7 + (j * 2), 5 + (i * 2), new Color(30, 180, 50), true);
+				if (i == 2) aliens[id] = new Alien(id, 7 + (j * 2), 5 + (i * 2), new Color(255, 180, 0), true);
+				if (i == 3) aliens[id] = new Alien(id, 7 + (j * 2), 5 + (i * 2), new Color(180, 30, 180), true);
 			}
 		}
 		allDead = false;
 		nextLevel = false;
-		for (int i=0;i<bombs.length;i++) {
-			bombs[i] = new Bomb(i, 1, 1, new Color(0,0,0),false);
-		}
+		for (int i = 0; i < bombs.length; i++) bombs[i] = new Bomb(i, 1, 1, new Color(0,0,0),false);
 		activeBombs = 0;
 	}
 	
@@ -496,12 +456,8 @@ public class GuiSpaceInvaders extends GuiArcade {
 			if (keyCode == KeyHandler.left.getKeyCode())
 				menu = 0;
 		} else {
-			if (keyCode == KeyHandler.left.getKeyCode()) {
-				tank.current = Direction.LEFT;
-			}
-			else if (keyCode == KeyHandler.right.getKeyCode()) {
-				tank.current = Direction.RIGHT;
-			}
+			if (keyCode == KeyHandler.left.getKeyCode()) tank.current = Direction.LEFT;
+			else if (keyCode == KeyHandler.right.getKeyCode()) tank.current = Direction.RIGHT;
 			else if (keyCode == KeyHandler.up.getKeyCode()) {
 				if (bullet == null) {
 					bullet = new Bullet(0, tank.x, tank.y, new Color(255,0,0), true);
@@ -509,10 +465,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 					getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.SPACEINVADERS_SHOOT, SoundCategory.BLOCKS, volume, 1.0f);
 				}
 			}
-			
-			if (keyCode == 1) {
-				giveReward(ArcadeItems.TICKET, (score / 200)); // Esc
-			}
+			if (keyCode == 1) giveReward(ArcadeItems.TICKET, (score / 200)); // Esc
 		}
 		super.keyTyped(typedChar, keyCode);
 	}
@@ -547,29 +500,6 @@ public class GuiSpaceInvaders extends GuiArcade {
 		EnumTile (int id, Color color) {
 			this.id = id;
 			this.color = color;
-		}
-	}
-	
-	private enum EnumBonus {
-		CHERRY (0, 100),
-		STRAWBERRY (1, 300),
-		PEACH (2, 500),
-		APPLE (3, 700),
-		GRAPES (4, 1000),
-		GALAXIAN (5, 2000),
-		BELL (6, 3000),
-		KEY (8, 5000);
-		
-		private int id;
-		private int points;
-		
-		EnumBonus (int id, int points) {
-			this.id = id;
-			this.points = points;
-		}
-		
-		public int getPoints () {
-			return points;
 		}
 	}
 	
@@ -684,15 +614,6 @@ public class GuiSpaceInvaders extends GuiArcade {
 						showBonus = false;
 						bonusTick = 0;
 					}
-				}
-			}
-			
-			// Bonus Logic
-			if (showBonus) {
-				if ((extendedX >= offsetX + (13 * 8) - 2 && (extendedX <= offsetX + (13 * 8) + 2)) && extendedY == offsetY + (17 * 8)) {
-					showBonus = false;
-					bonusTick = 0;
-					score += bonus.getPoints();
 				}
 			}
 		}
@@ -885,23 +806,12 @@ public class GuiSpaceInvaders extends GuiArcade {
 			glColor(aliencolor);
 			int startX = GUI_X + 10;
 			
-			if (alienid < 32) {
-				startX = GUI_X + 10;
-			}
-			if (alienid < 24) {
-				startX = GUI_X + 10 + (ALIEN * 6);
-			}
-			if (alienid < 16) {
-				startX = GUI_X + 10 + (ALIEN * 4);
-			}
-			if (alienid < 8) {
-				startX = GUI_X + 10 + (ALIEN * 2);
-			}
-			if (BODY_STATE == 0) {
-				drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, startX, MAZE_Y, ALIEN, ALIEN, 512, 512);
-			} else {
-				drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, startX + ALIEN, MAZE_Y, ALIEN, ALIEN, 512, 512);
-			}
+			if (alienid < 32) startX = GUI_X + 10;
+			if (alienid < 24) startX = GUI_X + 10 + (ALIEN * 6);
+			if (alienid < 16) startX = GUI_X + 10 + (ALIEN * 4);
+			if (alienid < 8) startX = GUI_X + 10 + (ALIEN * 2);
+			if (BODY_STATE == 0) drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, startX, MAZE_Y, ALIEN, ALIEN, 512, 512);
+			else drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, startX + ALIEN, MAZE_Y, ALIEN, ALIEN, 512, 512);
 			return this;
 		}
 	}
@@ -989,9 +899,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 			// Movement Logic
 			if (canMove) {
 				if (!isBlockedDown(x, y + 1)) {
-					if (isVisible) {
-						moveY += getSpeed();
-					}
+					if (isVisible) moveY += getSpeed();
 				} else {
 					canMove = false;
 					isVisible = false;
@@ -1025,16 +933,11 @@ public class GuiSpaceInvaders extends GuiArcade {
 		}
 		
 		private Bomb drawBomb () {
-			if (!isVisible) {
-				return this;
-			}
+			if (!isVisible) return this;
 			glColor(color);
 			// Body
-			if (BODY_STATE == 0) {
-				drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, 240, 270, 14, 14, 512, 512);
-			} else {
-				drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, 257, 270, 14, 14, 512, 512);
-			}
+			if (BODY_STATE == 0) drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, 240, 270, 14, 14, 512, 512);
+			else drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, 257, 270, 14, 14, 512, 512);
 		
 			return this;
 		}
@@ -1058,9 +961,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 			// Movement Logic
 			if (canMove) {
 				if (!isBlockedDown(x - 1, y)) {
-					if (isVisible) {
-						moveX -= getSpeed();
-					}
+					if (isVisible) moveX -= getSpeed();
 				} else {
 					canMove = false;
 					isVisible = false;
@@ -1099,15 +1000,12 @@ public class GuiSpaceInvaders extends GuiArcade {
 		}
 		
 		private UFO drawUFO () {
-			if (!isVisible) {
-				return this;
-			}
+			if (!isVisible) return this;
 			glColor(color);
 			// Body
 			int startX = GUI_X + 10 + (ALIEN * 8);
-			if (BODY_STATE == 0) {
-				drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, startX, MAZE_Y, ALIEN, ALIEN, 512, 512);
-			} else {
+			if (BODY_STATE == 0) drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, startX, MAZE_Y, ALIEN, ALIEN, 512, 512);
+			else {
 				glColor(color.brighter());
 				drawModalRectWithCustomSizedTexture(extendedX - 3, extendedY - 3, startX, MAZE_Y, ALIEN, ALIEN, 512, 512);
 			}

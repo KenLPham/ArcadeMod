@@ -8,10 +8,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
@@ -19,6 +16,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.energy.EnergyStorage;
+import superhb.arcademod.Reference;
 import superhb.arcademod.client.audio.LoopingSound;
 
 import javax.annotation.Nullable;
@@ -85,11 +83,11 @@ public class TileEntityArcade extends TileEntity implements ITickable {
 //				isPlaying = true;
 //				LoopingSound sound = new LoopingSound((TileEntityArcade)world.getTileEntity(pos), soundEvent, SoundCategory.BLOCKS, volume);
 //
-//				Minecraft.getMinecraft().getSoundHandler().playSound(sound);
+//				if (getWorld().isRemote) Minecraft.getMinecraft().getSoundHandler().playSound(sound);
 //			}
 //			if (shouldStart) {
 //				LoopingSound sound = new LoopingSound((TileEntityArcade)world.getTileEntity(pos), soundEvent, SoundCategory.BLOCKS, volume);
-//				Minecraft.getMinecraft().getSoundHandler().playSound(sound);
+//				if (getWorld().isRemote) Minecraft.getMinecraft().getSoundHandler().playSound(sound);
 //			}
 		} else {
 			// Play non looping sound
@@ -105,10 +103,15 @@ public class TileEntityArcade extends TileEntity implements ITickable {
 		}
 	}
 	
-	public void playSound (SoundEvent soundEvent, boolean looping) {
+	private SoundEvent setSound (ResourceLocation resource) {
+		return SoundEvent.REGISTRY.getObject(resource);
+	}
+	
+	public void playSound (ResourceLocation resource, float volume, boolean looping) {
 		loop = looping;
 		shouldStart = true;
-		this.soundEvent = soundEvent;
+		setVolume(volume);
+		this.soundEvent = setSound(resource);
 	}
 	
 	public boolean shouldStop () {

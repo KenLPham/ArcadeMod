@@ -5,6 +5,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import superhb.arcademod.Reference;
@@ -12,6 +13,8 @@ import superhb.arcademod.api.gui.GuiArcade;
 import superhb.arcademod.client.ArcadeItems;
 import superhb.arcademod.client.audio.ArcadeSounds;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
+import superhb.arcademod.network.ServerSoundMessage;
+import superhb.arcademod.util.ArcadePacketHandler;
 import superhb.arcademod.util.KeyHandler;
 
 import javax.annotation.Nullable;
@@ -94,7 +97,6 @@ public class GuiPacMan extends GuiArcade {
 		setStartMenu(0);
 	}
 	
-	// TODO: Move game logic here (gl with that)
 	@Override
 	public void updateScreen () {
 		super.updateScreen();
@@ -226,7 +228,10 @@ public class GuiPacMan extends GuiArcade {
 					break;
 			}
 		} else {
-			//getTileEntity().playSound(ArcadeSounds.PACMAN_SIREN, true);
+			//ArcadePacketHandler.INSTANCE.sendToServer(new ServerSoundMessage(ArcadeSounds.PACMAN_SIREN.getSoundName(), getPos(), volume, true, true));
+			//ArcadePacketHandler.INSTANCE.sendToServer(new ServerSoundMessage("theme.pacman_siren", getPos(), volume, true, true));
+			
+			//getTileEntity().playSound(new ResourceLocation(Reference.MODID, "theme.pacman_siren"), volume, true);
 			
 			drawMaze();
 			

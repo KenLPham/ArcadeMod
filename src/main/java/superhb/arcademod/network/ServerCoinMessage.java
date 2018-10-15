@@ -12,6 +12,8 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import superhb.arcademod.Arcade;
 import superhb.arcademod.util.ArcadePacketHandler;
 
+import java.util.ArrayList;
+
 // TODO: Add coinMenu and mainMenu ID to constructor
 public class ServerCoinMessage implements IMessage {
     private int cost;
@@ -55,20 +57,63 @@ public class ServerCoinMessage implements IMessage {
 
             thread.addScheduledTask(()->{
 				EntityPlayerMP serverPlayer = context.getServerHandler().player;
+	
+				ArrayList<int[]> slotIndexes = new ArrayList<>();
+				int totalCount = 0;
 				
-				//System.out.println("handler");
-				
-				// TODO: Do check for costs above 64
 				if (serverPlayer.inventory.hasItemStack(message.getStack())) {
-					ItemStack coin = serverPlayer.inventory.getStackInSlot(serverPlayer.inventory.getSlotFor(message.getStack()));
-					int slot = serverPlayer.inventory.getSlotFor(message.getStack());
-					if (coin.getCount() > message.getCost()) {
-						serverPlayer.inventory.decrStackSize(slot, message.getCost());
+					for (int i = 0; i < serverPlayer.inventory.getSizeInventory(); i++) {
+						if (serverPlayer.inventory.getStackInSlot(i).getItem().equals(message.getStack().getItem())) {
+							totalCount += serverPlayer.inventory.getStackInSlot(i).getCount();
+							slotIndexes.add(new int[] { i, serverPlayer.inventory.getStackInSlot(i).getCount() });
+						}
+					}
+					
+					if (totalCount < message.getCost()) ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(false, -1), serverPlayer);
+					else if (totalCount == message.getCost()) {
+						for (int[] i : slotIndexes) serverPlayer.inventory.removeStackFromSlot(i[0]);
 						ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(true, 0), serverPlayer);
-					} else if (coin.getCount() == message.getCost()) {
-						serverPlayer.inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
+					} else if (totalCount > message.getCost()) {
+						if (message.getCost() < 64) {
+							int useSlot = 0;
+							for (int i = 0; i < slotIndexes.size(); i++) {
+								if (slotIndexes.get(i)[1] >= message.getCost()) useSlot = slotIndexes.get(i)[0];
+							}
+							serverPlayer.inventory.decrStackSize(useSlot, message.getCost());
+						} else if (message.getCost() == 64) {
+							int useSlot = 0;
+							for (int i = 0; i < slotIndexes.size(); i++) {
+								if (slotIndexes.get(i)[1] >= message.getCost()) useSlot = slotIndexes.get(i)[0];
+							}
+							serverPlayer.inventory.removeStackFromSlot(useSlot);
+						} else if (message.getCost() > 64) {
+							int[] useSlot;
+							int j = 0;
+							
+							float stacksf = message.getCost() / 64.0F;
+							int stacks = message.getCost() / 64;
+							float remainder = (stacksf - stacks) * 64;
+							
+							if (remainder == 0) useSlot = new int[stacks];
+							else useSlot = new int[stacks + 1];
+							
+							for (int i = 0; i < slotIndexes.size(); i++) {
+								if (j < useSlot.length) {
+									if (slotIndexes.get(i)[i] == 64) useSlot[j] = slotIndexes.get(i)[0];
+									else if (remainder > 0 && slotIndexes.get(i)[1] >= remainder) useSlot[j] = slotIndexes.get(i)[0];
+									j++;
+								}
+							}
+							for (int i = 0; i < useSlot.length; i++) {
+								if (remainder == 0) serverPlayer.inventory.removeStackFromSlot(useSlot[i]);
+								else {
+									if (i < (useSlot.length - 1)) serverPlayer.inventory.removeStackFromSlot(useSlot[i]);
+									else if (i < useSlot.length) serverPlayer.inventory.decrStackSize(useSlot[i], (int)remainder);
+								}
+							}
+						}
 						ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(true, 0), serverPlayer);
-					} else ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(false, -1), serverPlayer);
+					}
 				} else ArcadePacketHandler.INSTANCE.sendTo(new ClientCoinMessage(false, -1), serverPlayer);
 			});
             return null;

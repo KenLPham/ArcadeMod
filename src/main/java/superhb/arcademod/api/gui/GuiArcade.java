@@ -54,7 +54,7 @@ public class GuiArcade extends GuiScreen {
 	public boolean canGetCoinBack = true;
 	
 	// Constructor Variable
-	private TileEntityArcade tileEntity;
+	private TileEntityArcade tileEntity; // TODO: Remove tileEntity access
 	private EntityPlayer player; // TODO: Remove player?
 	private World world;
 	private BlockPos pos;
@@ -173,6 +173,7 @@ public class GuiArcade extends GuiScreen {
 	 *
 	 * @return TileEntity
 	 */
+	@Deprecated
 	public TileEntityArcade getTileEntity () {
 		return tileEntity;
 	}

@@ -29,12 +29,8 @@ public class ClientCoinMessage implements IMessage {
 	
 	@Override
 	public void fromBytes (ByteBuf buf) {
-		try {
-			menu = buf.readInt();
-			enoughCoins = buf.readBoolean();
-		} catch (IndexOutOfBoundsException e) {
-			Arcade.logger.info("Error: " + e);
-		}
+		menu = buf.readInt();
+		enoughCoins = buf.readBoolean();
 	}
 	
 	public boolean isEnoughCoins () {

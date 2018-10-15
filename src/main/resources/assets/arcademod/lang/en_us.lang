@@ -61,6 +61,7 @@ control.arcademod:down.name=Down
 control.arcademod:left.name=Left/Back
 control.arcademod:right.name=Right
 control.arcademod:select.name=Select
+control.arcademod:jump.name=Jump
 
 control.arcademod:up.tetrominoes.name=Up/Rotate
 
