@@ -45,7 +45,8 @@ import java.util.*;
  */
 
 /* ChangeLog
-	- Updated to Forge 2705
+	2.2.0
+	- Added Space Invader
  */
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, updateJSON = Reference.UPDATE_URL)
 public class Arcade {
@@ -119,11 +120,11 @@ public class Arcade {
 		loadPrizeList(event);
 		
 		// Register TileEntity
-		GameRegistry.registerTileEntity(TileEntityArcade.class, Reference.MODID + ":tile_arcade");
-		GameRegistry.registerTileEntity(TileEntityPlushie.class, Reference.MODID + ":tile_plushie");
-		GameRegistry.registerTileEntity(TileEntityPrize.class, Reference.MODID + ":tile_prize");
-		GameRegistry.registerTileEntity(TileEntityPusher.class, Reference.MODID + ":tile_pusher");
-		
+		GameRegistry.registerTileEntity(TileEntityArcade.class, Reference.createResource("tile_arcade"));
+		GameRegistry.registerTileEntity(TileEntityPlushie.class, Reference.createResource("tile_plushie"));
+		GameRegistry.registerTileEntity(TileEntityPrize.class, Reference.createResource("tile_prize"));
+		GameRegistry.registerTileEntity(TileEntityPusher.class, Reference.createResource("tile_pusher"));
+
 		proxy.preInit(event);
 	}
 	
@@ -138,8 +139,7 @@ public class Arcade {
 		for (ModContainer mod : Loader.instance().getModList()) {
 			if (mod.getModId().equals(Reference.MODID)) {
 				status = ForgeVersion.getResult(mod).status;
-				if (status == ForgeVersion.Status.OUTDATED || status == ForgeVersion.Status.BETA_OUTDATED)
-					changelog = ForgeVersion.getResult(mod).changes.entrySet();
+				if (status == ForgeVersion.Status.OUTDATED || status == ForgeVersion.Status.BETA_OUTDATED) changelog = ForgeVersion.getResult(mod).changes.entrySet();
 			}
 		}
 		
@@ -209,8 +209,7 @@ public class Arcade {
 	// Gets files from /arcademod/games/ directory
 	private void getAddons (List<File> games) {
 		for (File game : games) {
-			if (game.isDirectory()) {
-			}
+			if (game.isDirectory()) {}
 		}
 	}
 }

@@ -73,10 +73,10 @@ public class GuiPong extends GuiArcade {
 	public GuiPong (World world, TileEntityArcade tileEntity, @Nullable BlockPos pos, EntityPlayer player) {
 		super(world, tileEntity, pos, player);
 		setGuiSize(GUI_X, GUI_Y);
-		setTexture(texture, 512, 512);
 		setCost(1);
 		setOffset(0, 0);
 		setButtonPos((GUI_X / 2) - (buttonWidth / 2), GUI_Y - 30);
+		setTexture(texture, 512, 512);
 		setStartMenu(0);
 		
 		addPlayer(player.getName());
@@ -113,7 +113,7 @@ public class GuiPong extends GuiArcade {
 			}
 		}
 	}
-	
+
 	@Override
 	public void drawScreen (int mouseX, int mouseY, float partialTicks) {
 		boardX = xScaled - (GUI_X / 2) + 8;
@@ -121,7 +121,7 @@ public class GuiPong extends GuiArcade {
 		super.drawScreen(mouseX, mouseY, partialTicks);
 		
 		if (inMenu) {
-			Mouse.setGrabbed(false);
+			if (Mouse.isGrabbed()) Mouse.setGrabbed(false);
 			switch (menu) {
 				case 0: // Main Menu
 					this.fontRenderer.drawString(I18n.format("game.arcademod:pong.name"), boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("game.arcademod:pong.name")) / 2), boardY + 2, Color.WHITE.getRGB());

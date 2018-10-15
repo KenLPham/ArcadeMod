@@ -505,8 +505,7 @@ public class GuiArcade extends GuiScreen {
 		return tileEntity.getLeaderboard()[0];
 	}
 	// UNUSED
-	
-	// Seems to only be an issue with Pong
+
 	@Override
 	protected void actionPerformed (GuiButton button) throws IOException {
 		if (button.enabled) {
