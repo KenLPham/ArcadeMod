@@ -9,7 +9,7 @@ public enum EnumGame implements IStringSerializable {
 	PONG(3, "pong"),
 	SPACEINVADERS(4, "spaceinvaders"),
 	//DDR(4, "ddr");
-	KONG(4, "kong");
+	KONG(5, "kong");
 	
 	private int id;
 	private String registryName;

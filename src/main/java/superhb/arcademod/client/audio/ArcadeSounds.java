@@ -40,21 +40,24 @@ public class ArcadeSounds {
 	@ObjectHolder("effect.pacman_fruit")
 	public static final SoundEvent PACMAN_FRUIT = null;
 	
-	@ObjectHolder("effect.pacman")
+	@ObjectHolder("theme.pacman")
 	public static final SoundEvent PACMAN_INTRO = null;
 	
 	@ObjectHolder("effect.pacman_ghost")
 	public static final SoundEvent PACMAN_GHOST = null;
 	
-	@ObjectHolder("effect.pacman_siren")
+	@ObjectHolder("theme.pacman_siren")
 	public static final SoundEvent PACMAN_SIREN = null;
 	
-	@ObjectHolder("effect.pacman_fright")
+	@ObjectHolder("theme.pacman_fright")
 	public static final SoundEvent PACMAN_FRIGHT = null;
 	
 	@ObjectHolder("effect.pacman_life")
 	public static final SoundEvent PACMAN_LIFE = null;
-	
+
+	@ObjectHolder("theme.pacman_eat")
+	public static final SoundEvent PACMAN_EAT = null;
+
 	@ObjectHolder("theme.spaceinvaders")
 	public static final SoundEvent SPACEINVADERS = null;
 	
@@ -66,6 +69,15 @@ public class ArcadeSounds {
 	
 	@ObjectHolder("effect.spaceinvaders_destroyed")
 	public static final SoundEvent SPACEINVADERS_DESTROYED = null;
+
+	@ObjectHolder("effect.pong_hit")
+	public static final SoundEvent PONG_HIT = null;
+
+	@ObjectHolder("effect.pong_miss")
+	public static final SoundEvent PONG_MISS = null;
+
+	@ObjectHolder("effect.pong_wall")
+	public static final SoundEvent PONG_WALL = null;
 	
 	@EventBusSubscriber
 	public static class RegistrationHandler {
@@ -87,10 +99,14 @@ public class ArcadeSounds {
 					createSound("theme.pacman_siren"),
 					createSound("theme.pacman_fright"),
 					createSound("effect.pacman_life"),
+					createSound("theme.pacman_eat"),
 					createSound("theme.spaceinvaders"),
 					createSound("effect.spaceinvaders_shoot"),
 					createSound("effect.spaceinvaders_explode"),
-					createSound("effect.spaceinvaders_destroyed")
+					createSound("effect.spaceinvaders_destroyed"),
+					createSound("effect.pong_hit"),
+					createSound("effect.pong_miss"),
+					createSound("effect.pong_wall")
 			};
 			
 			event.getRegistry().registerAll(sounds);

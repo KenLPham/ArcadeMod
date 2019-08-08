@@ -3,6 +3,7 @@ package superhb.arcademod.client.gui;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
@@ -10,6 +11,7 @@ import org.lwjgl.input.Mouse;
 import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArcade;
 import superhb.arcademod.client.ArcadeItems;
+import superhb.arcademod.client.audio.ArcadeSounds;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.network.pong.GetPlayerMessage;
 import superhb.arcademod.util.ArcadePacketHandler;
@@ -119,18 +121,23 @@ public class GuiPong extends GuiArcade {
 		boardX = xScaled - (GUI_X / 2) + 8;
 		boardY = yScaled - (GUI_Y / 2) + 8;
 		super.drawScreen(mouseX, mouseY, partialTicks);
-		
+
 		if (inMenu) {
 			if (Mouse.isGrabbed()) Mouse.setGrabbed(false);
+
+			int settingWidth = this.fontRenderer.getStringWidth(I18n.format("option.arcademod:setting.locale"));
+
 			switch (menu) {
 				case 0: // Main Menu
 					this.fontRenderer.drawString(I18n.format("game.arcademod:pong.name"), boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("game.arcademod:pong.name")) / 2), boardY + 2, Color.WHITE.getRGB());
 					
 					this.fontRenderer.drawString(I18n.format("option.arcademod:start.locale"), boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("option.arcademod:start.locale")) / 2), boardY + (GUI_Y / 2) - 10, Color.WHITE.getRGB());
 					this.fontRenderer.drawString(I18n.format("option.arcademod:control.locale"), boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("option.arcademod:control.locale")) / 2), boardY + (GUI_Y / 2), Color.WHITE.getRGB());
-					
+					this.fontRenderer.drawString(I18n.format("option.arcademod:setting.locale"), boardX + (GUI_X / 2) - (settingWidth / 2), boardY + (GUI_Y / 2) + 10, Color.WHITE.getRGB());
+
 					if (menuOption == 0) drawRightArrow(boardX + (GUI_X / 2) - 30,  boardY + (GUI_Y / 2) - 12, true);
-					else drawRightArrow(boardX + (GUI_X / 2) - 30,  boardY + (GUI_Y / 2) - 2, true);
+					else if (menuOption == 1) drawRightArrow(boardX + (GUI_X / 2) - 30,  boardY + (GUI_Y / 2) - 2, true);
+					else drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) + 8, true);
 					break;
 				case 1: // Start Menu
 					this.fontRenderer.drawString(I18n.format("option.arcademod:start.locale"), boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("option.arcademod:start.locale")) / 2), boardY + 2, Color.WHITE.getRGB());
@@ -161,6 +168,18 @@ public class GuiPong extends GuiArcade {
 					
 					// Back
 					this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), boardX + 2, boardY + (GUI_Y) - 23, Color.WHITE.getRGB());
+					break;
+				case 4: // Settings Menu
+					this.fontRenderer.drawString(I18n.format("option.arcademod:setting.locale"), boardX + (GUI_X / 2) - (settingWidth / 2), boardY + 2, Color.WHITE.getRGB());
+
+					int volumeWidth = this.fontRenderer.getStringWidth(I18n.format("text.arcademod:volume.locale"));
+					this.fontRenderer.drawString(I18n.format("text.arcademod:volume.locale"), boardX + (GUI_X / 2) - (volumeWidth / 2), boardY + (GUI_Y / 2) - 30, Color.white.getRGB());
+					drawVolumeBar(boardX + (GUI_X / 2), boardY + (GUI_Y / 2) - 20);
+
+					// Back
+					this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), boardX + 2, boardY + (GUI_Y) - 23, Color.WHITE.getRGB());
+					// Edit/Save
+					this.fontRenderer.drawString("[" + KeyHandler.select.getDisplayName() + "] " + (editVolume ? I18n.format("text.arcademod:save.locale") : I18n.format("text.arcademod:edit.locale")), boardX + 2, boardY + (GUI_Y) - 33, Color.white.getRGB());
 					break;
 			}
 		} else {
@@ -213,11 +232,11 @@ public class GuiPong extends GuiArcade {
 		if (inMenu) {
 			if (menu == 0) { // Main Menu
 				if (keyCode == KeyHandler.up.getKeyCode()) {
-					if (menuOption == 0) menuOption = 1;
+					if (menuOption == 0) menuOption = 2;
 					else menuOption--;
 				}
 				if (keyCode == KeyHandler.down.getKeyCode()) {
-					if (menuOption == 1) menuOption = 0;
+					if (menuOption == 2) menuOption = 0;
 					else menuOption++;
 				}
 				if (keyCode == KeyHandler.select.getKeyCode()) {
@@ -228,6 +247,7 @@ public class GuiPong extends GuiArcade {
 						else startGame();
 					}
 					if (menuOption == 1) menu = 2;
+					if (menuOption == 2) menu = 4;
 				}
 			} else if (menu == 1) { // Start Menu
 				if (keyCode == KeyHandler.up.getKeyCode()) {
@@ -252,6 +272,25 @@ public class GuiPong extends GuiArcade {
 				
 				// TODO: Send disconnect packet
 				if (keyCode == KeyHandler.left.getKeyCode()) menu = 1;
+			} else if (menu == 4) { // Settings Menu
+				if (keyCode == KeyHandler.left.getKeyCode()) {
+					if (editVolume) decreaseVolume();
+					else menu = 0;
+				}
+				if (keyCode == KeyHandler.right.getKeyCode()) {
+					if (editVolume) increaseVolume();
+				}
+				if (keyCode == KeyHandler.select.getKeyCode()) {
+					if (editVolume) {
+						editVolume = false;
+						saveVolume(true);
+					} else editVolume = true;
+				}
+				if (keyCode == 1 && editVolume) {
+					editVolume = false;
+					saveVolume(false);
+					return;
+				}
 			}
 		} else {
 			if (endGame > 0) {
@@ -267,6 +306,7 @@ public class GuiPong extends GuiArcade {
 			}
 		}
 		if (keyCode == 1) { // Esc
+			if (Mouse.isGrabbed()) Mouse.setGrabbed(false);
 			removePlayer(getPlayer().getName());
 		}
 		super.keyTyped(typedChar, keyCode);
@@ -349,7 +389,10 @@ public class GuiPong extends GuiArcade {
 		public void collisionDetection () {
 			// Outline Collision
 			for (Rectangle box : outlineBoundingBox) {
-				if (boundingBox.intersects(box)) yV = -yV;
+				if (boundingBox.intersects(box)) {
+					yV = -yV;
+					getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PONG_WALL, SoundCategory.BLOCKS, getVolume(), 1.0f);
+				}
 			}
 			
 			// Out Collision
@@ -358,12 +401,14 @@ public class GuiPong extends GuiArcade {
 				angle = (int)rand(0, 2);
 				x = 116;
 				y = (int)rand(5, 117);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PONG_MISS, SoundCategory.BLOCKS, getVolume(), 1.0f);
 				paddles[1].score++;
 			} else if (boundingBox.intersects(outBoundingBox[1])) { // Out on right paddle, left gets point
 				xV = -1;
 				angle = (int)rand(0, 2);
 				x = 116;
 				y = (int)rand(5, 117);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PONG_MISS, SoundCategory.BLOCKS, getVolume(), 1.0f);
 				paddles[0].score++;
 			}
 			
@@ -371,6 +416,7 @@ public class GuiPong extends GuiArcade {
 			for (Paddle paddle : paddles) {
 				if (boundingBox.intersects(paddle.boundingBox)) {
 					xV = -xV;
+					getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PONG_HIT, SoundCategory.BLOCKS, getVolume(), 1.0f);
 					int intersection = (paddle.extendedY + PADDLE_Y) - extendedY; // Higher = TOP
 					if (intersection > 14) { // Top
 						if (intersection > (28 - 5)) {

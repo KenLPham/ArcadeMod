@@ -2,7 +2,7 @@
 	"theme.tetris": {
 		"sounds": [
 			{
-				"name": "arcademod:tetris_theme",
+				"name": "arcademod:tetris/theme",
 				"stream": true
 			}
 		]
@@ -112,6 +112,14 @@
 			}
 		]
 	},
+	"theme.pacman_eat": {
+		"sounds": [
+			{
+				"name": "arcademod:pacman/eaten",
+				"stream": true
+			}
+		]
+	},
 	"theme.spaceinvaders": {
 		"sounds": [
 			{
@@ -140,6 +148,30 @@
 		"sounds": [
 			{
 				"name": "arcademod:spaceinvaders/destroyed",
+				"stream": true
+			}
+		]
+	},
+	"effect.pong_hit": {
+		"sounds": [
+			{
+				"name": "arcademod:pong/hit",
+				"stream": true
+			}
+		]
+	},
+	"effect.pong_miss": {
+		"sounds": [
+			{
+				"name": "arcademod:pong/miss",
+				"stream": true
+			}
+		]
+	},
+	"effect.pong_wall": {
+		"sounds": [
+			{
+				"name": "arcademod:pong/wall",
 				"stream": true
 			}
 		]

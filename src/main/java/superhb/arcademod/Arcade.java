@@ -25,7 +25,6 @@ import java.util.*;
 
 /* Game List
     - Mrs. Pac-Man
-    - Space Invaders
     - Donkey Kong (ReddyRedStoneOre) [CF]
     - Super Mario Bros (thatguyEnder) [CF]
     - Asteroids (WilchHabos) [CF]
@@ -45,8 +44,11 @@ import java.util.*;
  */
 
 /* ChangeLog
+	2.1.6
+	- Added sounds
+	- Added volume menu in each arcade machine
 	2.2.0
-	- Added Space Invader
+	- Added Space Invader (Created by fredkotze)
  */
 @Mod(modid = Reference.MODID, name = Reference.NAME, version = Reference.VERSION, updateJSON = Reference.UPDATE_URL)
 public class Arcade {

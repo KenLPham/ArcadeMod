@@ -24,6 +24,7 @@ import superhb.arcademod.util.*;
 import javax.annotation.Nullable;
 import java.awt.*;
 import java.io.IOException;
+import java.math.BigDecimal;
 
 public class GuiArcade extends GuiScreen {
 	// Tick Variables
@@ -35,6 +36,9 @@ public class GuiArcade extends GuiScreen {
 	public int menuOption = 0;
 	public int menu = 0, startMenu = 0;
 	public boolean useInternalMenu = true;
+	public boolean editVolume;
+	private float volume = 1.0f;
+	private int iVol = 100;
 	
 	// GUI Variables
 	public int textureWidth = 256, textureHeight = 256;
@@ -233,6 +237,24 @@ public class GuiArcade extends GuiScreen {
 		if (cost > 64) throw new IndexOutOfBoundsException("Max is 64");
 		else this.cost = cost;
 	}
+
+	public void increaseVolume () {
+		if (iVol < 100) iVol += 10;
+	}
+
+	public void decreaseVolume () {
+		if (iVol > 0) iVol -= 10;
+	}
+
+	// TODO: Save to TileEntity
+	public void saveVolume (boolean update) {
+		if (update) volume = iVol / 100f;
+		else iVol = (int)(volume * 100);
+	}
+
+	public float getVolume () {
+		return volume;
+	}
 	
 	/**
 	 * Returns World passed by GUIHandler
@@ -307,6 +329,15 @@ public class GuiArcade extends GuiScreen {
 				buttonList.get(0).visible = false;
 			}
 		}
+	}
+
+	public void drawVolumeBar (int x, int y) {
+		String bar = "[";
+
+		for (int i = 0; i < (iVol / 10); i++) bar += "||";
+		for (int i = 0; i < 10 - (iVol / 10); i++) bar += " ";
+
+		this.fontRenderer.drawString(bar + "] " + iVol + "%", x - (this.fontRenderer.getStringWidth(bar + "] " + iVol + "%") / 2), y, editVolume ? Color.white.getRGB() : Color.gray.getRGB());
 	}
 	
 	/**

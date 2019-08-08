@@ -25,6 +25,9 @@ text.arcademod:score.locale=Score
 text.arcademod:topscore.locale=Top Score
 text.arcademod:level.locale=Level
 text.arcademod:return_menu.name=Return to Menu
+text.arcademod:volume.locale=Volume
+text.arcademod:edit.locale=Edit
+text.arcademod:save.locale=Save
 
 text.arcademod:next.tetrominoes.locale=Next
 text.arcademod:level.tetrominoes.locale=Level

@@ -1,5 +1,6 @@
 package superhb.arcademod.client.gui;
 
+import net.minecraft.client.audio.PositionedSoundRecord;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,6 +13,7 @@ import superhb.arcademod.Reference;
 import superhb.arcademod.api.gui.GuiArcade;
 import superhb.arcademod.client.ArcadeItems;
 import superhb.arcademod.client.audio.ArcadeSounds;
+import superhb.arcademod.client.audio.LoopingSound;
 import superhb.arcademod.client.tileentity.TileEntityArcade;
 import superhb.arcademod.network.ServerSoundMessage;
 import superhb.arcademod.util.ArcadePacketHandler;
@@ -50,9 +52,8 @@ public class GuiPacMan extends GuiArcade {
 	private static final int ENERGIZER = 8;
 	
 	// Audio Variables
-	private float volume = 1f; // TODO: Create volume slider in game settings (separate volume sliders for different sounds?)
 	private int waka;
-	private boolean playSiren = true;
+	private LoopingSound siren, fright, ghostEaten;
 	
 	// ==Audio==
 	// Siren is played normally. When Energizer is eaten fast siren is
@@ -102,6 +103,14 @@ public class GuiPacMan extends GuiArcade {
 		super.updateScreen();
 		
 		if (inMenu) {
+			if (siren == null) siren = new LoopingSound(this.getTileEntity(), ArcadeSounds.PACMAN_SIREN, SoundCategory.BLOCKS, getVolume());
+			if (fright == null) fright = new LoopingSound(this.getTileEntity(), ArcadeSounds.PACMAN_FRIGHT, SoundCategory.BLOCKS, getVolume());
+			if (ghostEaten == null) ghostEaten = new LoopingSound(getTileEntity(), ArcadeSounds.PACMAN_GHOST, SoundCategory.BLOCKS, getVolume());
+
+			if (mc.getSoundHandler().isSoundPlaying(siren)) mc.getSoundHandler().stopSound(siren);
+			if (mc.getSoundHandler().isSoundPlaying(fright)) mc.getSoundHandler().stopSound(fright);
+			if (mc.getSoundHandler().isSoundPlaying(ghostEaten)) mc.getSoundHandler().stopSound(ghostEaten);
+
 			if (menu == 3) {
 				if ((tickCounter - backTick) == 60) {
 					tickCounter = score = ENERGIZER_STATE = mazeBlinks = mazeBlinkTick = deathTick = gameOverTick = energizerTick = scatterTick = scaredTime = scaredFlash = level = 0;
@@ -110,6 +119,15 @@ public class GuiPacMan extends GuiArcade {
 			}
 		} else {
 			if (playing) {
+				// TODO: Fix Error
+				// Sound Logic
+				if (pacman.canEatGhost) {
+					if (!mc.getSoundHandler().isSoundPlaying(fright) && !gameOver) mc.getSoundHandler().playSound(fright);
+				} else {
+					if (!mc.getSoundHandler().isSoundPlaying(siren) && !gameOver) mc.getSoundHandler().playSound(siren);
+				}
+
+
 				// Pac-Man Logic
 				for (int i = 0; i < 3; i++) pacman.move().updatePosition(boardX, boardY);
 				pacman.update();
@@ -164,7 +182,7 @@ public class GuiPacMan extends GuiArcade {
 				
 				if (showBonus && (tickCounter - bonusTick) == bonusTime) showBonus = false;
 			} else {
-				if ((tickCounter - startTick) == 35) {
+				if ((tickCounter - startTick) == 80) {
 					playing = true;
 					pacman.canMove = true;
 					for (int i = 0; i < ghosts.length; i++) ghosts[i].canMove = true;
@@ -199,12 +217,9 @@ public class GuiPacMan extends GuiArcade {
 					this.fontRenderer.drawString(I18n.format("option.arcademod:control.locale"), boardX + (GUI_X / 2) - (controlWidth / 2), boardY + (GUI_Y / 2) - 20, Color.WHITE.getRGB());
 					this.fontRenderer.drawString(I18n.format("option.arcademod:setting.locale"), boardX + (GUI_X / 2) - (settingWidth / 2), boardY + (GUI_Y / 2) - 10, Color.WHITE.getRGB());
 					
-					if (menuOption == 0)
-						drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 32, true); // Start
-					else if (menuOption == 1)
-						drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 22, true); // Controls
-					else if (menuOption == 2)
-						drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 12, true); // Settings
+					if (menuOption == 0) drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 32, true); // Start
+					else if (menuOption == 1) drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 22, true); // Controls
+					else if (menuOption == 2) drawRightArrow(boardX + (GUI_X / 2) - 30, boardY + (GUI_Y / 2) - 12, true); // Settings
 					break;
 				case 1: // Controls
 					this.fontRenderer.drawString(I18n.format("option.arcademod:control.locale"), boardX + (GUI_X / 2) - (controlWidth / 2), boardY + 2, Color.WHITE.getRGB());
@@ -219,20 +234,23 @@ public class GuiPacMan extends GuiArcade {
 					this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), boardX + 2, boardY + (GUI_Y) - 30, Color.white.getRGB());
 					break;
 				case 2: // Settings
+					this.fontRenderer.drawString(I18n.format("option.arcademod:setting.locale"), boardX + (GUI_X / 2) - (settingWidth / 2), boardY + 2, Color.white.getRGB());
+
+					int volumeWidth = this.fontRenderer.getStringWidth(I18n.format("text.arcademod:volume.locale"));
+					this.fontRenderer.drawString(I18n.format("text.arcademod:volume.locale"), boardX + (GUI_X / 2) - (volumeWidth / 2), boardY + (GUI_Y / 2) - 30, Color.white.getRGB());
+					drawVolumeBar(boardX + (GUI_X / 2), boardY + (GUI_Y / 2) - 20);
+
 					// Back
 					this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), boardX + 2, boardY + (GUI_Y) - 30, Color.white.getRGB());
+					// Edit/Save
+					this.fontRenderer.drawString("[" + KeyHandler.select.getDisplayName() + "] " + (editVolume ? I18n.format("text.arcademod:save.locale") : I18n.format("text.arcademod:edit.locale")), boardX + 2, boardY + (GUI_Y) - 40, Color.white.getRGB());
 					break;
 				case 3: // Game Over
 					this.fontRenderer.drawString(I18n.format("text.arcademod:gameover.locale"), boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:gameover.locale")) / 2), boardY + (GUI_Y / 2) - 20, Color.WHITE.getRGB());
-					this.fontRenderer.drawString(I18n.format("text.arcademod:score.locale") + ": " + score, boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:score.locale=Score") + ": " + score)), boardY + (GUI_Y / 2), Color.WHITE.getRGB());
+					this.fontRenderer.drawString(I18n.format("text.arcademod:score.locale") + ": " + score, boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:score.locale") + ": " + score)), boardY + (GUI_Y / 2), Color.WHITE.getRGB());
 					break;
 			}
 		} else {
-			//ArcadePacketHandler.INSTANCE.sendToServer(new ServerSoundMessage(ArcadeSounds.PACMAN_SIREN.getSoundName(), getPos(), volume, true, true));
-			//ArcadePacketHandler.INSTANCE.sendToServer(new ServerSoundMessage("theme.pacman_siren", getPos(), volume, true, true));
-			
-			//getTileEntity().playSound(new ResourceLocation(Reference.MODID, "theme.pacman_siren"), volume, true);
-			
 			drawMaze();
 			
 			for (int y = 0; y < 31; y++) {
@@ -292,20 +310,20 @@ public class GuiPacMan extends GuiArcade {
 	}
 	
 	private void endGame () {
-		// TODO: play game over sound
 		if (!gameOver) {
 			gameOver = true;
+			if (mc.getSoundHandler().isSoundPlaying(siren)) mc.getSoundHandler().stopSound(siren);
+			if (mc.getSoundHandler().isSoundPlaying(fright)) mc.getSoundHandler().stopSound(fright);
+			if (mc.getSoundHandler().isSoundPlaying(ghostEaten)) mc.getSoundHandler().stopSound(ghostEaten);
+			getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_DEATH, SoundCategory.BLOCKS, getVolume(), 1.0f);
 			pacman.canMove = false;
 			for (int i = 0; i < ghosts.length; i++) ghosts[i].canMove = false;
-			//getTileEntity().playSound(ArcadeSounds.PACMAN_DEATH, false);
 			pacman.kill();
 		}
 		this.fontRenderer.drawString(I18n.format("text.arcademod:gameover.locale"), boardX + (MAZE_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:gameover.locale")) / 2), boardY + (MAZE_Y / 2) + 13, Color.red.getRGB());
 	}
 	
 	private void setupGame () {
-		// TODO: Sound
-		//getTileEntity().playSound(ArcadeSounds.PACMAN_SIREN, true);
 		getLevelData();
 		resetGame();
 		
@@ -332,7 +350,9 @@ public class GuiPacMan extends GuiArcade {
 		inMenu = false;
 		pacman = new Player();
 		canGetCoinBack = false;
-		
+
+		getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_INTRO, SoundCategory.BLOCKS, getVolume(), 1.0f);
+
 		setupTiles();
 		setupGame();
 	}
@@ -352,10 +372,31 @@ public class GuiPacMan extends GuiArcade {
 				if (keyCode == KeyHandler.select.getKeyCode()) {
 					if (menuOption == 0) startGame();
 					else menu = menuOption;
+					return;
 				}
 			}
-			if (keyCode == KeyHandler.left.getKeyCode())
-				menu = 0; // This will have to change when volume slider is made
+			if (keyCode == KeyHandler.left.getKeyCode()) {
+				if (menu == 2 && editVolume) decreaseVolume();
+				else menu = 0;
+			}
+			if (keyCode == KeyHandler.right.getKeyCode()) {
+				if (menu == 2 && editVolume) increaseVolume();
+			}
+			if (keyCode == 1) {
+				if (menu == 2 && editVolume) {
+					editVolume = false;
+					saveVolume(false);
+					return;
+				}
+			}
+			if (keyCode == KeyHandler.select.getKeyCode()) {
+				if (menu == 2) {
+					if (editVolume) {
+						saveVolume(true);
+						editVolume = false;
+					} else editVolume = true;
+				}
+			}
 		} else {
 			if (keyCode == KeyHandler.left.getKeyCode()) pacman.desired = Direction.LEFT;
 			else if (keyCode == KeyHandler.right.getKeyCode()) pacman.desired = Direction.RIGHT;
@@ -731,36 +772,35 @@ public class GuiPacMan extends GuiArcade {
 			useGlobalCounter = false;
 			current = desired = Direction.LEFT;
 		}
-		
-		// TODO: Play through tileEntity?
+
 		private void playWaka () {
 			if (waka == 0) {
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_1, SoundCategory.BLOCKS, volume, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_1, SoundCategory.BLOCKS, getVolume(), 1.0f);
 				waka++;
 				return;
 			}
 			if (waka == 1) {
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_2, SoundCategory.BLOCKS, volume, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_2, SoundCategory.BLOCKS, getVolume(), 1.0f);
 				waka++;
 				return;
 			}
 			if (waka == 2) {
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_3, SoundCategory.BLOCKS, volume, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_3, SoundCategory.BLOCKS, getVolume(), 1.0f);
 				waka++;
 				return;
 			}
 			if (waka == 3) {
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_4, SoundCategory.BLOCKS, volume, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_4, SoundCategory.BLOCKS, getVolume(), 1.0f);
 				waka++;
 				return;
 			}
 			if (waka == 4) {
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_5, SoundCategory.BLOCKS, volume, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_5, SoundCategory.BLOCKS, getVolume(), 1.0f);
 				waka++;
 				return;
 			}
 			if (waka == 5) {
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_6, SoundCategory.BLOCKS, volume, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_WAKA_6, SoundCategory.BLOCKS, getVolume(), 1.0f);
 				waka = 0;
 				return;
 			}
@@ -1058,22 +1098,19 @@ public class GuiPacMan extends GuiArcade {
 		@Override
 		public void update () {
 			// Collision Detection
-			//if (((x == pacman.x) && (y == pacman.y)) && ((extendedX == pacman.extendedX) && (extendedY == pacman.extendedY))) {
-			//if ((extendedX == pacman.extendedX) && (extendedY == pacman.extendedY)) {
-			//if ((extendedX >= (pacman.extendedX - 4) && extendedX <= (pacman.extendedX + 4)) && (extendedY >= (pacman.extendedY - 4) && extendedY <= (pacman.extendedY + 4)) && (((extendedX - offsetX) % 8) == 0 && ((extendedY - offsetY) % 8) == 0)) {
-			//if ((x == pacman.x) && (y == pacman.y)) {
 			// TODO: Add text saying how many points received?
 			// TODO: Figure out how to make it so when ghosts are ontop of one another their both eaten instead of one getting away.
 			if ((((extendedX - offsetX) / 8) == ((pacman.extendedX - offsetX) / 8)) && (((extendedY - offsetY) / 8) == ((pacman.extendedY - offsetY) / 8))) {
 				if (isScared) {
 					isScared = false;
+					getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.PACMAN_GHOST, SoundCategory.BLOCKS, getVolume(), 1.0f);
 					pauseTick = tickCounter;
 					scaredDuration = tickCounter - scaredTick; // I think this works. idk tho
 					eaten = true;
 					pause();
 				}
 				if (scared) {
-					if ((tickCounter - pauseTick) == 20) {
+					if ((tickCounter - pauseTick) == 18) {
 						unpause();
 						pauseTick = 0;
 						scaredTick = tickCounter + scaredDuration;
@@ -1101,9 +1138,15 @@ public class GuiPacMan extends GuiArcade {
 			// House Logic
 			if (eaten) {
 				//if ((x >= 11 && x <= 16) && (y >= 13 && y <= 15)) {
+
+				if (mc.getSoundHandler().isSoundPlaying(siren)) mc.getSoundHandler().stopSound(siren);
+				if (mc.getSoundHandler().isSoundPlaying(fright)) mc.getSoundHandler().stopSound(fright);
+				if (!mc.getSoundHandler().isSoundPlaying(ghostEaten)) mc.getSoundHandler().playSound(ghostEaten);
+
 				if (x == 13 && y == 15) {
 					eaten = scared = isScared = false;
 					remove = true;
+					if (mc.getSoundHandler().isSoundPlaying(ghostEaten)) mc.getSoundHandler().stopSound(ghostEaten);
 				}
 			}
 			if (inHouse) {
@@ -1112,8 +1155,7 @@ public class GuiPacMan extends GuiArcade {
 						inHouse = false;
 						//remove = true;
 						beRemoved = true;
-						if (houseQueue.get(0) == 3)
-							useGlobalCounter = false; // Disable global counter if it is releasing Clyde
+						if (houseQueue.get(0) == 3) useGlobalCounter = false; // Disable global counter if it is releasing Clyde
 						houseQueue.remove(0);
 					}
 				} else {
@@ -1169,6 +1211,7 @@ public class GuiPacMan extends GuiArcade {
 			// Makes ghost scared when pacman is energized
 			if (!eaten) {
 				if ((pacman.energizerMode && !scared) || (pacman.energizerMode && isScared)) {
+					if (mc.getSoundHandler().isSoundPlaying(siren)) mc.getSoundHandler().stopSound(siren);
 					scared = true;
 					if (info == EnumGhost.CLYDE) pacman.energizerMode = false;
 					scaredTick = tickCounter;
@@ -1193,6 +1236,7 @@ public class GuiPacMan extends GuiArcade {
 					if (blinks == scaredFlash) {
 						SCARED_STATE = blinks = pacman.ghostsEaten = scaredTick = 0;
 						scared = pacman.canEatGhost = blink = isScared = false;
+						if (mc.getSoundHandler().isSoundPlaying(fright)) mc.getSoundHandler().stopSound(fright);
 					}
 				}
 			}

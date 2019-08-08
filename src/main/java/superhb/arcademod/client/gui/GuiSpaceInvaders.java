@@ -32,9 +32,6 @@ public class GuiSpaceInvaders extends GuiArcade {
 	private static final int ALIEN = 14;
 	private static final int TANK = 15;
 	
-	// Audio Variables
-	private float volume = 1f; // TODO: Create volume slider in game settings (separate volume sliders for different sounds?)
-	
 	// Board Variables
 	private int boardX, boardY;
 	private int score;
@@ -88,12 +85,9 @@ public class GuiSpaceInvaders extends GuiArcade {
 			}
 		} else {
 			if (playing) {
-				if (theme == null) {
-					theme = new LoopingSound(this.getTileEntity(), ArcadeSounds.SPACEINVADERS, SoundCategory.RECORDS, volume - 0.5f);
-				}
-				if (!mc.getSoundHandler().isSoundPlaying(theme)) {
-					mc.getSoundHandler().playSound(theme);
-				}
+				if (theme == null) theme = new LoopingSound(this.getTileEntity(), ArcadeSounds.SPACEINVADERS, SoundCategory.BLOCKS, Math.max(0, getVolume() - 0.2f));
+				if (!mc.getSoundHandler().isSoundPlaying(theme)) mc.getSoundHandler().playSound(theme);
+
 				// Tank Logic
 				for (int i = 0; i < 3; i++) tank.move().updatePosition(boardX, boardY);
 				tank.update();
@@ -254,12 +248,20 @@ public class GuiSpaceInvaders extends GuiArcade {
 					this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), boardX + 2, boardY + (GUI_Y) - 30, Color.white.getRGB());
 					break;
 				case 2: // Settings
+					this.fontRenderer.drawString(I18n.format("option.arcademod:setting.locale"), boardX + (GUI_X / 2) - (settingWidth / 2), boardY + 2, Color.white.getRGB());
+
+					int volumeWidth = this.fontRenderer.getStringWidth(I18n.format("text.arcademod:volume.locale"));
+					this.fontRenderer.drawString(I18n.format("text.arcademod:volume.locale"), boardX + (GUI_X / 2) - (volumeWidth / 2), boardY + (GUI_Y / 2) - 30, Color.white.getRGB());
+					drawVolumeBar(boardX + (GUI_X / 2), boardY + (GUI_Y / 2) - 20);
+
+					// Edit/Save
+					this.fontRenderer.drawString("[" + KeyHandler.select.getDisplayName() + "] " + (editVolume ? I18n.format("text.arcademod:save.locale") : I18n.format("text.arcademod:edit.locale")), boardX + 2, boardY + (GUI_Y) - 40, Color.white.getRGB());
 					// Back
 					this.fontRenderer.drawString("[" + KeyHandler.left.getDisplayName() + "] " + I18n.format("option.arcademod:back.name"), boardX + 2, boardY + (GUI_Y) - 30, Color.white.getRGB());
 					break;
 				case 3: // Game Over
 					this.fontRenderer.drawString(I18n.format("text.arcademod:gameover.locale"), boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:gameover.locale")) / 2), boardY + (GUI_Y / 2) - 20, Color.WHITE.getRGB());
-					this.fontRenderer.drawString(I18n.format("text.arcademod:score.locale") + ": " + score, boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:score.locale=Score") + ": " + score)), boardY + (GUI_Y / 2), Color.WHITE.getRGB());
+					this.fontRenderer.drawString(I18n.format("text.arcademod:score.locale") + ": " + score, boardX + (GUI_X / 2) - (this.fontRenderer.getStringWidth(I18n.format("text.arcademod:score.locale") + ": " + score)), boardY + (GUI_Y / 2), Color.WHITE.getRGB());
 					/*if (score > topScore) {
 						if (leaderboard[0] == null) {
 							leaderboard[0] = new ArcadeLeaderboard(getPlayer().getName(), score);
@@ -335,7 +337,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 						aliens[id].isVisible = false;
 						bullet = null;
 						score += 10;
-						getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.SPACEINVADERS_DESTROYED, SoundCategory.BLOCKS, volume - 0.2f, 1.0f);
+						getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.SPACEINVADERS_DESTROYED, SoundCategory.BLOCKS, getVolume(), 1.0f);
 					}
 				}
 			}
@@ -360,7 +362,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 					ufo.isVisible) {
 				bullet = null;
 				ufo = null;
-				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.SPACEINVADERS_DESTROYED, SoundCategory.BLOCKS, volume - 0.2f, 1.0f);
+				getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.SPACEINVADERS_DESTROYED, SoundCategory.BLOCKS, getVolume(), 1.0f);
 				score += 50;
 			}
 		}
@@ -451,10 +453,34 @@ public class GuiSpaceInvaders extends GuiArcade {
 				if (keyCode == KeyHandler.select.getKeyCode()) {
 					if (menuOption == 0) startGame();
 					else menu = menuOption;
+					return;
 				}
 			}
-			if (keyCode == KeyHandler.left.getKeyCode())
+			if (keyCode == KeyHandler.left.getKeyCode()) {
+				if (menu == 2 && editVolume) {
+					decreaseVolume();
+					return;
+				}
 				menu = 0;
+			}
+			if (keyCode == KeyHandler.right.getKeyCode()) {
+				if (menu == 2 && editVolume) increaseVolume();
+			}
+			if (keyCode == KeyHandler.select.getKeyCode()) {
+				if (menu == 2) {
+					if (editVolume) {
+						editVolume = false;
+						saveVolume(true);
+					} else editVolume = true;
+				}
+			}
+			if (keyCode == 1) {
+				if (menu == 2 && editVolume) {
+					editVolume = false;
+					saveVolume(false);
+					return;
+				}
+			}
 		} else {
 			if (keyCode == KeyHandler.left.getKeyCode()) tank.current = Direction.LEFT;
 			else if (keyCode == KeyHandler.right.getKeyCode()) tank.current = Direction.RIGHT;
@@ -462,7 +488,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 				if (bullet == null) {
 					bullet = new Bullet(0, tank.x, tank.y, new Color(255,0,0), true);
 					bullet.canMove = true;
-					getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.SPACEINVADERS_SHOOT, SoundCategory.BLOCKS, volume, 1.0f);
+					getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.SPACEINVADERS_SHOOT, SoundCategory.BLOCKS, getVolume(), 1.0f);
 				}
 			}
 			if (keyCode == 1) giveReward(ArcadeItems.TICKET, (score / 200)); // Esc
@@ -621,7 +647,7 @@ public class GuiSpaceInvaders extends GuiArcade {
 		public void kill () {
 			playDeathAnimation = true;
 			deathTick = tickCounter;
-			getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.SPACEINVADERS_EXPLODE, SoundCategory.BLOCKS, volume, 1.0f);
+			getWorld().playSound(getPlayer(), getPos(), ArcadeSounds.SPACEINVADERS_EXPLODE, SoundCategory.BLOCKS, getVolume(), 1.0f);
 		}
 		
 		private void reset () {
